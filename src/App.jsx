@@ -236,7 +236,7 @@ Return ONLY valid JSON, no markdown, no preamble, in this exact shape:
 /* ---------------------------------------------------------------
    HOME
 --------------------------------------------------------------- */
-function Home({ onOpen, unlocked }) {
+function Home({ onOpen, unlocked, collapsedCategories, toggleCategory }) {
   return (
     <div style={{ background: C.canvas, minHeight: "100vh" }}>
       {/* Hero Section */}
@@ -352,9 +352,28 @@ function Home({ onOpen, unlocked }) {
             { title: "DC Bridges", filter: exp => exp.id === "wheatstone-bridge" || exp.id.includes("kelvin") },
             { title: "AC Bridges", filter: exp => exp.tag.startsWith("AC-") },
             { title: "Sensors & Transducers", filter: exp => exp.id !== "wheatstone-bridge" && !exp.id.includes("kelvin") && !exp.tag.startsWith("AC-") }
-          ].map(category => (
+          ].map(category => {
+            const isCollapsed = collapsedCategories[category.title];
+            return (
             <div key={category.title}>
-              <h3 style={{ fontSize: 20, fontWeight: 700, color: C.ink, marginBottom: 16, borderBottom: `2px solid ${C.border}`, paddingBottom: 8 }}>{category.title}</h3>
+              <div 
+                onClick={() => toggleCategory(category.title)}
+                style={{ 
+                  display: "flex", alignItems: "center", justifyContent: "space-between", 
+                  cursor: "pointer", borderBottom: `2px solid ${C.border}`, paddingBottom: 8, marginBottom: 16 
+                }}
+              >
+                <h3 style={{ fontSize: 20, fontWeight: 700, color: C.ink, margin: 0 }}>{category.title}</h3>
+                <ChevronRight 
+                  size={20} 
+                  color={C.muted} 
+                  style={{ 
+                    transform: isCollapsed ? "rotate(0deg)" : "rotate(90deg)", 
+                    transition: "transform 0.2s ease" 
+                  }} 
+                />
+              </div>
+              {!isCollapsed && (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 24 }}>
                 {EXPERIMENTS.filter(category.filter).map(exp => {
                   const isLocked = false;
@@ -413,8 +432,9 @@ function Home({ onOpen, unlocked }) {
           );
         })}
               </div>
+              )}
             </div>
-          ))}
+          )})}
         </div>
       </div>
 
@@ -660,6 +680,14 @@ export default function App() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [unlocked, setUnlocked] = useState(false);
+  const [collapsedCategories, setCollapsedCategories] = useState({});
+
+  const toggleCategory = (title) => {
+    setCollapsedCategories(prev => ({
+      ...prev,
+      [title]: !prev[title]
+    }));
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -728,8 +756,9 @@ export default function App() {
         </div>
       </div>
 
-      {view === "home" && <Home onOpen={openExperiment} unlocked={unlocked} />}
-      {view === "detail" && active && (
+      {view === "home" ? (
+        <Home onOpen={openExperiment} unlocked={unlocked} collapsedCategories={collapsedCategories} toggleCategory={toggleCategory} />
+      ) : view === "detail" && active && (
         <div style={{ paddingTop: 76 }}>
           <Detail exp={active} tab={tab} setTab={setTab} onBack={() => setView("home")} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         </div>
@@ -822,9 +851,27 @@ export default function App() {
             ].map(category => {
               const exps = EXPERIMENTS.filter(category.filter);
               if (exps.length === 0) return null;
+              const isCollapsed = collapsedCategories[category.title];
               return (
                 <div key={category.title}>
-                  <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, fontWeight: 800, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 12 }}>{category.title}</div>
+                  <div 
+                    onClick={() => toggleCategory(category.title)}
+                    style={{ 
+                      display: "flex", alignItems: "center", justifyContent: "space-between", 
+                      cursor: "pointer", marginBottom: 12 
+                    }}
+                  >
+                    <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, fontWeight: 800, letterSpacing: 1.5, textTransform: "uppercase" }}>{category.title}</div>
+                    <ChevronRight 
+                      size={14} 
+                      color="rgba(255,255,255,0.4)" 
+                      style={{ 
+                        transform: isCollapsed ? "rotate(0deg)" : "rotate(90deg)", 
+                        transition: "transform 0.2s ease" 
+                      }} 
+                    />
+                  </div>
+                  {!isCollapsed && (
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     {exps.map((exp, i) => {
                       const isLocked = false;
@@ -857,10 +904,11 @@ export default function App() {
                   </button>
                 );
               })}
-            </div>
-          </div>
-        );
-      })}
+                  </div>
+                  )}
+                </div>
+              );
+            })}
     </div>
   </div>
       </div>
