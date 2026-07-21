@@ -116,3 +116,30 @@ code {
   opacity: 1;
   transform: translateY(0);
 }
+
+:root {
+  --shell: #121826;
+  --shellSoft: #1c2436;
+  --canvas: #eef1ee;
+  --card: #ffffff;
+  --copper: #c1712f;
+  --copperDark: #8f5320;
+  --teal: #1f7a72;
+  --ink: #1b2430;
+  --muted: #68707c;
+  --border: #dfe3df;
+}
+
+[data-theme='dark'] {
+  --shell: #0a0e14;
+  --shellSoft: #141b25;
+  --canvas: #0a0e14;
+  --card: #141b25;
+  --copper: #d9823e;
+  --copperDark: #f0a369;
+  --teal: #28a89c;
+  --ink: #e2e8f0;
+  --muted: #94a3b8;
+  --border: #2a3547;
+}
+

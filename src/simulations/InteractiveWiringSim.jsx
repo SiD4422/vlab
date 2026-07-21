@@ -75,6 +75,129 @@ const CONFIG = {
       };
     },
   },
+
+  "capacitance-comparison": {
+    title: "Capacitance Comparison Bridge",
+    armLabels: { "A::B": "C1 (unknown)", "B::C": "R1", "A::D": "C2 (standard)", "C::D": "R2" },
+    sliders: [
+      { key: "R1", label: "R1", unit: "Ω", min: 10, max: 1000, step: 10, def: 500 },
+      { key: "R2", label: "R2", unit: "Ω", min: 10, max: 1000, step: 10, def: 500 },
+      { key: "C2", label: "C2", unit: "µF", min: 0.1, max: 10, step: 0.1, def: 1.0 },
+    ],
+    genTarget: () => ({ C1: +(0.5 + Math.random() * 5).toFixed(1) }),
+    compute: (s, t) => {
+      const C1_calc = s.C2 * (s.R1 / s.R2);
+      const err = Math.abs(C1_calc - t.C1) / t.C1;
+      const imbalance = Math.min(5000, err * 10000);
+      return {
+        imbalance,
+        results: [
+          { label: "C1 (calculated)", value: `${C1_calc.toFixed(2)} µF` },
+          { label: "C1 (true)", value: `${t.C1} µF` }
+        ],
+        formula: "C1 = C2 · (R1 / R2)"
+      };
+    }
+  },
+  "maxwell-inductance": {
+    title: "Maxwell's Inductance Bridge",
+    armLabels: { "A::B": "L1, R1 (unknown)", "B::C": "R3", "A::D": "L2, R2 (standard)", "C::D": "R4" },
+    sliders: [
+      { key: "R2", label: "R2", unit: "Ω", min: 10, max: 1000, step: 1, def: 200 },
+      { key: "R3", label: "R3", unit: "Ω", min: 10, max: 1000, step: 1, def: 200 },
+      { key: "R4", label: "R4", unit: "Ω", min: 10, max: 1000, step: 1, def: 200 },
+      { key: "L2", label: "L2", unit: "mH", min: 10, max: 200, step: 1, def: 50 },
+    ],
+    genTarget: () => ({ L1: +(20 + Math.random() * 100).toFixed(1), R1: +(30 + Math.random() * 150).toFixed(1) }),
+    compute: (s, t) => {
+      const L1_calc = s.L2 * (s.R3 / s.R4);
+      const R1_calc = s.R2 * (s.R3 / s.R4);
+      const errL = Math.abs(L1_calc - t.L1) / t.L1;
+      const errR = Math.abs(R1_calc - t.R1) / t.R1;
+      return {
+        imbalance: Math.min(5000, ((errL + errR) / 2) * 8000),
+        results: [
+          { label: "L1 (calculated)", value: `${L1_calc.toFixed(1)} mH` }, { label: "L1 (true)", value: `${t.L1} mH` },
+          { label: "R1 (calculated)", value: `${R1_calc.toFixed(1)} Ω` }, { label: "R1 (true)", value: `${t.R1} Ω` }
+        ],
+        formula: "L1 = L2(R3/R4)      R1 = R2(R3/R4)"
+      };
+    }
+  },
+  "hays": {
+    title: "Hay's Bridge",
+    armLabels: { "A::B": "L1, R1 (unknown)", "B::C": "R3", "A::D": "R2, C2 (series)", "C::D": "R4" },
+    sliders: [
+      { key: "R2", label: "R2", unit: "Ω", min: 10, max: 2000, step: 10, def: 500 },
+      { key: "R3", label: "R3", unit: "Ω", min: 10, max: 2000, step: 10, def: 500 },
+      { key: "R4", label: "R4", unit: "Ω", min: 10, max: 2000, step: 10, def: 500 },
+      { key: "C2", label: "C2", unit: "µF", min: 0.1, max: 5, step: 0.1, def: 1.0 },
+    ],
+    genTarget: () => ({ L1: +(50 + Math.random() * 200).toFixed(1), R1: +(20 + Math.random() * 80).toFixed(1) }),
+    compute: (s, t) => {
+      const omega = 2 * Math.PI * 1000;
+      const denom = 1 + Math.pow(omega * (s.C2*1e-6) * s.R2, 2);
+      const L1_calc = (s.R3 * s.R4 * (s.C2*1e-6)) / denom * 1000; // in mH
+      const R1_calc = (omega * omega * Math.pow(s.C2*1e-6, 2) * s.R2 * s.R3 * s.R4) / denom;
+      const errL = Math.abs(L1_calc - t.L1) / t.L1;
+      const errR = Math.abs(R1_calc - t.R1) / t.R1;
+      return {
+        imbalance: Math.min(5000, ((errL + errR) / 2) * 8000),
+        results: [
+          { label: "L1 (calc)", value: `${L1_calc.toFixed(1)} mH` }, { label: "L1 (true)", value: `${t.L1} mH` },
+          { label: "R1 (calc)", value: `${R1_calc.toFixed(1)} Ω` }, { label: "R1 (true)", value: `${t.R1} Ω` }
+        ],
+        formula: "L1 = (R3 R4 C2)/(1 + (ω C2 R2)²)"
+      };
+    }
+  },
+  "wiens": {
+    title: "Wien's Bridge",
+    armLabels: { "A::B": "C1, R1 (series)", "B::C": "R3", "A::D": "C2, R2 (parallel)", "C::D": "R4" },
+    sliders: [
+      { key: "R2", label: "R2", unit: "Ω", min: 100, max: 10000, step: 100, def: 1000 },
+      { key: "R3", label: "R3", unit: "Ω", min: 100, max: 10000, step: 100, def: 2000 },
+      { key: "R4", label: "R4", unit: "Ω", min: 100, max: 10000, step: 100, def: 1000 },
+      { key: "C2", label: "C2", unit: "µF", min: 0.01, max: 1, step: 0.01, def: 0.1 },
+    ],
+    genTarget: () => ({ f: +(500 + Math.random() * 1500).toFixed(0) }), // target frequency
+    compute: (s, t) => {
+      // Assuming C1=C2, R1=R2 for balance condition simplification (often true in basic setups)
+      // Actual frequency f = 1 / (2π√(R1 R2 C1 C2))
+      const f_calc = 1 / (2 * Math.PI * s.R2 * (s.C2 * 1e-6));
+      const errF = Math.abs(f_calc - t.f) / t.f;
+      return {
+        imbalance: Math.min(5000, errF * 15000),
+        results: [
+          { label: "Freq (calc)", value: `${f_calc.toFixed(0)} Hz` },
+          { label: "Freq (true)", value: `${t.f} Hz` }
+        ],
+        formula: "f = 1 / (2π√(R1 R2 C1 C2))"
+      };
+    }
+  },
+  "kelvin": {
+    title: "Kelvin Bridge",
+    armLabels: { "A::B": "Rx (unknown)", "B::C": "R2", "A::D": "Rs (standard)", "C::D": "R1" },
+    sliders: [
+      { key: "R1", label: "R1", unit: "Ω", min: 1, max: 1000, step: 1, def: 100 },
+      { key: "R2", label: "R2", unit: "Ω", min: 1, max: 1000, step: 1, def: 100 },
+      { key: "Rs", label: "Rs", unit: "mΩ", min: 0.1, max: 10, step: 0.1, def: 1.0 },
+    ],
+    genTarget: () => ({ Rx: +(0.1 + Math.random() * 5).toFixed(2) }), // in mΩ
+    compute: (s, t) => {
+      const Rx_calc = s.Rs * (s.R1 / s.R2);
+      const err = Math.abs(Rx_calc - t.Rx) / t.Rx;
+      return {
+        imbalance: Math.min(5000, err * 20000),
+        results: [
+          { label: "Rx (calc)", value: `${Rx_calc.toFixed(3)} mΩ` },
+          { label: "Rx (true)", value: `${t.Rx} mΩ` }
+        ],
+        formula: "Rx = Rs · (R1 / R2)"
+      };
+    }
+  },
   schering: {
     title: "Schering's Capacitance Bridge",
     armLabels: {

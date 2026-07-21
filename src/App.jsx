@@ -4,7 +4,7 @@ import {
   Link2, Target, ArrowLeft, Loader2, CheckCircle2, XCircle, Star,
   ChevronRight, Cpu, Menu, X, Activity,
   GraduationCap, Mail, Phone, MapPin, Shield, Globe, Users, Lock
-} from "lucide-react";
+, Search, Sun, Moon, Check } from "lucide-react";
 
 import StrainGaugeSim from "./simulations/StrainGaugeSim";
 import BridgeCircuitsSim from "./simulations/BridgeCircuitsSim";
@@ -15,17 +15,16 @@ import InteractiveWiringSim from "./simulations/InteractiveWiringSim";
    accent (component/trace color), teal secondary, warm paper canvas
 --------------------------------------------------------------- */
 const C = {
-  shell: "#121826",      // header / sidebar ink
-  shellSoft: "#1c2436",
-  canvas: "#eef1ee",     // page background
-  card: "#ffffff",
-  copper: "#c1712f",
-  copperDark: "#8f5320",
-  teal: "#1f7a72",
-  ink: "#1b2430",
-  muted: "#68707c",
-  border: "#dfe3df",
-  border2: "#2a3346",
+  shell: "var(--shell)",
+  shellSoft: "var(--shellSoft)",
+  canvas: "var(--canvas)",
+  card: "var(--card)",
+  copper: "var(--copper)",
+  copperDark: "var(--copperDark)",
+  teal: "var(--teal)",
+  ink: "var(--ink)",
+  muted: "var(--muted)",
+  border: "var(--border)",
 };
 
 /* ---------------------------------------------------------------
@@ -72,7 +71,7 @@ const TABS = [
 /* ---------------------------------------------------------------
    QUIZ
 --------------------------------------------------------------- */
-function Quiz({ questions }) {
+function Quiz({ questions, onComplete }) {
   const [picked, setPicked] = useState({});
   const [checked, setChecked] = useState(false);
 
@@ -120,8 +119,11 @@ function Quiz({ questions }) {
         </div>
       ))}
       <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <button onClick={toggleTheme} style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", width: 40, height: 40, borderRadius: "50%", background: "rgba(255,255,255,0.1)" }}>
+              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
         <button
-          onClick={() => setChecked(true)}
+          onClick={() => { setChecked(true); if(onComplete) onComplete(); }}
           disabled={Object.keys(picked).length < questions.length}
           style={{
             background: C.copper, color: "#fff", border: "none", borderRadius: 8,
@@ -236,7 +238,7 @@ Return ONLY valid JSON, no markdown, no preamble, in this exact shape:
 /* ---------------------------------------------------------------
    HOME
 --------------------------------------------------------------- */
-function Home({ onOpen, unlocked, collapsedCategories, toggleCategory }) {
+function Home({ onOpen, unlocked, collapsedCategories, toggleCategory, searchQuery, setSearchQuery, completed }) {
   return (
     <div style={{ background: C.canvas, minHeight: "100vh" }}>
       {/* Hero Section */}
@@ -340,6 +342,16 @@ function Home({ onOpen, unlocked, collapsedCategories, toggleCategory }) {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 32 }}>
           <div>
             <h2 style={{ fontSize: 32, fontWeight: 800, color: C.ink, margin: "0 0 8px" }}>Available Experiments</h2>
+            <div style={{ position: "relative", marginTop: 16, width: "100%", maxWidth: 400 }}>
+              <Search size={18} color={C.muted} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }} />
+              <input 
+                type="text" 
+                placeholder="Search experiments by name or tag..." 
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                style={{ width: "100%", background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: "12px 16px 12px 42px", color: C.ink, fontSize: 15, boxSizing: "border-box" }}
+              />
+            </div>
             <p style={{ color: C.muted, fontSize: 16, margin: 0 }}>Select an experiment to begin the virtual lab session.</p>
           </div>
           <div style={{ fontSize: 14, fontWeight: 700, color: C.copperDark, background: "#f4ece0", padding: "6px 12px", borderRadius: 999 }}>
@@ -375,7 +387,7 @@ function Home({ onOpen, unlocked, collapsedCategories, toggleCategory }) {
               </div>
               {!isCollapsed && (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 24 }}>
-                {EXPERIMENTS.filter(category.filter).map(exp => {
+                {EXPERIMENTS.filter(category.filter).filter(e => e.title.toLowerCase().includes(searchQuery.toLowerCase()) || e.tag.toLowerCase().includes(searchQuery.toLowerCase())).map(exp => {
                   const isLocked = false;
                   return (
             <button
@@ -471,7 +483,7 @@ function Home({ onOpen, unlocked, collapsedCategories, toggleCategory }) {
 /* ---------------------------------------------------------------
    EXPERIMENT DETAIL
 --------------------------------------------------------------- */
-function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen }) {
+function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCompleted }) {
   return (
     <div>
       {/* Top Breadcrumb Header */}
@@ -568,11 +580,21 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen }) {
               {exp.id === "strain-gauge" ? (
                 <StrainGaugeSim />
               ) : exp.id === "maxwell-lc-bridge" ? (
-                <InteractiveWiringSim type="maxwell" />
+                <InteractiveWiringSim bridgeType="maxwell" />
               ) : exp.id === "schering-bridge" ? (
-                <InteractiveWiringSim type="schering" />
+                <InteractiveWiringSim bridgeType="schering" />
+              ) : exp.id === "capacitance-comparison-bridge" ? (
+                <InteractiveWiringSim bridgeType="capacitance-comparison" />
+              ) : exp.id === "maxwell-inductance-bridge" ? (
+                <InteractiveWiringSim bridgeType="maxwell-inductance" />
+              ) : exp.id === "hays-bridge" ? (
+                <InteractiveWiringSim bridgeType="hays" />
+              ) : exp.id === "wiens-bridge" ? (
+                <InteractiveWiringSim bridgeType="wiens" />
+              ) : exp.id === "kelvin-bridge" ? (
+                <InteractiveWiringSim bridgeType="kelvin" />
               ) : (
-                <div style={{ padding: "40px 20px", textAlign: "center", color: C.muted, background: "#f8f9fa", borderRadius: 8, border: `1px solid ${C.border}` }}>
+                <div style={{ padding: "40px 20px", textAlign: "center", color: C.muted, background: "var(--card)", borderRadius: 8, border: `1px solid ${C.border}` }}>
                   <Activity size={32} color={C.border} style={{ marginBottom: 12 }} />
                   <div>The interactive simulation for {exp.title} is currently under development.</div>
                   <div style={{ fontSize: 13, marginTop: 4 }}>Check back soon!</div>
@@ -582,7 +604,7 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen }) {
           )}
 
           {tab === "pretest" && <Section title="Pretest"><Quiz questions={exp.pretest} /></Section>}
-          {tab === "posttest" && <Section title="Posttest"><Quiz questions={exp.posttest} /></Section>}
+          {tab === "posttest" && <Section title="Posttest"><Quiz questions={exp.posttest} onComplete={markCompleted} /></Section>}
 
           {tab === "procedure" && (
             <Section title="Procedure">
@@ -681,6 +703,24 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [unlocked, setUnlocked] = useState(false);
   const [collapsedCategories, setCollapsedCategories] = useState({});
+  const [searchQuery, setSearchQuery] = useState("");
+  const [completed, setCompleted] = useState(() => JSON.parse(localStorage.getItem('vlab_completed') || '[]'));
+  const [theme, setTheme] = useState(() => localStorage.getItem('vlab_theme') || 'light');
+
+  useEffect(() => {
+    localStorage.setItem('vlab_completed', JSON.stringify(completed));
+  }, [completed]);
+
+  useEffect(() => {
+    localStorage.setItem('vlab_theme', theme);
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light');
+  const markCompleted = (id) => {
+    if(!completed.includes(id)) setCompleted([...completed, id]);
+  };
+
 
   const toggleCategory = (title) => {
     setCollapsedCategories(prev => ({
@@ -757,10 +797,10 @@ export default function App() {
       </div>
 
       {view === "home" ? (
-        <Home onOpen={openExperiment} unlocked={unlocked} collapsedCategories={collapsedCategories} toggleCategory={toggleCategory} />
+        <Home onOpen={openExperiment} unlocked={unlocked} collapsedCategories={collapsedCategories} toggleCategory={toggleCategory} searchQuery={searchQuery} setSearchQuery={setSearchQuery} completed={completed} />
       ) : view === "detail" && active && (
         <div style={{ paddingTop: 76 }}>
-          <Detail exp={active} tab={tab} setTab={setTab} onBack={() => setView("home")} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+          <Detail exp={active} tab={tab} setTab={setTab} onBack={() => setView("home")} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} markCompleted={() => markCompleted(active.id)} />
         </div>
       )}
 
@@ -842,14 +882,26 @@ export default function App() {
         
 
         <div style={{ padding: "24px" }}>
-          <h4 style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, fontWeight: 800, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 20 }}>Curriculum</h4>
+          <div style={{ marginBottom: 20 }}>
+            <h4 style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, fontWeight: 800, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 12 }}>Curriculum</h4>
+            <div style={{ position: "relative" }}>
+              <Search size={14} color="rgba(255,255,255,0.4)" style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)" }} />
+              <input 
+                type="text" 
+                placeholder="Search..." 
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                style={{ width: "100%", background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: "8px 12px 8px 34px", color: "#fff", fontSize: 13, boxSizing: "border-box" }}
+              />
+            </div>
+          </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
             {[
               { title: "DC Bridges", filter: exp => exp.id === "wheatstone-bridge" || exp.id.includes("kelvin") },
               { title: "AC Bridges", filter: exp => exp.tag.startsWith("AC-") },
               { title: "Sensors & Transducers", filter: exp => exp.id !== "wheatstone-bridge" && !exp.id.includes("kelvin") && !exp.tag.startsWith("AC-") }
             ].map(category => {
-              const exps = EXPERIMENTS.filter(category.filter);
+              const exps = EXPERIMENTS.filter(category.filter).filter(e => e.title.toLowerCase().includes(searchQuery.toLowerCase()) || e.tag.toLowerCase().includes(searchQuery.toLowerCase()));
               if (exps.length === 0) return null;
               const isCollapsed = collapsedCategories[category.title];
               return (
@@ -875,30 +927,24 @@ export default function App() {
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     {exps.map((exp, i) => {
                       const isLocked = false;
+                      const isCompleted = completed.includes(exp.id);
+                      const globalIndex = EXPERIMENTS.findIndex(e => e.id === exp.id) + 1;
                       return (
-                <button
-                  key={exp.id}
-                  onClick={() => {
-                    if (!isLocked) {
-                      openExperiment(exp.id);
-                      setMenuOpen(false);
-                    }
-                  }}
-                  style={{
-                    background: isLocked ? "transparent" : "rgba(255,255,255,0.04)", 
-                    border: isLocked ? "1px solid transparent" : "1px solid rgba(255,255,255,0.08)", 
-                    borderRadius: 12, textAlign: "left", padding: "12px",
-                    display: "flex", alignItems: "center", gap: 14, cursor: isLocked ? "not-allowed" : "pointer",
-                    opacity: isLocked ? 0.4 : 1, transition: "all 0.2s ease"
-                  }}
-                >
-                  <div style={{ 
-                    width: 36, height: 36, borderRadius: 8, flexShrink: 0,
-                    background: isLocked ? "rgba(255,255,255,0.05)" : "linear-gradient(135deg, #2dd4bf 0%, #0d9488 100%)", 
-                    color: isLocked ? "rgba(255,255,255,0.4)" : "#fff", 
-                    display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 800 
-                  }}>
-                    {isLocked ? <Lock size={14} /> : i + 1}
+                        <button
+                          key={exp.id}
+                          onClick={() => { if(!isLocked) { setActiveId(exp.id); setView("detail"); if(window.innerWidth < 1024) setSidebarOpen(false); } }}
+                          style={{
+                            textAlign: "left", padding: "10px 14px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.05)",
+                            background: activeId === exp.id ? "rgba(255, 255, 255, 0.1)" : "transparent",
+                            cursor: isLocked ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: 12,
+                            opacity: isLocked ? 0.5 : 1, transition: "background 0.2s ease"
+                          }}
+                        >
+                          <div style={{ 
+                            width: 26, height: 26, borderRadius: 6, background: isCompleted ? C.teal : "rgba(255,255,255,0.1)", color: "#fff", 
+                            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 800 
+                          }}>
+                            {isLocked ? <Lock size={12} /> : isCompleted ? <Check size={14} /> : globalIndex}
                   </div>
                   <span style={{ color: "#fff", fontSize: 14, fontWeight: 600, lineHeight: 1.3 }}>{exp.title}</span>
                   </button>
