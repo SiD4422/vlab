@@ -645,7 +645,7 @@ function Home({ onOpen, unlocked }) {
               <h3 style={{ fontSize: 20, fontWeight: 700, color: C.ink, marginBottom: 16, borderBottom: `2px solid ${C.border}`, paddingBottom: 8 }}>{category.title}</h3>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 24 }}>
                 {EXPERIMENTS.filter(category.filter).map(exp => {
-                  const isLocked = !unlocked && exp.id !== "strain-gauge" && exp.id !== "bridge-circuits";
+                  const isLocked = false;
                   return (
             <button
               key={exp.id}
@@ -1113,7 +1113,7 @@ export default function App() {
                   <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, fontWeight: 800, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 12 }}>{category.title}</div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     {exps.map((exp, i) => {
-                      const isLocked = !unlocked && exp.id !== "strain-gauge" && exp.id !== "bridge-circuits";
+                      const isLocked = false;
                       return (
                 <button
                   key={exp.id}
