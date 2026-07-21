@@ -635,10 +635,18 @@ function Home({ onOpen, unlocked }) {
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 24 }}>
-          {EXPERIMENTS.map(exp => {
-            const isLocked = !unlocked && exp.id !== "strain-gauge" && exp.id !== "bridge-circuits";
-            return (
+        <div style={{ display: "flex", flexDirection: "column", gap: 40 }}>
+          {[
+            { title: "DC Bridges", filter: exp => exp.id === "wheatstone-bridge" },
+            { title: "AC Bridges", filter: exp => exp.id === "bridge-circuits" },
+            { title: "Sensors & Transducers", filter: exp => exp.id !== "wheatstone-bridge" && exp.id !== "bridge-circuits" }
+          ].map(category => (
+            <div key={category.title}>
+              <h3 style={{ fontSize: 20, fontWeight: 700, color: C.ink, marginBottom: 16, borderBottom: `2px solid ${C.border}`, paddingBottom: 8 }}>{category.title}</h3>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 24 }}>
+                {EXPERIMENTS.filter(category.filter).map(exp => {
+                  const isLocked = !unlocked && exp.id !== "strain-gauge" && exp.id !== "bridge-circuits";
+                  return (
             <button
               key={exp.id}
               onClick={() => { if(!isLocked) onOpen(exp.id); }}
@@ -690,7 +698,11 @@ function Home({ onOpen, unlocked }) {
                 {!isLocked && <ArrowLeft className="exp-arrow" size={16} color={C.muted} style={{ transform: "rotate(180deg)", transition: "all 0.2s ease" }} />}
               </div>
             </button>
-          )})}
+          );
+        })}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -1088,10 +1100,21 @@ export default function App() {
 
         <div style={{ padding: "24px" }}>
           <h4 style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, fontWeight: 800, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 20 }}>Curriculum</h4>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {EXPERIMENTS.map((exp, i) => {
-              const isLocked = !unlocked && exp.id !== "strain-gauge" && exp.id !== "bridge-circuits";
+          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+            {[
+              { title: "DC Bridges", filter: exp => exp.id === "wheatstone-bridge" },
+              { title: "AC Bridges", filter: exp => exp.id === "bridge-circuits" },
+              { title: "Sensors & Transducers", filter: exp => exp.id !== "wheatstone-bridge" && exp.id !== "bridge-circuits" }
+            ].map(category => {
+              const exps = EXPERIMENTS.filter(category.filter);
+              if (exps.length === 0) return null;
               return (
+                <div key={category.title}>
+                  <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, fontWeight: 800, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 12 }}>{category.title}</div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {exps.map((exp, i) => {
+                      const isLocked = !unlocked && exp.id !== "strain-gauge" && exp.id !== "bridge-circuits";
+                      return (
                 <button
                   key={exp.id}
                   onClick={() => {
@@ -1117,11 +1140,15 @@ export default function App() {
                     {isLocked ? <Lock size={14} /> : i + 1}
                   </div>
                   <span style={{ color: "#fff", fontSize: 14, fontWeight: 600, lineHeight: 1.3 }}>{exp.title}</span>
-                </button>
-              );
-            })}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        );
+      })}
+    </div>
+  </div>
       </div>
     </div>
   );
