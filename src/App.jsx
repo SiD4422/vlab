@@ -487,7 +487,7 @@ function Team() {
       </div>
 
       {/* Developers Section */}
-      <div className="reveal" style={{ background: "var(--shellSoft)", padding: "80px 40px", borderTop: `1px solid ${C.border}` }}>
+      <div className="reveal" style={{ background: "var(--canvas)", padding: "80px 40px" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 48 }}>
             <h2 style={{ fontSize: 32, fontWeight: 800, color: "var(--ink)", margin: "0 0 16px" }}>Developers</h2>
