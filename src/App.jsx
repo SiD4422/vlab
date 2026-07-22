@@ -480,6 +480,33 @@ function Home({ onOpen, unlocked, collapsedCategories, toggleCategory, searchQue
           </div>
         </div>
       </div>
+
+      {/* Faculty Section */}
+      <div className="reveal" style={{ background: "var(--canvas)", padding: "80px 40px", borderTop: `1px solid ${C.border}` }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 48 }}>
+            <h2 style={{ fontSize: 32, fontWeight: 800, color: C.ink, margin: "0 0 16px" }}>Faculty In-Charge</h2>
+            <p style={{ color: C.muted, fontSize: 18, maxWidth: 600, margin: "0 auto" }}>
+              Our dedicated instructors ensure a rigorous and industry-aligned practical curriculum.
+            </p>
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 32, justifyContent: "center" }}>
+            {[
+              { name: "Dr. Sowmmiya U", role: "Faculty In-Charge", specialty: "Power Electronics" },
+              { name: "Dr. Usha S", role: "Faculty In-Charge", specialty: "Electrical & Electronics Engineering" }
+            ].map((faculty, i) => (
+              <div key={i} style={{ background: "var(--card)", borderRadius: 16, padding: 32, width: 300, textAlign: "center", border: `1px solid ${C.border}`, boxShadow: "0 4px 14px rgba(0,0,0,0.03)" }}>
+                <div style={{ width: 90, height: 90, borderRadius: "50%", background: "var(--shell)", color: C.teal, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
+                  <Users size={40} />
+                </div>
+                <h3 style={{ margin: "0 0 8px", fontSize: 20, color: C.ink }}>{faculty.name}</h3>
+                <div style={{ color: C.copper, fontWeight: 700, fontSize: 14, marginBottom: 8 }}>{faculty.role}</div>
+                <div style={{ color: C.muted, fontSize: 14 }}>Specialty: {faculty.specialty}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -794,7 +821,7 @@ export default function App() {
           <div style={{ display: "flex", gap: 28, fontSize: 14, color: "#c3c9d6", fontWeight: 600 }}>
             <span style={{ color: view === "home" ? "#fff" : "#c3c9d6", cursor: "pointer" }} onClick={() => setView("home")}>Home</span>
             <span style={{ cursor: "pointer" }}>About Lab</span>
-            <span style={{ cursor: "pointer" }}>Developers</span>
+            <a href="https://github.com/SiD4422/vlab" target="_blank" rel="noopener noreferrer" style={{ cursor: "pointer", color: "inherit", textDecoration: "none" }}>Developers</a>
             <button onClick={() => setUnlocked(!unlocked)} style={{ display: "none" }}>Toggle</button>
           </div>
         </div>
