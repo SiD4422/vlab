@@ -471,11 +471,15 @@ function Team() {
           <div style={{ display: "flex", flexWrap: "wrap", gap: 32, justifyContent: "center" }}>
             {[
               { name: "Dr. Sowmmiya U", role: "Faculty In-Charge", skills: ["Power Electronics", "Renewable Energy"] },
-              { name: "Dr. Usha S", role: "Faculty In-Charge", skills: ["Electrical Engineering", "Control Systems"] }
+              { name: "Dr. Usha S", role: "Faculty In-Charge", skills: ["Electrical Engineering", "Control Systems"], image: "/usha.png" }
             ].map((faculty, i) => (
               <div key={i} style={{ background: "var(--card)", borderRadius: 16, padding: 32, width: 320, textAlign: "center", border: `1px solid ${C.border}`, boxShadow: "0 4px 14px rgba(0,0,0,0.03)", display: "flex", flexDirection: "column", alignItems: "center" }}>
                 <div style={{ width: 90, height: 90, borderRadius: "50%", background: "var(--shell)", color: C.teal, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", overflow: "hidden" }}>
-                  <Users size={40} />
+                  {faculty.image ? (
+                    <img src={faculty.image} alt={faculty.name} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }} />
+                  ) : (
+                    <Users size={40} />
+                  )}
                 </div>
                 <h3 style={{ margin: "0 0 8px", fontSize: 20, color: "var(--ink)" }}>{faculty.name}</h3>
                 <div style={{ color: C.copper, fontWeight: 700, fontSize: 14, marginBottom: 20 }}>{faculty.role}</div>
