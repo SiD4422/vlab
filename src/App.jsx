@@ -470,7 +470,7 @@ function Team() {
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 32, justifyContent: "center" }}>
             {[
-              { name: "Dr. Sowmmiya U", role: "Faculty In-Charge", skills: ["Power Electronics", "Renewable Energy"] },
+              { name: "Dr. Sowmmiya U", role: "Faculty In-Charge", skills: ["Power Electronics", "Renewable Energy"], image: "/sowmmiya.png" },
               { name: "Dr. Usha S", role: "Faculty In-Charge", skills: ["Electrical Engineering", "Control Systems"], image: "/usha.png" }
             ].map((faculty, i) => (
               <div key={i} style={{ background: "var(--card)", borderRadius: 16, padding: 32, width: 320, textAlign: "center", border: `1px solid ${C.border}`, boxShadow: "0 4px 14px rgba(0,0,0,0.03)", display: "flex", flexDirection: "column", alignItems: "center" }}>
