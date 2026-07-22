@@ -460,16 +460,34 @@ function Team() {
   return (
     <div style={{ paddingTop: 76, minHeight: "100vh", background: "var(--canvas)" }}>
       {/* Faculty Section */}
-      <div className="reveal" style={{ background: "var(--canvas)", padding: "80px 40px", borderTop: `1px solid ${C.border}` }}>
+      <div className="reveal" style={{ background: "var(--canvas)", padding: "80px 40px" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 48 }}>
             <h2 style={{ fontSize: 32, fontWeight: 800, color: "var(--ink)", margin: "0 0 16px" }}>Faculty In-Charge</h2>
             <p style={{ color: "var(--muted)", fontSize: 18, maxWidth: 600, margin: "0 auto" }}>
               Our dedicated instructors ensure a rigorous and industry-aligned practical curriculum.
             </p>
-      
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 32, justifyContent: "center" }}>
+            {[
+              { name: "Dr. Sowmmiya U", role: "Faculty In-Charge", specialty: "Power Electronics" },
+              { name: "Dr. Usha S", role: "Faculty In-Charge", specialty: "Electrical & Electronics Engineering" }
+            ].map((faculty, i) => (
+              <div key={i} style={{ background: "var(--card)", borderRadius: 16, padding: 32, width: 300, textAlign: "center", border: `1px solid ${C.border}`, boxShadow: "0 4px 14px rgba(0,0,0,0.03)" }}>
+                <div style={{ width: 90, height: 90, borderRadius: "50%", background: "var(--shell)", color: C.teal, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", overflow: "hidden" }}>
+                  <Users size={40} />
+                </div>
+                <h3 style={{ margin: "0 0 8px", fontSize: 20, color: "var(--ink)" }}>{faculty.name}</h3>
+                <div style={{ color: C.copper, fontWeight: 700, fontSize: 14, marginBottom: 8 }}>{faculty.role}</div>
+                <div style={{ color: "var(--muted)", fontSize: 14 }}>Specialty: {faculty.specialty}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Developers Section */}
-      <div className="reveal" style={{ background: "var(--shellSoft)", padding: "80px 40px" }}>
+      <div className="reveal" style={{ background: "var(--shellSoft)", padding: "80px 40px", borderTop: `1px solid ${C.border}` }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 48 }}>
             <h2 style={{ fontSize: 32, fontWeight: 800, color: "var(--ink)", margin: "0 0 16px" }}>Developers</h2>
@@ -479,8 +497,8 @@ function Team() {
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 32, justifyContent: "center" }}>
             {[
-              { name: "SiD", role: "Lead Developer", specialty: "Full-Stack & Physics Engine" },
-              { name: "Abhyudaya Singh", role: "Lead UI/UX Designer", specialty: "EEE (B.Tech)", image: "/abhyudaya_pro.jpg" }
+              { name: "Abhyudaya Singh", role: "Lead UI/UX Designer", specialty: "EEE (B.Tech)", image: "/abhyudaya_pro.jpg" },
+              { name: "SiD", role: "Lead Developer", specialty: "Full-Stack & Physics Engine" }
             ].map((faculty, i) => (
               <div key={i} style={{ background: "var(--card)", borderRadius: 16, padding: 32, width: 300, textAlign: "center", border: `1px solid ${C.border}`, boxShadow: "0 4px 14px rgba(0,0,0,0.03)" }}>
                 <div style={{ width: 90, height: 90, borderRadius: "50%", background: "var(--shell)", color: C.teal, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", overflow: "hidden" }}>
@@ -493,25 +511,6 @@ function Team() {
                 <h3 style={{ margin: "0 0 8px", fontSize: 20, color: "var(--ink)" }}>{faculty.name}</h3>
                 <div style={{ color: C.copper, fontWeight: 700, fontSize: 14, marginBottom: 8 }}>{faculty.role}</div>
                 <div style={{ color: "var(--muted)", fontSize: 14 }}>Focus: {faculty.specialty}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 32, justifyContent: "center" }}>
-            {[
-              { name: "Dr. Sowmmiya U", role: "Faculty In-Charge", specialty: "Power Electronics" },
-              { name: "Dr. Usha S", role: "Faculty In-Charge", specialty: "Electrical & Electronics Engineering" }
-            ].map((faculty, i) => (
-              <div key={i} style={{ background: "var(--card)", borderRadius: 16, padding: 32, width: 300, textAlign: "center", border: `1px solid ${C.border}`, boxShadow: "0 4px 14px rgba(0,0,0,0.03)" }}>
-                <div style={{ width: 90, height: 90, borderRadius: "50%", background: "var(--shell)", color: C.teal, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
-                  <Users size={40} />
-                </div>
-                <h3 style={{ margin: "0 0 8px", fontSize: 20, color: "var(--ink)" }}>{faculty.name}</h3>
-                <div style={{ color: C.copper, fontWeight: 700, fontSize: 14, marginBottom: 8 }}>{faculty.role}</div>
-                <div style={{ color: "var(--muted)", fontSize: 14 }}>Specialty: {faculty.specialty}</div>
               </div>
             ))}
           </div>
@@ -833,7 +832,7 @@ export default function App() {
           <div style={{ display: "flex", gap: 28, fontSize: 14, color: "#c3c9d6", fontWeight: 600 }}>
             <span style={{ color: view === "home" ? "#fff" : "#c3c9d6", cursor: "pointer" }} onClick={() => setView("home")}>Home</span>
             <span style={{ cursor: "pointer" }}>About Lab</span>
-            <a href="?view=team" target="_blank" rel="noopener noreferrer" style={{ color: view === "team" ? "#fff" : "#c3c9d6", cursor: "pointer", textDecoration: "none" }}>Developers</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); setView("team"); }} style={{ color: view === "team" ? "#fff" : "#c3c9d6", cursor: "pointer", textDecoration: "none" }}>Developers</a>
             <button onClick={() => setUnlocked(!unlocked)} style={{ display: "none" }}>Toggle</button>
           </div>
         </div>
