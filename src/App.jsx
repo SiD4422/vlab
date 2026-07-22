@@ -470,16 +470,22 @@ function Team() {
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 32, justifyContent: "center" }}>
             {[
-              { name: "Dr. Sowmmiya U", role: "Faculty In-Charge", specialty: "Power Electronics" },
-              { name: "Dr. Usha S", role: "Faculty In-Charge", specialty: "Electrical & Electronics Engineering" }
+              { name: "Dr. Sowmmiya U", role: "Faculty In-Charge", skills: ["Power Electronics", "Renewable Energy"] },
+              { name: "Dr. Usha S", role: "Faculty In-Charge", skills: ["Electrical Engineering", "Control Systems"] }
             ].map((faculty, i) => (
-              <div key={i} style={{ background: "var(--card)", borderRadius: 16, padding: 32, width: 300, textAlign: "center", border: `1px solid ${C.border}`, boxShadow: "0 4px 14px rgba(0,0,0,0.03)" }}>
+              <div key={i} style={{ background: "var(--card)", borderRadius: 16, padding: 32, width: 320, textAlign: "center", border: `1px solid ${C.border}`, boxShadow: "0 4px 14px rgba(0,0,0,0.03)", display: "flex", flexDirection: "column", alignItems: "center" }}>
                 <div style={{ width: 90, height: 90, borderRadius: "50%", background: "var(--shell)", color: C.teal, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", overflow: "hidden" }}>
                   <Users size={40} />
                 </div>
                 <h3 style={{ margin: "0 0 8px", fontSize: 20, color: "var(--ink)" }}>{faculty.name}</h3>
-                <div style={{ color: C.copper, fontWeight: 700, fontSize: 14, marginBottom: 8 }}>{faculty.role}</div>
-                <div style={{ color: "var(--muted)", fontSize: 14 }}>Specialty: {faculty.specialty}</div>
+                <div style={{ color: C.copper, fontWeight: 700, fontSize: 14, marginBottom: 20 }}>{faculty.role}</div>
+                <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap", marginTop: "auto" }}>
+                  {faculty.skills.map((skill, idx) => (
+                    <span key={idx} style={{ background: "var(--shell)", color: "var(--ink)", padding: "6px 12px", borderRadius: 20, fontSize: 12, fontWeight: 600, border: `1px solid ${C.border}` }}>
+                      {skill}
+                    </span>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
@@ -497,10 +503,10 @@ function Team() {
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 32, justifyContent: "center" }}>
             {[
-              { name: "Abhyudaya Singh", role: "Lead UI/UX Designer", specialty: "EEE (B.Tech)", image: "/abhyudaya_pro.jpg" },
-              { name: "Siddharth Kumar", role: "Lead Developer", specialty: "Full-Stack & Physics Engine", image: "/siddharth_pro.jpg" }
+              { name: "Abhyudaya Singh", role: "Lead UI/UX Designer", skills: ["UI/UX Design", "Figma", "EEE (B.Tech)"], image: "/abhyudaya_pro.jpg" },
+              { name: "Siddharth Kumar", role: "Lead Developer", skills: ["Full-Stack", "Physics Engine", "React"], image: "/siddharth_pro.jpg" }
             ].map((faculty, i) => (
-              <div key={i} style={{ background: "var(--card)", borderRadius: 16, padding: 32, width: 300, textAlign: "center", border: `1px solid ${C.border}`, boxShadow: "0 4px 14px rgba(0,0,0,0.03)" }}>
+              <div key={i} style={{ background: "var(--card)", borderRadius: 16, padding: 32, width: 320, textAlign: "center", border: `1px solid ${C.border}`, boxShadow: "0 4px 14px rgba(0,0,0,0.03)", display: "flex", flexDirection: "column", alignItems: "center" }}>
                 <div style={{ width: 90, height: 90, borderRadius: "50%", background: "var(--shell)", color: C.teal, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", overflow: "hidden" }}>
                   {faculty.image ? (
                     <img src={faculty.image} alt={faculty.name} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }} />
@@ -509,8 +515,14 @@ function Team() {
                   )}
                 </div>
                 <h3 style={{ margin: "0 0 8px", fontSize: 20, color: "var(--ink)" }}>{faculty.name}</h3>
-                <div style={{ color: C.copper, fontWeight: 700, fontSize: 14, marginBottom: 8 }}>{faculty.role}</div>
-                <div style={{ color: "var(--muted)", fontSize: 14 }}>Focus: {faculty.specialty}</div>
+                <div style={{ color: C.copper, fontWeight: 700, fontSize: 14, marginBottom: 20 }}>{faculty.role}</div>
+                <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap", marginTop: "auto" }}>
+                  {faculty.skills.map((skill, idx) => (
+                    <span key={idx} style={{ background: "var(--shell)", color: "var(--ink)", padding: "6px 12px", borderRadius: 20, fontSize: 12, fontWeight: 600, border: `1px solid ${C.border}` }}>
+                      {skill}
+                    </span>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
