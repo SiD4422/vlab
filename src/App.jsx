@@ -470,8 +470,8 @@ function Team() {
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 32, justifyContent: "center" }}>
             {[
-              { name: "Dr. Sowmmiya U", role: "Faculty In-Charge", department: "Electrical and Electronics Engineering", institute: "SRMIST, Kattankulathur", email: "sowmmiyu@srmist.edu.in", image: "/sowmmiya.png" },
-              { name: "Dr. Usha S", role: "Faculty In-Charge", department: "Electrical and Electronics Engineering", institute: "SRMIST, Kattankulathur", email: "ushas@srmist.edu.in", image: "/usha.png" }
+              { name: "Dr. Sowmmiya U", role: "Faculty In-Charge", department: "Electrical and Electronics Engineering", institute: "SRMIST, Kattankulathur", email: "sowmmiyu@srmist.edu.in", image: "/sowmmiya.png", description: "Research interests include grid integration of renewable sources, condition monitoring, and power transfer in wind energy systems." },
+              { name: "Dr. Usha S", role: "Faculty In-Charge", department: "Electrical and Electronics Engineering", institute: "SRMIST, Kattankulathur", email: "ushas@srmist.edu.in", image: "/usha.png", description: "Research focuses on Power Electronics Converters, Stability analysis of Induction motors, and Electric drive systems." }
             ].map((faculty, i) => (
               <div key={i} style={{ background: "var(--card)", borderRadius: 16, padding: "40px 32px", width: 360, textAlign: "center", border: `1px solid ${C.border}`, boxShadow: "0 4px 14px rgba(0,0,0,0.03)", display: "flex", flexDirection: "column", alignItems: "center" }}>
                 <div style={{ width: 100, height: 100, borderRadius: "50%", background: "var(--shell)", color: C.teal, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px", overflow: "hidden" }}>
@@ -487,7 +487,13 @@ function Team() {
                 </div>
                 
                 <div style={{ color: "var(--text)", fontSize: 16, marginBottom: 6 }}>{faculty.department}</div>
-                <div style={{ color: "var(--muted)", fontSize: 15, marginBottom: 28 }}>{faculty.institute}</div>
+                <div style={{ color: "var(--muted)", fontSize: 15, marginBottom: 16 }}>{faculty.institute}</div>
+                
+                {faculty.description && (
+                  <div style={{ color: "var(--text)", fontSize: 14, lineHeight: 1.6, marginBottom: 28, textAlign: "center" }}>
+                    {faculty.description}
+                  </div>
+                )}
                 
                 {faculty.email && (
                   <a href={`mailto:${faculty.email}`} style={{ marginTop: "auto", background: "#3b82f6", color: "#fff", padding: "12px 24px", borderRadius: 8, display: "inline-flex", alignItems: "center", gap: 8, textDecoration: "none", fontWeight: 600, fontSize: 15, width: "100%", justifyContent: "center", boxSizing: "border-box" }}>
@@ -529,7 +535,13 @@ function Team() {
                 </div>
                 
                 <div style={{ color: "var(--text)", fontSize: 16, marginBottom: 6 }}>{faculty.department}</div>
-                <div style={{ color: "var(--muted)", fontSize: 15, marginBottom: 28 }}>{faculty.institute}</div>
+                <div style={{ color: "var(--muted)", fontSize: 15, marginBottom: 16 }}>{faculty.institute}</div>
+                
+                {faculty.description && (
+                  <div style={{ color: "var(--text)", fontSize: 14, lineHeight: 1.6, marginBottom: 28, textAlign: "center" }}>
+                    {faculty.description}
+                  </div>
+                )}
                 
                 {faculty.email && (
                   <a href={`mailto:${faculty.email}`} style={{ marginTop: "auto", background: "#3b82f6", color: "#fff", padding: "12px 24px", borderRadius: 8, display: "inline-flex", alignItems: "center", gap: 8, textDecoration: "none", fontWeight: 600, fontSize: 15, width: "100%", justifyContent: "center", boxSizing: "border-box" }}>
