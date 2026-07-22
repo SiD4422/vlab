@@ -450,27 +450,26 @@ function Home({ onOpen, unlocked, collapsedCategories, toggleCategory, searchQue
         </div>
       </div>
 
-      {/* Faculty Section */}
-      <div className="reveal" style={{ background: "#f8f9fa", padding: "80px 40px", borderTop: `1px solid ${C.border}` }}>
+      {/* Developers Section */}
+      <div className="reveal" style={{ background: "var(--shellSoft)", padding: "80px 40px", borderTop: `1px solid ${C.border}` }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 48 }}>
-            <h2 style={{ fontSize: 32, fontWeight: 800, color: C.ink, margin: "0 0 16px" }}>Faculty In-Charge</h2>
+            <h2 style={{ fontSize: 32, fontWeight: 800, color: C.ink, margin: "0 0 16px" }}>Developers</h2>
             <p style={{ color: C.muted, fontSize: 18, maxWidth: 600, margin: "0 auto" }}>
-              Our dedicated instructors ensure a rigorous and industry-aligned practical curriculum.
+              The minds behind this virtual laboratory experience.
             </p>
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 32, justifyContent: "center" }}>
             {[
-              { name: "Dr. Sowmmiya U", role: "Faculty In-Charge", specialty: "Power Electronics" },
-              { name: "Dr. Usha S", role: "Faculty In-Charge", specialty: "Electrical & Electronics Engineering" }
+              { name: "SiD", role: "Lead Developer", specialty: "Full-Stack & Physics Engine" }
             ].map((faculty, i) => (
-              <div key={i} style={{ background: "#fff", borderRadius: 16, padding: 32, width: 300, textAlign: "center", border: `1px solid ${C.border}`, boxShadow: "0 4px 14px rgba(0,0,0,0.03)" }}>
-                <div style={{ width: 90, height: 90, borderRadius: "50%", background: "#e8f5f3", color: C.teal, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
+              <div key={i} style={{ background: "var(--card)", borderRadius: 16, padding: 32, width: 300, textAlign: "center", border: `1px solid ${C.border}`, boxShadow: "0 4px 14px rgba(0,0,0,0.03)" }}>
+                <div style={{ width: 90, height: 90, borderRadius: "50%", background: "var(--shell)", color: C.teal, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
                   <Users size={40} />
                 </div>
                 <h3 style={{ margin: "0 0 8px", fontSize: 20, color: C.ink }}>{faculty.name}</h3>
                 <div style={{ color: C.copper, fontWeight: 700, fontSize: 14, marginBottom: 8 }}>{faculty.role}</div>
-                <div style={{ color: C.muted, fontSize: 14 }}>Specialty: {faculty.specialty}</div>
+                <div style={{ color: C.muted, fontSize: 14 }}>Focus: {faculty.specialty}</div>
               </div>
             ))}
           </div>
@@ -790,8 +789,8 @@ export default function App() {
           <div style={{ display: "flex", gap: 28, fontSize: 14, color: "#c3c9d6", fontWeight: 600 }}>
             <span style={{ color: view === "home" ? "#fff" : "#c3c9d6", cursor: "pointer" }} onClick={() => setView("home")}>Home</span>
             <span style={{ cursor: "pointer" }}>About Lab</span>
-            <span style={{ cursor: "pointer" }}>Faculty</span>
-            <span style={{ cursor: "pointer" }}>Contact</span>
+            <span style={{ cursor: "pointer" }}>Developers</span>
+            <button onClick={() => setUnlocked(!unlocked)} style={{ display: "none" }}>Toggle</button>
           </div>
         </div>
       </div>
@@ -834,7 +833,7 @@ export default function App() {
             <div style={{ display: "flex", flexDirection: "column", gap: 12, fontSize: 14 }}>
               <a href="#" style={{ color: "#c3c9d6", textDecoration: "none" }}>Admissions</a>
               <a href="#" style={{ color: "#c3c9d6", textDecoration: "none" }}>Academic Calendar</a>
-              <a href="#" style={{ color: "#c3c9d6", textDecoration: "none" }}>Department Faculty</a>
+              <a href="#" style={{ color: "#c3c9d6", textDecoration: "none" }}>Developers</a>
               <a href="#" style={{ color: "#c3c9d6", textDecoration: "none" }}>Student Portal</a>
             </div>
           </div>
