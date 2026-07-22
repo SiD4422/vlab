@@ -485,7 +485,7 @@ function Team() {
                 <div style={{ color: C.copper, fontWeight: 700, fontSize: 14, marginBottom: 20 }}>{faculty.role}</div>
                 <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap", marginTop: "auto" }}>
                   {faculty.skills.map((skill, idx) => (
-                    <span key={idx} style={{ background: "var(--shell)", color: "var(--ink)", padding: "6px 12px", borderRadius: 20, fontSize: 12, fontWeight: 600, border: `1px solid ${C.border}` }}>
+                    <span key={idx} style={{ background: "var(--shell)", color: "#fff", padding: "6px 12px", borderRadius: 20, fontSize: 12, fontWeight: 600, border: `1px solid ${C.border}` }}>
                       {skill}
                     </span>
                   ))}
@@ -522,7 +522,7 @@ function Team() {
                 <div style={{ color: C.copper, fontWeight: 700, fontSize: 14, marginBottom: 20 }}>{faculty.role}</div>
                 <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap", marginTop: "auto" }}>
                   {faculty.skills.map((skill, idx) => (
-                    <span key={idx} style={{ background: "var(--shell)", color: "var(--ink)", padding: "6px 12px", borderRadius: 20, fontSize: 12, fontWeight: 600, border: `1px solid ${C.border}` }}>
+                    <span key={idx} style={{ background: "var(--shell)", color: "#fff", padding: "6px 12px", borderRadius: 20, fontSize: 12, fontWeight: 600, border: `1px solid ${C.border}` }}>
                       {skill}
                     </span>
                   ))}
