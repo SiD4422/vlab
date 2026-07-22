@@ -461,11 +461,16 @@ function Home({ onOpen, unlocked, collapsedCategories, toggleCategory, searchQue
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 32, justifyContent: "center" }}>
             {[
-              { name: "SiD", role: "Lead Developer", specialty: "Full-Stack & Physics Engine" }
+              { name: "SiD", role: "Lead Developer", specialty: "Full-Stack & Physics Engine" },
+              { name: "Abhyudaya Singh", role: "Lead UI/UX Designer", specialty: "EEE (B.Tech)", image: "/abhyudaya.jpg" }
             ].map((faculty, i) => (
               <div key={i} style={{ background: "var(--card)", borderRadius: 16, padding: 32, width: 300, textAlign: "center", border: `1px solid ${C.border}`, boxShadow: "0 4px 14px rgba(0,0,0,0.03)" }}>
-                <div style={{ width: 90, height: 90, borderRadius: "50%", background: "var(--shell)", color: C.teal, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
-                  <Users size={40} />
+                <div style={{ width: 90, height: 90, borderRadius: "50%", background: "var(--shell)", color: C.teal, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", overflow: "hidden" }}>
+                  {faculty.image ? (
+                    <img src={faculty.image} alt={faculty.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  ) : (
+                    <Users size={40} />
+                  )}
                 </div>
                 <h3 style={{ margin: "0 0 8px", fontSize: 20, color: C.ink }}>{faculty.name}</h3>
                 <div style={{ color: C.copper, fontWeight: 700, fontSize: 14, marginBottom: 8 }}>{faculty.role}</div>
