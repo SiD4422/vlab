@@ -350,9 +350,9 @@ function render(){
         ${iconInner(c)}
         ${termHtml}
       </g>
-      <text class="label-name" x="${c.x}" y="${c.y-30}">${def.label}</text>
-      ${valLabel?`<text class="label-val" x="${c.x}" y="${c.y+40}">${valLabel}</text>`:''}
-      <text class="label-read" data-role="reading" data-comp="${c.id}" x="${c.x}" y="${c.y+54}"></text>
+      <text class="label-name" x="${c.x}" y="${c.y-48}">${def.label}</text>
+      ${valLabel?`<text class="label-val" x="${c.x}" y="${c.y+48}">${valLabel}</text>`:''}
+      <text class="label-read" data-role="reading" data-comp="${c.id}" x="${c.x}" y="${c.y+62}"></text>
       ${isSel ? `
         <g class="ctx-btn" data-role="ctx-rotate" data-comp="${c.id}" transform="translate(${c.x-30},${c.y-40})">
           <circle cx="0" cy="0" r="14" stroke="var(--border)" stroke-width="1.5"/>
