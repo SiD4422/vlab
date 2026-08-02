@@ -74,6 +74,54 @@
   .insp-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
   .insp-title{font-size:15px;font-weight:700;margin-bottom:4px;}
   .insp-sub{font-size:11.5px;color:var(--muted);margin-bottom:14px;}
+  /* === OSCILLOSCOPE === */
+  #osc-toggle{
+    position:fixed; bottom:20px; right:20px; z-index:200;
+    background:var(--accent); color:#04201d; border:none;
+    border-radius:50%; width:48px; height:48px; font-size:20px;
+    box-shadow:0 4px 20px rgba(13,148,136,.45); cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:.2s;
+  }
+  #osc-toggle:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(13,148,136,.6);}
+  #osc-panel{
+    position:fixed; bottom:80px; right:20px; z-index:199;
+    width:520px; background:#0f172a; border:1px solid #1e3a5f;
+    border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,.5);
+    font-family:var(--mono); color:#e2e8f0;
+    display:none; flex-direction:column; overflow:hidden;
+    resize:both; min-width:360px; min-height:260px;
+  }
+  #osc-panel.open{display:flex;}
+  .osc-topbar{
+    display:flex;align-items:center;gap:8px;padding:10px 14px;
+    background:#1e293b; border-bottom:1px solid #334155;
+    cursor:move; user-select:none;
+  }
+  .osc-title{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#94a3b8;flex:1;}
+  .osc-btn{
+    font-family:var(--mono);font-size:10px;font-weight:600;
+    padding:4px 9px;border-radius:6px;border:1px solid #334155;
+    background:#0f172a;color:#94a3b8;cursor:pointer;transition:.15s;
+  }
+  .osc-btn:hover{border-color:#0d9488;color:#2dd4bf;}
+  .osc-btn.active{background:#0d9488;color:#04201d;border-color:#0d9488;}
+  #osc-canvas{display:block;width:100%;background:#050d1a;flex:1;cursor:crosshair;}
+  .osc-footer{
+    display:flex;align-items:center;gap:8px;padding:8px 12px;
+    background:#1e293b;border-top:1px solid #334155;flex-wrap:wrap;
+  }
+  .osc-channel{
+    display:flex;align-items:center;gap:5px;
+    padding:4px 9px;border-radius:20px;font-size:10.5px;
+    border:1px solid; cursor:pointer; transition:.15s;
+  }
+  .osc-channel .dot{width:8px;height:8px;border-radius:50%;}
+  .osc-channel.muted{opacity:.4;text-decoration:line-through;}
+  .osc-no-probe{
+    flex:1;text-align:center;font-size:11px;color:#475569;padding:6px;
+  }
+  .osc-readout{font-size:10px;color:#64748b;margin-left:auto;}
 </style>
 </head>
 <body>
@@ -96,6 +144,27 @@
       <svg id="canvas" width="1600" height="1100"></svg>
     </div>
     <div class="inspector" id="inspector"></div>
+  </div>
+</div>
+
+<!-- Oscilloscope Toggle Button -->
+<button id="osc-toggle" title="Open Oscilloscope">📈</button>
+
+<!-- Oscilloscope Panel -->
+<div id="osc-panel">
+  <div class="osc-topbar" id="osc-drag-handle">
+    <span class="osc-title">⚡ Oscilloscope</span>
+    <select id="osc-probe-sel" style="font-family:var(--mono);font-size:11px;background:#0f172a;color:#94a3b8;border:1px solid #334155;border-radius:6px;padding:3px 6px;">
+      <option value="">— Probe a component —</option>
+    </select>
+    <button class="osc-btn" id="osc-add-ch">+ Add</button>
+    <button class="osc-btn" id="osc-clear-ch">Clear All</button>
+    <button class="osc-btn" id="osc-freeze">❄ Freeze</button>
+    <button class="osc-btn" id="osc-close">✕</button>
+  </div>
+  <canvas id="osc-canvas" height="200"></canvas>
+  <div class="osc-footer" id="osc-footer">
+    <span class="osc-no-probe">Add a component probe above to start plotting ↑</span>
   </div>
 </div>
 
@@ -302,6 +371,11 @@ let drag = null;
 let drawingWire = null;
 let uidCounter = 1;
 const uid = ()=> 'c'+(uidCounter++);
+
+// Expose globals for the oscilloscope
+Object.defineProperty(window,'_sbComponents',{get:()=>components});
+Object.defineProperty(window,'_sbCompTypes',{get:()=>COMP_TYPES});
+Object.defineProperty(window,'_sbSimTime',{get:()=>simTime});
 
 function addComponent(type, x, y){
   const def = COMP_TYPES[type];
@@ -610,7 +684,7 @@ function tick(now){
     simHistory = res.history;
     simTime += PHYS_DT;
   }
-  if(res) applyReadings(res.readings);
+  if(res){ applyReadings(res.readings); if(window._oscUpdate) window._oscUpdate(res.readings, simTime); }
 }
 
 function applyReadings(readings){
@@ -700,6 +774,270 @@ function loadExample(comps, ws){
   render(); renderInspector();
 }
 
+
+/* ============================
+   OSCILLOSCOPE ENGINE
+   ============================ */
+(function(){
+  const COLORS = ['#2dd4bf','#f59e0b','#f43f5e','#818cf8','#34d399','#fb923c','#e879f9','#38bdf8'];
+  const MAX_SAMPLES = 800;
+  const TIME_WINDOW = 4; // seconds to show
+
+  let channels = [];
+  let frozen = false;
+  let oscOpen = false;
+  let animId = null;
+
+  const panel     = document.getElementById('osc-panel');
+  const canvas    = document.getElementById('osc-canvas');
+  const ctx       = canvas.getContext('2d');
+  const footer    = document.getElementById('osc-footer');
+  const probeSel  = document.getElementById('osc-probe-sel');
+  const btnToggle = document.getElementById('osc-toggle');
+  const btnAdd    = document.getElementById('osc-add-ch');
+  const btnClear  = document.getElementById('osc-clear-ch');
+  const btnFreeze = document.getElementById('osc-freeze');
+  const btnClose  = document.getElementById('osc-close');
+
+  // ── draggable panel ──────────────────────────────────────────────
+  (function makeDraggable(){
+    const handle = document.getElementById('osc-drag-handle');
+    let ox=0,oy=0,px=0,py=0;
+    handle.addEventListener('mousedown', e=>{
+      if(e.target.tagName==='SELECT'||e.target.tagName==='BUTTON') return;
+      px=e.clientX; py=e.clientY;
+      const r=panel.getBoundingClientRect();
+      ox=r.left; oy=r.top;
+      panel.style.right='auto';
+      panel.style.left=ox+'px'; panel.style.top=oy+'px'; panel.style.bottom='auto';
+      const mm=ev=>{ panel.style.left=(ox+ev.clientX-px)+'px'; panel.style.top=(oy+ev.clientY-py)+'px'; };
+      const mu=()=>{ document.removeEventListener('mousemove',mm); document.removeEventListener('mouseup',mu); };
+      document.addEventListener('mousemove',mm);
+      document.addEventListener('mouseup',mu);
+    });
+  })();
+
+  // ── toggle open/close ─────────────────────────────────────────────
+  btnToggle.addEventListener('click', ()=>{
+    oscOpen = !oscOpen;
+    panel.classList.toggle('open', oscOpen);
+    btnToggle.textContent = oscOpen ? '✕' : '📈';
+    if(oscOpen){ resizeCanvas(); startDraw(); }
+    else stopDraw();
+  });
+  btnClose.addEventListener('click', ()=>{
+    oscOpen=false; panel.classList.remove('open');
+    btnToggle.textContent='📈'; stopDraw();
+  });
+
+  // ── freeze toggle ─────────────────────────────────────────────────
+  btnFreeze.addEventListener('click', ()=>{
+    frozen=!frozen;
+    btnFreeze.classList.toggle('active', frozen);
+    btnFreeze.textContent = frozen ? '▶ Resume' : '❄ Freeze';
+  });
+
+  // ── populate probe selector ───────────────────────────────────────
+  function refreshProbeList(){
+    const prev = probeSel.value;
+    probeSel.innerHTML = '<option value="">— Probe a component —</option>';
+    (window._sbComponents||[]).forEach(c=>{
+      if(['ground','junction','switch'].includes(c.type)) return;
+      const def = (window._sbCompTypes||{})[c.type];
+      const label = def ? def.label : c.type;
+      const el = document.createElement('option');
+      el.value = c.id;
+      el.textContent = `${label} (${c.id})`;
+      probeSel.appendChild(el);
+    });
+    if(prev) probeSel.value=prev;
+  }
+
+  // ── add channel ───────────────────────────────────────────────────
+  btnAdd.addEventListener('click', ()=>{
+    const id = probeSel.value;
+    if(!id) return;
+    const c = (window._sbComponents||[]).find(x=>x.id===id);
+    if(!c) return;
+    const def = (window._sbCompTypes||{})[c.type];
+    const label = def ? def.label : c.type;
+    // auto pick metric (V or I or P)
+    const metrics = getMetrics(c.type);
+    metrics.forEach((metric,mi)=>{
+      if(channels.find(ch=>ch.compId===id && ch.metric===metric)) return;
+      const color = COLORS[(channels.length) % COLORS.length];
+      channels.push({ compId:id, label:`${label} ${metric}`, metric, color, data:[], muted:false });
+    });
+    renderFooter();
+  });
+
+  function getMetrics(type){
+    if(['voltmeter','battery','acsource','capacitor','inductor','galvanometer'].includes(type)) return ['V','I'];
+    if(type==='ammeter') return ['I'];
+    if(type==='resistor'||type==='bulb') return ['V','I'];
+    return ['V'];
+  }
+
+  // ── clear all channels ────────────────────────────────────────────
+  btnClear.addEventListener('click', ()=>{ channels=[]; renderFooter(); });
+
+  // ── render channel chips in footer ───────────────────────────────
+  function renderFooter(){
+    if(channels.length===0){
+      footer.innerHTML='<span class="osc-no-probe">Add a component probe above to start plotting ↑</span>';
+      return;
+    }
+    footer.innerHTML='';
+    channels.forEach((ch,i)=>{
+      const el = document.createElement('div');
+      el.className='osc-channel'+(ch.muted?' muted':'');
+      el.style.borderColor=ch.color;
+      el.style.color=ch.color;
+      el.innerHTML=`<span class="dot" style="background:${ch.color}"></span>${ch.label}.${ch.metric}`;
+      el.title='Click to mute/unmute';
+      el.addEventListener('click', ()=>{ ch.muted=!ch.muted; renderFooter(); });
+      const rm=document.createElement('span');
+      rm.textContent='✕'; rm.style.marginLeft='4px'; rm.style.cursor='pointer'; rm.style.opacity='.6';
+      rm.addEventListener('click', e=>{ e.stopPropagation(); channels.splice(i,1); renderFooter(); });
+      el.appendChild(rm);
+      footer.appendChild(el);
+    });
+    const ro=document.createElement('span');
+    ro.className='osc-readout'; ro.id='osc-readout';
+    footer.appendChild(ro);
+  }
+
+  // ── canvas resize ─────────────────────────────────────────────────
+  function resizeCanvas(){
+    canvas.width = panel.clientWidth;
+    canvas.height = Math.max(160, panel.clientHeight - 90);
+  }
+  new ResizeObserver(resizeCanvas).observe(panel);
+
+  // ── draw loop ─────────────────────────────────────────────────────
+  function startDraw(){ if(animId) return; loop(); }
+  function stopDraw(){ if(animId){ cancelAnimationFrame(animId); animId=null; } }
+  function loop(){ animId=requestAnimationFrame(loop); draw(); }
+
+  function draw(){
+    const W=canvas.width, H=canvas.height;
+    ctx.clearRect(0,0,W,H);
+
+    // background gradient
+    const bg=ctx.createLinearGradient(0,0,0,H);
+    bg.addColorStop(0,'#050d1a'); bg.addColorStop(1,'#0a1628');
+    ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+    // grid lines
+    ctx.strokeStyle='rgba(148,163,184,0.07)'; ctx.lineWidth=1;
+    const cols=10, rows=8;
+    for(let i=0;i<=cols;i++){ ctx.beginPath(); ctx.moveTo(i*W/cols,0); ctx.lineTo(i*W/cols,H); ctx.stroke(); }
+    for(let i=0;i<=rows;i++){ ctx.beginPath(); ctx.moveTo(0,i*H/rows); ctx.lineTo(W,i*H/rows); ctx.stroke(); }
+    // center axes
+    ctx.strokeStyle='rgba(148,163,184,0.18)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(0,H/2); ctx.lineTo(W,H/2); ctx.stroke();
+
+    if(channels.length===0){
+      ctx.fillStyle='#334155'; ctx.font='13px IBM Plex Mono';
+      ctx.textAlign='center'; ctx.fillText('No channels. Add a probe ↗', W/2, H/2);
+      return;
+    }
+
+    // auto-scale: find global max across all visible channels
+    let maxVal=1e-9;
+    channels.forEach(ch=>{
+      if(ch.muted||ch.data.length<2) return;
+      ch.data.forEach(p=>{ if(Math.abs(p.v)>maxVal) maxVal=Math.abs(p.v); });
+    });
+    const scale = (H/2-16) / maxVal;
+
+    // time axis: last TIME_WINDOW seconds
+    const now = window._sbSimTime||0;
+    const tStart = Math.max(0, now - TIME_WINDOW);
+
+    // draw each channel
+    channels.forEach(ch=>{
+      if(ch.muted || ch.data.length<2) return;
+      ctx.save();
+      ctx.strokeStyle=ch.color;
+      ctx.lineWidth=2;
+      ctx.shadowColor=ch.color;
+      ctx.shadowBlur=4;
+      ctx.lineJoin='round';
+      ctx.beginPath();
+      let first=true;
+      ch.data.forEach(p=>{
+        if(p.t<tStart) return;
+        const x = ((p.t-tStart)/TIME_WINDOW)*W;
+        const y = H/2 - p.v*scale;
+        if(first){ ctx.moveTo(x,y); first=false; } else ctx.lineTo(x,y);
+      });
+      ctx.stroke();
+
+      // latest value label at right edge
+      if(ch.data.length){
+        const last=ch.data[ch.data.length-1];
+        const y=Math.max(14,Math.min(H-6, H/2-last.v*scale));
+        ctx.shadowBlur=0;
+        ctx.fillStyle=ch.color;
+        ctx.font='bold 10px IBM Plex Mono';
+        ctx.textAlign='right';
+        ctx.fillText(`${ch.label}.${ch.metric}: ${fmtOsc(last.v,ch.metric)}`, W-6, y);
+      }
+      ctx.restore();
+    });
+
+    // time axis labels
+    ctx.fillStyle='#475569'; ctx.font='9.5px IBM Plex Mono'; ctx.textAlign='center'; ctx.shadowBlur=0;
+    for(let i=0;i<=4;i++){
+      const t2 = tStart + (i/4)*TIME_WINDOW;
+      ctx.fillText(t2.toFixed(2)+'s', (i/4)*W, H-3);
+    }
+    // y=0 label
+    ctx.textAlign='left'; ctx.fillText('0', 3, H/2-3);
+
+    // max scale label
+    ctx.fillText(`+${fmtOsc(maxVal,'V')}`, 3, 14);
+    ctx.fillText(`-${fmtOsc(maxVal,'V')}`, 3, H-14);
+
+    // frozen indicator
+    if(frozen){
+      ctx.fillStyle='rgba(250,204,21,0.9)'; ctx.font='bold 11px IBM Plex Mono';
+      ctx.textAlign='center';
+      ctx.fillText('❄ FROZEN', W/2, 16);
+    }
+  }
+
+  function fmtOsc(v, metric){
+    const unit = metric==='I'?'A': metric==='P'?'W':'V';
+    const a=Math.abs(v);
+    if(a>=1) return v.toFixed(3)+unit;
+    if(a>=1e-3) return (v*1e3).toFixed(2)+'m'+unit;
+    if(a>=1e-6) return (v*1e6).toFixed(2)+'µ'+unit;
+    return v.toExponential(2)+unit;
+  }
+
+  // ── hook into simulation tick ─────────────────────────────────────
+  // We expose a global update hook the tick() calls
+  window._oscUpdate = function(readings, t){
+    if(frozen) return;
+    refreshProbeList();
+    channels.forEach(ch=>{
+      const r=readings[ch.compId]; if(!r) return;
+      let val=0;
+      if(ch.metric==='V') val=r.V||0;
+      else if(ch.metric==='I') val=r.I||0;
+      else if(ch.metric==='P') val=r.P||0;
+      ch.data.push({t, v:val});
+      // trim old samples beyond 2x window
+      const cutoff=t-TIME_WINDOW*2;
+      while(ch.data.length && ch.data[0].t<cutoff) ch.data.shift();
+      if(ch.data.length>MAX_SAMPLES) ch.data.shift();
+    });
+  };
+
+  renderFooter();
+})();
 
 renderPalette();
 render();
