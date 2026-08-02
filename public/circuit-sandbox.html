@@ -535,6 +535,17 @@ svg.addEventListener('pointerup', (e)=>{
         addWire({compId:jId, t:0}, targetWire.b);
         addWire(drag.from, {compId:jId, t:0});
       }
+    } else if (target.id === 'canvas' || target.tagName.toLowerCase() === 'svg') {
+      const ca = components.find(c=>c.id===drag.from.compId);
+      if(ca){
+        const startPt = absTerminal(ca, drag.from.t);
+        const dropPt = svgPoint(e);
+        if (Math.hypot(dropPt.x-startPt.x, dropPt.y-startPt.y) > 20) {
+          const jId = uid();
+          components.push({id:jId, type:'junction', x:snap(dropPt.x), y:snap(dropPt.y), rotation:0});
+          addWire(drag.from, {compId:jId, t:0});
+        }
+      }
     }
     removeWireDraft(); render();
   }
