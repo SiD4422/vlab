@@ -44,7 +44,10 @@
   svg#canvas{display:block;cursor:default;}
   .comp-body{cursor:grab;}
   .comp-body:active{cursor:grabbing;}
-  .comp-body.selected .body-outline{stroke:var(--accent);stroke-width:2;}
+  .comp-body.selected .body-outline{stroke:var(--accent);stroke-width:2.5;stroke-dasharray:6 4;fill:rgba(13,148,136,0.05);}
+  .ctx-btn{cursor:pointer;}
+  .ctx-btn circle{transition:0.15s;fill:var(--panel);}
+  .ctx-btn:hover circle{fill:var(--panel2);}
   .terminal{fill:var(--muted);stroke:var(--bg);stroke-width:1.5;cursor:crosshair;}
   .terminal:hover{fill:var(--accent);}
   .lead{stroke:var(--muted);stroke-width:2.5;fill:none;}
@@ -349,6 +352,16 @@ function render(){
       <text class="label-name" x="${c.x}" y="${c.y-30}">${def.label}</text>
       ${valLabel?`<text class="label-val" x="${c.x}" y="${c.y+40}">${valLabel}</text>`:''}
       <text class="label-read" data-role="reading" data-comp="${c.id}" x="${c.x}" y="${c.y+54}"></text>
+      ${isSel ? `
+        <g class="ctx-btn" data-role="ctx-rotate" data-comp="${c.id}" transform="translate(${c.x-30},${c.y-40})">
+          <circle cx="0" cy="0" r="14" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="0" y="4" font-size="14" fill="var(--text)" text-anchor="middle">↻</text>
+        </g>
+        <g class="ctx-btn" data-role="ctx-delete" data-comp="${c.id}" transform="translate(${c.x+30},${c.y-40})">
+          <circle cx="0" cy="0" r="14" stroke="var(--danger)" stroke-width="1.5"/>
+          <text x="0" y="4.5" font-size="13" fill="var(--danger)" text-anchor="middle">🗑</text>
+        </g>
+      ` : ''}
     `;
   });
   svg.innerHTML = html;
@@ -448,6 +461,18 @@ function snap(v){ return Math.round(v/GRID)*GRID; }
 svg.addEventListener('pointerdown', (e)=>{
   const pt = svgPoint(e);
   const target = e.target;
+  const ctxBtn = target.closest ? target.closest('.ctx-btn') : null;
+  if(ctxBtn){
+    const role = ctxBtn.dataset.role;
+    const compId = ctxBtn.dataset.comp;
+    if(role==='ctx-rotate'){
+      const c = components.find(x=>x.id===compId);
+      if(c){ c.rotation = ((c.rotation||0)+90)%360; render(); }
+    } else if(role==='ctx-delete'){
+      removeComponent(compId); selected=null; render(); renderInspector();
+    }
+    return;
+  }
   if(placing){
     addComponent(placing, snap(pt.x), snap(pt.y));
     placing = null;
