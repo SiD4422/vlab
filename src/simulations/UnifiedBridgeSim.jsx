@@ -246,9 +246,9 @@ export default function UnifiedBridgeSim({ bridgeId }) {
  * Shows: Apparatus list, Balance Formula, Observation Table, Result.
  */
 export function BridgeProcedurePanel({ bridgeId, bridgeState, onStateChange }) {
-  const [graphX, setGraphX] = useState('');
-  const [graphY, setGraphY] = useState('');
   const bridge = BRIDGES.find(b => b.id === bridgeId);
+  const [graphX, setGraphX] = useState(bridge && bridge.tabCols.length >= 2 ? bridge.tabCols[0].k : '');
+  const [graphY, setGraphY] = useState(bridge && bridge.tabCols.length >= 2 ? bridge.tabCols[1].k : '');
   if (!bridge) return null;
   const st = bridgeState || initBridgeState(bridge);
   function update(newSt) { if (onStateChange) onStateChange(newSt); }
