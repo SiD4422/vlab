@@ -10,11 +10,12 @@ export const EXPERIMENTS = [
       "Compare quarter, half and full bridge configurations."
     ],
     "theory": [
+      "A Strain Gauge is a resistive sensor whose resistance changes with applied force; it is essentially a resistor that stretches or compresses.",
+      "Resistance is measured in Ohms (Ω), representing the opposition to current flow in the gauge.",
       "Stress is internal force per unit cross-sectional area; strain ε = ΔL / L is the resulting fractional deformation (dimensionless).",
-      "A strain gauge is a resistive element bonded to a surface — as the surface strains, the gauge's resistance changes proportionally.",
       "Gauge factor GF = (ΔR/R) / ε. Metallic foil gauges typically have GF between 2 and 5.",
-      "A Wheatstone bridge converts the small resistance change into a measurable output voltage. Full-bridge (4 active arms) gives the highest sensitivity and cancels temperature drift.",
-      "A dummy (unstrained) gauge on an adjacent arm is used for temperature compensation."
+      "A Wheatstone bridge converts the small resistance change (ΔR) into a measurable output voltage (ΔV).",
+      "Formula: ΔV = V_in * (GF * ε) / 4 for a quarter-bridge setup."
     ],
     "procedure": [
       "Connect the active gauge in a quarter-bridge configuration with the bridge supply.",
@@ -104,11 +105,12 @@ export const EXPERIMENTS = [
       "Study bridge sensitivity to small resistance changes."
     ],
     "theory": [
-      "A Wheatstone bridge has four resistive arms R1, R2, R3, R4 with a galvanometer across the bridge diagonal.",
-      "Balance condition: R1/R2 = R3/R4, which gives zero galvanometer deflection.",
-      "An unknown resistance can be found precisely by adjusting a known arm until balance is achieved.",
-      "When one arm's resistance changes slightly (as with a strain gauge), the bridge becomes unbalanced and produces an output proportional to that change.",
-      "Bridge sensitivity depends on arm resistance ratios and the excitation voltage."
+      "A Resistor is a passive electrical component that limits or regulates the flow of electrical current.",
+      "Resistance is measured in Ohms (Ω), which quantifies the opposition to the current flow.",
+      "The Wheatstone bridge consists of four resistive arms (P, Q, R, and Rx) together with a source of EMF and a null detector (galvanometer).",
+      "When the bridge is balanced, no current flows through the galvanometer, indicating that the potential at both terminals is equal.",
+      "Balance Formula: P × Rx = Q × R",
+      "This gives the unknown resistance as Rx = (Q × R) / P."
     ],
     "procedure": [
       "Set up the four-arm bridge with a known unknown resistor in one arm.",
@@ -436,9 +438,12 @@ export const EXPERIMENTS = [
       "Observe the effect of lead and contact resistances."
     ],
     "theory": [
-      "The Kelvin bridge is a modification of the Wheatstone bridge and provides greatly increased accuracy in the measurement of low value resistances (typically below 1 ohm).",
-      "It uses a second set of ratio arms to compensate for the resistance of the connecting leads and contacts, which would otherwise introduce significant error.",
-      "At balance, the unknown resistance Rx is given by Rx = R3 * (R1/R2) = R3 * (a/b) where R1/R2 and a/b are the primary and secondary ratio arms respectively."
+      "A Resistor restricts current flow, and in this experiment, we measure very low resistance values (fractions of an Ohm).",
+      "Resistance is measured in Ohms (Ω). Low resistances require specialized techniques to avoid errors from lead wire resistances.",
+      "The Kelvin Bridge is a modification of the Wheatstone bridge, specifically designed for accurately measuring unknown resistors below 1 Ω.",
+      "It minimizes the effect of contact and lead resistances by using an additional set of ratio arms.",
+      "Balance Formula: P × Rx = Q × S",
+      "This gives the unknown low resistance as Rx = (Q × S) / P."
     ],
     "procedure": [
       "Connect the unknown low resistance to the bridge terminals.",
@@ -565,9 +570,11 @@ export const EXPERIMENTS = [
       "Eliminate thermoelectric EMF errors."
     ],
     "theory": [
-      "The Kelvin Double Bridge incorporates two sets of ratio arms. It is the industrial standard for measuring resistances from 1 micro-ohm to 1 ohm.",
-      "By reversing the DC supply and taking the average of the two balance readings, thermoelectric EMFs generated at junctions can be perfectly canceled out.",
-      "The condition for balance remains independent of the yoke resistance connecting the standard and unknown resistors if the inner and outer ratios are perfectly matched."
+      "Resistors restrict current. When measuring ultra-low resistances (Ohms, Ω), the resistance of connecting wires and contacts can cause significant errors.",
+      "The Kelvin Double Bridge uses two sets of ratio arms (outer P, Q and inner p, q) to completely eliminate lead resistance errors (yoke resistance 'r').",
+      "When the ratio of the outer arms equals the ratio of the inner arms (P/Q = p/q), the effect of the connecting link is zeroed out.",
+      "Balance Formula: Rx = (P/Q) × S + [q×r / (p+q+r)] × (P/Q − p/q)",
+      "If P/Q = p/q exactly, the formula simplifies perfectly to Rx = (P/Q) × S."
     ],
     "procedure": [
       "Connect the massive current leads and separate potential leads to the unknown resistor (4-terminal measurement).",
@@ -694,9 +701,12 @@ export const EXPERIMENTS = [
       "Analyze dielectric losses."
     ],
     "theory": [
-      "In its simplest form, the capacitance comparison bridge consists of two resistive arms and two capacitive arms.",
-      "By adjusting the resistive arms, both the magnitude and the phase angle of the unknown capacitor can be balanced against a standard loss-free capacitor.",
-      "At balance: Cx = C_std * (R1/R2) and rx = r_std * (R2/R1)."
+      "A Capacitor is a passive electrical component that stores energy in an electric field between two conductive plates.",
+      "Capacitance is measured in Farads (F). In practical circuits, microfarads (µF) are typically used (1 µF = 10^-6 F).",
+      "The Capacitance Comparison Bridge measures an unknown capacitance (Cx) by comparing it with a known standard loss-free capacitor (C2).",
+      "The bridge is balanced using an AC source and a headphone detector to find the null point (minimum audio signal).",
+      "Balance Formula: Cx × R3 = C2 × R4",
+      "This yields the unknown capacitance as Cx = (C2 × R4) / R3."
     ],
     "procedure": [
       "Apply an AC sinusoidal excitation (e.g., 1 kHz).",
@@ -822,9 +832,12 @@ export const EXPERIMENTS = [
       "Determine internal resistance of the coil."
     ],
     "theory": [
-      "This bridge compares an unknown inductance with a standard variable inductance.",
-      "Because it uses a standard inductor, it is rarely used for precise measurements due to the bulkiness and magnetic interference of standard inductors.",
-      "At balance: Lx = L_std * (R2/R3) and Rx = R_std * (R2/R3)."
+      "An Inductor is a passive electrical component (usually a coil of wire) that stores energy in a magnetic field when electric current flows through it.",
+      "Inductance is measured in Henrys (H). Practical coils are often measured in millihenrys (mH, 1 mH = 10^-3 H).",
+      "The Maxwell Inductance Bridge compares an unknown inductor (L1) and its internal resistance (R1) against a standard variable inductor (L2).",
+      "AC bridges require balancing both the real (resistive) and imaginary (reactive) parts of the circuit impedance.",
+      "Balance Formula for Inductance: L1 = (R3 / R4) × L2",
+      "Balance Formula for Resistance: R1 = (R3 / R4) × (R2 + r2)"
     ],
     "procedure": [
       "Connect the unknown coil.",
@@ -950,9 +963,11 @@ export const EXPERIMENTS = [
       "Eliminate the need for standard inductors."
     ],
     "theory": [
-      "Also known as the Maxwell-Wien bridge, this circuit measures an unknown inductance in terms of a known capacitance.",
-      "This is highly advantageous because standard capacitors are compact, perfectly shielded, and nearly loss-free compared to standard inductors.",
-      "At balance: Lx = R2 * R3 * C4 and Rx = (R2 * R3) / R4."
+      "Inductance (Henrys, H or mH) represents a coil's opposition to changes in current. Capacitance (Farads, F or µF) represents the ability to store charge.",
+      "The Maxwell LC Bridge (often just called Maxwell's Bridge) uniquely measures an unknown inductance (Lx) using a standard variable capacitor (C4) instead of another inductor.",
+      "This avoids the bulk and magnetic field interference problems of standard inductors. It is best suited for medium-Q coils.",
+      "Balance Formula for Inductance: Lx = R2 × R3 × C4",
+      "Balance Formula for Coil Resistance: Rx = (R2 × R3) / R4"
     ],
     "procedure": [
       "Connect the unknown coil in arm 1.",
@@ -1077,9 +1092,11 @@ export const EXPERIMENTS = [
       "Measure coils with Q > 10."
     ],
     "theory": [
-      "Hay’s bridge is a modification of Maxwell’s bridge. It connects the standard capacitor in series with a resistor rather than in parallel.",
-      "This series configuration makes the bridge perfectly suited for measuring high-Q coils (where the inductive reactance is much larger than the resistance).",
-      "For high Q coils, the balance equations become nearly independent of frequency."
+      "Inductance is measured in millihenrys (mH), and Capacitance in microfarads (µF).",
+      "Hay's Bridge is a modification of Maxwell's LC Bridge. Instead of a parallel resistor-capacitor network, it uses a series resistor-capacitor network (R4 and C4).",
+      "This configuration is specifically suited for measuring high-Q coils (Quality factor Q > 10) because it allows for a much more practical value of R4.",
+      "Balance Formula for Inductance: Lx = (R2 × R3 × C4) / (1 + X²), where X = 2π × f × C4 × R4",
+      "Balance Formula for Coil Resistance: Rx = X² × (R2 × R3 / R4) / (1 + X²)"
     ],
     "procedure": [
       "Connect a high-Q inductor.",
@@ -1204,9 +1221,11 @@ export const EXPERIMENTS = [
       "Understand 6-node bridge circuits."
     ],
     "theory": [
-      "The Anderson bridge is an AC bridge used to measure self-inductance in terms of a standard capacitor. It is a modification of the Maxwell-Wien bridge.",
-      "Unlike the Maxwell bridge which requires a variable capacitor, the Anderson bridge achieves balance by using a fixed standard capacitor and a variable resistor.",
-      "It is highly accurate for measuring low-Q coils, though the balance equations are significantly more complex."
+      "Inductance is measured in millihenrys (mH) and Capacitance in microfarads (µF).",
+      "The Anderson Bridge is a versatile modification of the Maxwell bridge that allows accurate measurement of a wide range of inductances (from a few microhenrys to several henrys).",
+      "It uses a fixed standard capacitor (C) and achieves balance by varying a resistor (m), removing the need for an expensive variable standard capacitor.",
+      "Balance Formula for Inductance: Lx = C × [ R × Q + (R + S) × m ]",
+      "The DC balance for resistance is first achieved using S = (Q × R) / P."
     ],
     "procedure": [
       "Connect the circuit involving the 5th intermediate node.",
@@ -1332,9 +1351,11 @@ export const EXPERIMENTS = [
       "Understand high-voltage AC bridges."
     ],
     "theory": [
-      "Schering bridge is extensively used for measuring capacitance and the dielectric loss (dissipation factor) of capacitors and insulating cables.",
-      "At balance: Cx = C2 * (R4/R3).",
-      "The dissipation factor D = ω * C4 * R4."
+      "Capacitance is measured in microfarads (µF). The Dissipation Factor (D) is a dimensionless number representing the energy lost (as heat) inside a real capacitor.",
+      "The Schering Bridge is one of the most important AC bridges used extensively for measuring the capacitance and the dissipation factor (dielectric loss) of capacitors.",
+      "It is especially useful for high-voltage testing of cables and insulators.",
+      "Balance Formula for Capacitance: Cx = C2 × (R4 / R3)",
+      "Balance Formula for Dissipation Factor: D = 2π × f × C4 × R4"
     ],
     "procedure": [
       "Connect the unknown capacitor (Cx).",
@@ -1459,9 +1480,11 @@ export const EXPERIMENTS = [
       "Design a Wien bridge oscillator."
     ],
     "theory": [
-      "Wien’s bridge is primarily used for the precision measurement of audio frequencies.",
-      "The bridge consists of a series RC combination in one arm and a parallel RC combination in the adjoining arm.",
-      "At balance, the frequency is given by f = 1 / (2 * π * √(R1*R2*C1*C2)). If R1=R2=R and C1=C2=C, then f = 1 / (2πRC)."
+      "Resistors (Ohms, Ω) and Capacitors (microfarads, µF) can be combined to create frequency-selective filter networks.",
+      "Wien's Bridge is primarily used to measure the frequency of an unknown AC source, rather than measuring component values.",
+      "It balances only at a single specific frequency for a given set of R and C values.",
+      "In a symmetric configuration (R1=R2=R and C1=C2=C), the ratio arms must be fixed such that R3 = 2 × R4.",
+      "Balance Formula for Frequency: f = 1 / (2π × R × C) Hz"
     ],
     "procedure": [
       "Apply the unknown frequency source.",
@@ -1586,9 +1609,11 @@ export const EXPERIMENTS = [
       "Eliminate stray capacitance errors completely."
     ],
     "theory": [
-      "Transformer ratio arm bridges replace the conventional resistive ratio arms with an inductive voltage divider (a tightly coupled transformer).",
-      "This design offers incredible accuracy (up to 1 part in 10^8) and completely immunizes the bridge against stray capacitances to ground.",
-      "It is widely used in national standards laboratories for calibrating capacitors and inductors."
+      "Capacitance is measured in microfarads (µF).",
+      "The Transformer Ratio Bridge replaces the standard resistive ratio arms of a classical bridge with a precision-tapped transformer.",
+      "Transformer windings are highly stable, immune to temperature variations, and offer extremely precise voltage ratios compared to resistors.",
+      "Balance Formula: Cx = Cs × n",
+      "Where 'n' is the turns ratio (N2/N1) of the tapped transformer windings."
     ],
     "procedure": [
       "Connect the unknown impedance and the standard impedance to the transformer taps.",
