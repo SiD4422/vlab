@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { driver } from "driver.js";
+import "driver.js/dist/driver.css";
 import {
   Zap, BookOpen, ClipboardCheck, ListOrdered, Sparkles, MessageSquare,
   Link2, Target, ArrowLeft, Loader2, CheckCircle2, XCircle, Star,
@@ -493,6 +495,31 @@ function Team() {
    EXPERIMENT DETAIL
 --------------------------------------------------------------- */
 function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCompleted, bridgeSims, setBridgeSims }) {
+  const startTour = () => {
+    const driverObj = driver({
+      showProgress: true,
+      steps: [
+        {
+          element: '#tour-tabs',
+          popover: { title: 'Navigation', description: 'Use these tabs to switch between Theory, Simulation, and Procedure.', side: "right", align: 'start' }
+        },
+        {
+          element: '#tour-reference',
+          popover: { title: 'Reference Diagram', description: 'This is the exact circuit schematic you need to build for this experiment.', side: "bottom", align: 'start' }
+        },
+        {
+          element: '#tour-sandbox',
+          popover: { title: 'Circuit Sandbox', description: 'This is your workspace. Drag components from the palette, click the terminals to wire them, and manually balance the bridge.', side: "top", align: 'start' }
+        },
+        {
+          element: '#tour-procedure-tab',
+          popover: { title: 'Record Readings', description: 'Once balanced, click the Procedure tab to manually record your readings into the observation table.', side: "right", align: 'start' }
+        }
+      ]
+    });
+    driverObj.drive();
+  };
+
   return (
     <div>
       {/* Top Breadcrumb Header */}
@@ -509,7 +536,7 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
         <div style={{
           width: sidebarOpen ? 240 : 0, overflow: "hidden", flexShrink: 0, transition: "width 0.15s",
           position: "sticky", top: 116,
-        }}>
+        }} id="tour-tabs">
           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
             <div style={{ fontSize: 12, fontWeight: 800, color: C.muted, textTransform: "uppercase", letterSpacing: 1, paddingLeft: 16, marginBottom: 12 }}>
               Module Contents
@@ -520,6 +547,7 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
               return (
                 <button
                   key={t.id}
+                  id={t.id === "procedure" ? "tour-procedure-tab" : undefined}
                   onClick={() => setTab(t.id)}
                   style={{
                     display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderRadius: 8,
@@ -547,7 +575,21 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
             <span style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontSize: 13, fontWeight: 700, color: "#475569", background: "#f1f5f9", border: "1px solid #e2e8f0", padding: "4px 10px", borderRadius: 6 }}>{exp.tag}</span>
             <span style={{ fontSize: 13, fontWeight: 600, color: "#94a3b8" }}>Required Module</span>
           </div>
-          <h2 style={{ fontSize: 36, fontWeight: 800, color: "#0f172a", margin: "0 0 32px", letterSpacing: -0.5 }}>{exp.title}</h2>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", margin: "0 0 32px" }}>
+            <h2 style={{ fontSize: 36, fontWeight: 800, color: "#0f172a", margin: 0, letterSpacing: -0.5 }}>{exp.title}</h2>
+            {tab === "simulation" && exp.id !== "strain-gauge" && (
+              <button
+                onClick={startTour}
+                style={{
+                  display: "flex", alignItems: "center", gap: 8, padding: "10px 16px",
+                  background: C.teal, color: "#fff", border: "none", borderRadius: 8,
+                  fontWeight: 600, fontSize: 14, cursor: "pointer", boxShadow: "0 4px 12px rgba(13, 148, 136, 0.3)"
+                }}
+              >
+                <Sparkles size={16} /> Guide Me
+              </button>
+            )}
+          </div>
 
           {tab === "aim" && (
             <div>
@@ -592,7 +634,7 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
                 </Section>
               ) : (
                 <>
-                  <Section title="Reference Diagram">
+                  <Section title="Reference Diagram" id="tour-reference">
                     {[
                       "wheatstone-bridge", "kelvin-bridge", "kelvin-double-bridge",
                       "capacitance-comparison-bridge", "maxwell-inductance-bridge",
@@ -608,7 +650,7 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
                     )}
                   </Section>
                   
-                  <Section title="Circuit Sandbox Workspace">
+                  <Section title="Circuit Sandbox Workspace" id="tour-sandbox">
                     <CircuitSandbox />
                   </Section>
                 </>
@@ -657,9 +699,9 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
   );
 }
 
-function Section({ title, children }) {
+function Section({ title, children, id }) {
   return (
-    <div style={{ marginBottom: 32 }}>
+    <div style={{ marginBottom: 40 }} id={id}>
       <div style={{ fontSize: 16, fontWeight: 800, color: "#1e293b", letterSpacing: 0.5, textTransform: "uppercase", marginBottom: 16, paddingBottom: 12, borderBottom: "2px solid #f1f5f9" }}>{title}</div>
       <div style={{ fontSize: 16, color: "#334155", lineHeight: 1.8 }}>{children}</div>
     </div>
