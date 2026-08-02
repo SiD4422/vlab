@@ -378,6 +378,11 @@ export default function UnifiedBridgeSim({ bridgeId, bridgeState, onStateChange 
             onClick={() => {
               const fx = fixedLookup(bridge);
               const computed = bridge.compute(st.ctrl, fx);
+              // round computed values to avoid crazy decimals in editable inputs
+              Object.keys(computed).forEach(k => {
+                const dec = bridge.hidden.find(h => h.key === k)?.decimals ?? 2;
+                computed[k] = parseFloat(computed[k].toFixed(dec));
+              });
               update({ ...st, rows: [...st.rows, { ...st.ctrl, ...computed }] });
             }}
           >
@@ -415,6 +420,19 @@ export function BridgeProcedurePanel({ bridgeId, bridgeState, onStateChange }) {
   const st = bridgeState || initBridgeState(bridge);
   function update(newSt) { if (onStateChange) onStateChange(newSt); }
 
+  function updateRow(index, key, rawVal) {
+    const newRows = [...st.rows];
+    const val = rawVal === '' ? '' : parseFloat(rawVal);
+    newRows[index] = { ...newRows[index], [key]: isNaN(val) ? rawVal : val };
+    update({ ...st, rows: newRows });
+  }
+
+  function addEmptyRow() {
+    const emptyRow = {};
+    bridge.tabCols.forEach(c => emptyRow[c.k] = '');
+    update({ ...st, rows: [...st.rows, emptyRow] });
+  }
+
   const sectionTitle = {
     fontSize: 13, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase',
     color: 'var(--muted)', marginBottom: 12, marginTop: 24,
@@ -435,16 +453,18 @@ export function BridgeProcedurePanel({ bridgeId, bridgeState, onStateChange }) {
 
   /* average result */
   let resultContent = null;
-  if (st.rows.length > 0) {
+  const validRows = st.rows.filter(r => bridge.hidden.every(h => typeof r[h.key] === 'number' && !isNaN(r[h.key])));
+  
+  if (validRows.length > 0) {
     const avg = {};
-    bridge.hidden.forEach(h => { avg[h.key] = st.rows.reduce((a, r) => a + r[h.key], 0) / st.rows.length; });
+    bridge.hidden.forEach(h => { avg[h.key] = validRows.reduce((a, r) => a + r[h.key], 0) / validRows.length; });
     resultContent = bridge.hidden.map(h => {
       const errStr = st.revealed
         ? ` | Actual = ${fmt(st.hidden[h.key], 4)} ${h.unit} — Error: ${fmt(Math.abs(avg[h.key] - st.hidden[h.key]) / st.hidden[h.key] * 100, 2)}%`
         : '';
       return (
         <div key={h.key} style={{ marginBottom: 6 }}>
-          {h.label} (mean of {st.rows.length} trial{st.rows.length > 1 ? 's' : ''}) ={' '}
+          {h.label} (mean of {validRows.length} valid trial{validRows.length > 1 ? 's' : ''}) ={' '}
           <b style={{ color: 'var(--teal)' }}>{fmt(avg[h.key], 4)} {h.unit}</b>
           {st.revealed && <span style={{ color: 'var(--muted)', fontSize: 13 }}>{errStr}</span>}
         </div>
@@ -489,34 +509,61 @@ export function BridgeProcedurePanel({ bridgeId, bridgeState, onStateChange }) {
                 <tr>
                   <td colSpan={bridge.tabCols.length + 1}
                     style={{ ...td, color: 'var(--muted)', textAlign: 'center', padding: 24 }}>
-                    No readings yet — go to the <b>Simulation</b> tab, balance the bridge, and click "Record Reading".
+                    No readings yet — go to the <b>Simulation</b> tab and record a reading, or add a row manually.
                   </td>
                 </tr>
               ) : st.rows.map((row, i) => (
                 <tr key={i} style={{ background: i % 2 === 0 ? 'transparent' : 'var(--canvas)' }}>
                   <td style={td}>{i + 1}</td>
                   {bridge.tabCols.map(c => (
-                    <td key={c.k} style={td}>{fmt(row[c.k], c.u === 'µF' ? 4 : 2)}</td>
+                    <td key={c.k} style={{ ...td, padding: '4px 8px' }}>
+                      <input
+                        type="number"
+                        step="any"
+                        value={row[c.k] !== undefined ? row[c.k] : ''}
+                        onChange={e => updateRow(i, c.k, e.target.value)}
+                        style={{
+                          width: '100%',
+                          minWidth: '70px',
+                          background: 'var(--card)',
+                          border: '1px solid var(--border)',
+                          borderRadius: 4,
+                          padding: '6px 8px',
+                          fontFamily: 'ui-monospace,monospace',
+                          fontSize: 12.5,
+                          color: 'var(--ink)',
+                          outline: 'none',
+                          boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.02)'
+                        }}
+                      />
+                    </td>
                   ))}
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        {st.rows.length > 0 && (
-          <div style={{ padding: '10px 16px', borderTop: '1px solid var(--border)', display: 'flex', gap: 10 }}>
-            <button
-              onClick={() => update({ ...st, revealed: !st.revealed })}
-              style={{ fontSize: 13, fontWeight: 600, padding: '6px 14px', borderRadius: 7, border: '1px solid var(--teal)', background: 'transparent', color: 'var(--teal)', cursor: 'pointer' }}>
-              {st.revealed ? 'Hide' : 'Reveal'} True Value
-            </button>
-            <button
-              onClick={() => update({ ...st, rows: [], revealed: false })}
-              style={{ fontSize: 13, fontWeight: 600, padding: '6px 14px', borderRadius: 7, border: '1px solid var(--border)', background: 'transparent', color: 'var(--muted)', cursor: 'pointer' }}>
-              Clear
-            </button>
-          </div>
-        )}
+        <div style={{ padding: '10px 16px', borderTop: '1px solid var(--border)', display: 'flex', gap: 10 }}>
+          <button
+            onClick={addEmptyRow}
+            style={{ fontSize: 13, fontWeight: 600, padding: '6px 14px', borderRadius: 7, border: '1px solid var(--border)', background: 'var(--canvas)', color: 'var(--ink)', cursor: 'pointer' }}>
+            + Add Row
+          </button>
+          {st.rows.length > 0 && (
+            <>
+              <button
+                onClick={() => update({ ...st, revealed: !st.revealed })}
+                style={{ fontSize: 13, fontWeight: 600, padding: '6px 14px', borderRadius: 7, border: '1px solid var(--teal)', background: 'transparent', color: 'var(--teal)', cursor: 'pointer' }}>
+                {st.revealed ? 'Hide' : 'Reveal'} True Value
+              </button>
+              <button
+                onClick={() => update({ ...st, rows: [], revealed: false })}
+                style={{ fontSize: 13, fontWeight: 600, padding: '6px 14px', borderRadius: 7, border: '1px solid var(--border)', background: 'transparent', color: 'var(--muted)', cursor: 'pointer' }}>
+                Clear
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Result */}
