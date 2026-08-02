@@ -7,8 +7,7 @@ import {
 , Search, Sun, Moon, Check } from "lucide-react";
 
 import StrainGaugeSim from "./simulations/StrainGaugeSim";
-import BridgeCircuitsSim from "./simulations/BridgeCircuitsSim";
-import InteractiveWiringSim from "./simulations/InteractiveWiringSim";
+import UnifiedBridgeSim from "./simulations/UnifiedBridgeSim";
 
 /* ---------------------------------------------------------------
    DESIGN TOKENS — circuit-board palette: ink navy shell, copper
@@ -558,7 +557,7 @@ function Team() {
 /* ---------------------------------------------------------------
    EXPERIMENT DETAIL
 --------------------------------------------------------------- */
-function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCompleted }) {
+function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCompleted, bridgeSims, setBridgeSims }) {
   return (
     <div>
       {/* Top Breadcrumb Header */}
@@ -654,20 +653,19 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
             <Section title="Interactive Simulation">
               {exp.id === "strain-gauge" ? (
                 <StrainGaugeSim />
-              ) : exp.id === "maxwell-lc-bridge" ? (
-                <InteractiveWiringSim bridgeType="maxwell" />
-              ) : exp.id === "schering-bridge" ? (
-                <InteractiveWiringSim bridgeType="schering" />
-              ) : exp.id === "capacitance-comparison-bridge" ? (
-                <InteractiveWiringSim bridgeType="capacitance-comparison" />
-              ) : exp.id === "maxwell-inductance-bridge" ? (
-                <InteractiveWiringSim bridgeType="maxwell-inductance" />
-              ) : exp.id === "hays-bridge" ? (
-                <InteractiveWiringSim bridgeType="hays" />
-              ) : exp.id === "wiens-bridge" ? (
-                <InteractiveWiringSim bridgeType="wiens" />
-              ) : exp.id === "kelvin-bridge" ? (
-                <InteractiveWiringSim bridgeType="kelvin" />
+              ) : [
+                "wheatstone-bridge", "kelvin-bridge", "kelvin-double-bridge",
+                "capacitance-comparison-bridge", "maxwell-inductance-bridge",
+                "maxwell-lc-bridge", "hays-bridge", "anderson-bridge",
+                "schering-bridge", "wiens-bridge", "transformer-ratio-bridge"
+              ].includes(exp.id) ? (
+                <UnifiedBridgeSim
+                  bridgeId={exp.id}
+                  bridgeState={bridgeSims[exp.id]}
+                  onStateChange={newSt =>
+                    setBridgeSims(prev => ({ ...prev, [exp.id]: newSt }))
+                  }
+                />
               ) : (
                 <div style={{ padding: "40px 20px", textAlign: "center", color: C.muted, background: "var(--card)", borderRadius: 8, border: `1px solid ${C.border}` }}>
                   <Activity size={32} color={C.border} style={{ marginBottom: 12 }} />
@@ -781,6 +779,8 @@ export default function App() {
   const [unlocked, setUnlocked] = useState(false);
   const [collapsedCategories, setCollapsedCategories] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
+  // Persistent bridge sim state — keyed by exp.id, survives sidebar navigation
+  const [bridgeSims, setBridgeSims] = useState({});
   const [completed, setCompleted] = useState(() => JSON.parse(localStorage.getItem('vlab_completed') || '[]'));
   const [theme, setTheme] = useState(() => localStorage.getItem('vlab_theme') || 'light');
 
@@ -877,7 +877,7 @@ export default function App() {
         <Home onOpen={openExperiment} unlocked={unlocked} collapsedCategories={collapsedCategories} toggleCategory={toggleCategory} searchQuery={searchQuery} setSearchQuery={setSearchQuery} completed={completed} />
       ) : view === "detail" && active ? (
         <div style={{ paddingTop: 76 }}>
-          <Detail exp={active} tab={tab} setTab={setTab} onBack={() => setView("home")} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} markCompleted={() => markCompleted(active.id)} />
+          <Detail exp={active} tab={tab} setTab={setTab} onBack={() => setView("home")} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} markCompleted={() => markCompleted(active.id)} bridgeSims={bridgeSims} setBridgeSims={setBridgeSims} />
         </div>
       ) : view === "team" ? (
         <Team />
