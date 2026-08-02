@@ -61,7 +61,6 @@ const TABS = [
   { id: "simulation", label: "Simulation", icon: Activity, badge: "BETA" },
   { id: "pretest", label: "Pretest", icon: ClipboardCheck },
   { id: "procedure", label: "Procedure", icon: ListOrdered },
-  { id: "sandbox", label: "Circuit Sandbox", icon: Zap, badge: "NEW" },
   { id: "posttest", label: "Posttest", icon: ClipboardCheck },
   { id: "references", label: "References", icon: Link2 },
   { id: "feedback", label: "Feedback", icon: MessageSquare },
@@ -586,30 +585,37 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
           )}
 
           {tab === "simulation" && (
-            <Section title="Interactive Simulation">
-              {exp.id === "strain-gauge" ? (
-                <StrainGaugeSim />
-              ) : [
-                "wheatstone-bridge", "kelvin-bridge", "kelvin-double-bridge",
-                "capacitance-comparison-bridge", "maxwell-inductance-bridge",
-                "maxwell-lc-bridge", "hays-bridge", "anderson-bridge",
-                "schering-bridge", "wiens-bridge", "transformer-ratio-bridge"
-              ].includes(exp.id) ? (
-                <UnifiedBridgeSim
-                  bridgeId={exp.id}
-                  bridgeState={bridgeSims[exp.id]}
-                  onStateChange={newSt =>
-                    setBridgeSims(prev => ({ ...prev, [exp.id]: newSt }))
-                  }
-                />
-              ) : (
-                <div style={{ padding: "40px 20px", textAlign: "center", color: C.muted, background: "var(--card)", borderRadius: 8, border: `1px solid ${C.border}` }}>
-                  <Activity size={32} color={C.border} style={{ marginBottom: 12 }} />
-                  <div>The interactive simulation for {exp.title} is currently under development.</div>
-                  <div style={{ fontSize: 13, marginTop: 4 }}>Check back soon!</div>
-                </div>
-              )}
-            </Section>
+            <div>
+              <Section title="Interactive Simulation">
+                {exp.id === "strain-gauge" ? (
+                  <StrainGaugeSim />
+                ) : [
+                  "wheatstone-bridge", "kelvin-bridge", "kelvin-double-bridge",
+                  "capacitance-comparison-bridge", "maxwell-inductance-bridge",
+                  "maxwell-lc-bridge", "hays-bridge", "anderson-bridge",
+                  "schering-bridge", "wiens-bridge", "transformer-ratio-bridge"
+                ].includes(exp.id) ? (
+                  <UnifiedBridgeSim
+                    bridgeId={exp.id}
+                    bridgeState={bridgeSims[exp.id]}
+                    onStateChange={newSt =>
+                      setBridgeSims(prev => ({ ...prev, [exp.id]: newSt }))
+                    }
+                  />
+                ) : (
+                  <div style={{ padding: "40px 20px", textAlign: "center", color: C.muted, background: "var(--card)", borderRadius: 8, border: `1px solid ${C.border}` }}>
+                    <Activity size={32} color={C.border} style={{ marginBottom: 12 }} />
+                    <div>The interactive simulation for {exp.title} is currently under development.</div>
+                    <div style={{ fontSize: 13, marginTop: 4 }}>Check back soon!</div>
+                  </div>
+                )}
+              </Section>
+              <div style={{ marginTop: 48, paddingTop: 32, borderTop: `2px dashed ${C.border}` }}>
+                <Section title="Freeplay Sandbox">
+                  <CircuitSandbox />
+                </Section>
+              </div>
+            </div>
           )}
 
           {tab === "pretest" && <Section title="Pretest"><Quiz questions={exp.pretest} /></Section>}
@@ -637,8 +643,6 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
               )}
             </Section>
           )}
-
-          {tab === "sandbox" && <Section title="Circuit Sandbox"><CircuitSandbox /></Section>}
 
           {tab === "references" && (
             <Section title="References">
