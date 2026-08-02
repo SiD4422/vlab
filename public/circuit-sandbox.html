@@ -8,9 +8,9 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0a0e14; --panel:#111826; --panel2:#161f30; --border:#243044;
-    --text:#e7edf5; --muted:#8a96ac; --accent:#2dd4c8; --accent-dim:#1a4f4c;
-    --warn:#f5a524; --danger:#f5556e; --mono:'IBM Plex Mono',monospace; --sans:'Inter',system-ui,sans-serif;
+    --bg:#ffffff; --panel:#f8fafc; --panel2:#e2e8f0; --border:#cbd5e1;
+    --text:#0f172a; --muted:#64748b; --accent:#0d9488; --accent-dim:#ccfbf1;
+    --warn:#d97706; --danger:#e11d48; --mono:'IBM Plex Mono',monospace; --sans:'Inter',system-ui,sans-serif;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--sans);height:100%;overflow:hidden;}
@@ -19,18 +19,18 @@
   button.primary{background:var(--accent);color:#04201d;border-color:var(--accent);}
   button.primary:hover{opacity:.88;color:#04201d;}
   button:disabled{opacity:.4;cursor:not-allowed;}
-  input[type=number]{width:100%;background:#0d1420;border:1px solid var(--border);color:var(--text);border-radius:7px;padding:7px 9px;font-family:var(--mono);font-size:13px;}
+  input[type=number]{width:100%;background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:7px 9px;font-family:var(--mono);font-size:13px;}
   input[type=number]:focus{outline:1px solid var(--accent);}
 
   .app{display:grid;grid-template-rows:52px 1fr;height:100vh;}
-  .topbar{display:flex;align-items:center;gap:10px;padding:0 16px;border-bottom:1px solid var(--border);background:#080b11;}
+  .topbar{display:flex;align-items:center;gap:10px;padding:0 16px;border-bottom:1px solid var(--border);background:var(--panel);}
   .brand{font-family:var(--mono);font-weight:700;font-size:13px;letter-spacing:.06em;color:var(--accent);white-space:nowrap;}
   .topbar .sep{width:1px;height:26px;background:var(--border);margin:0 4px;}
   .topbar .spacer{flex:1;}
   .hint{font-family:var(--mono);font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
   .body{display:grid;grid-template-columns:200px 1fr 260px;min-height:0;}
-  .palette{border-right:1px solid var(--border);background:#080b11;padding:14px 10px;overflow-y:auto;}
+  .palette{border-right:1px solid var(--border);background:var(--panel);padding:14px 10px;overflow-y:auto;}
   .palette h4{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:4px 6px 10px;}
   .pitem{display:flex;align-items:center;gap:10px;padding:9px 8px;border-radius:9px;cursor:pointer;margin-bottom:4px;border:1px solid transparent;}
   .pitem:hover{background:var(--panel);border-color:var(--border);}
@@ -39,33 +39,33 @@
   .pitem span{font-size:12.5px;font-weight:500;}
 
   .canvas-wrap{position:relative;overflow:auto;background:
-      linear-gradient(90deg, #0d1420 1px, transparent 1px) 0 0/40px 40px,
-      linear-gradient(#0d1420 1px, transparent 1px) 0 0/40px 40px, var(--bg);}
+      linear-gradient(90deg, var(--panel2) 1px, transparent 1px) 0 0/40px 40px,
+      linear-gradient(var(--panel2) 1px, transparent 1px) 0 0/40px 40px, var(--bg);}
   svg#canvas{display:block;cursor:default;}
   .comp-body{cursor:grab;}
   .comp-body:active{cursor:grabbing;}
   .comp-body.selected .body-outline{stroke:var(--accent);stroke-width:2;}
-  .terminal{fill:#4c5b73;stroke:#0a0e14;stroke-width:1.5;cursor:crosshair;}
+  .terminal{fill:var(--muted);stroke:var(--bg);stroke-width:1.5;cursor:crosshair;}
   .terminal:hover{fill:var(--accent);}
-  .lead{stroke:#5a6b85;stroke-width:2.5;fill:none;}
-  .icon-line{stroke:#c7d0de;stroke-width:2.2;fill:none;stroke-linecap:round;}
+  .lead{stroke:var(--muted);stroke-width:2.5;fill:none;}
+  .icon-line{stroke:var(--text);stroke-width:2.2;fill:none;stroke-linecap:round;}
   .label-name{fill:var(--muted);font-family:var(--mono);font-size:10.5px;text-anchor:middle;}
   .label-val{fill:var(--text);font-family:var(--mono);font-size:10.5px;text-anchor:middle;font-weight:600;}
   .label-read{fill:var(--accent);font-family:var(--mono);font-size:11px;text-anchor:middle;font-weight:700;}
-  .wire{stroke:#4c5b73;stroke-width:3;fill:none;cursor:pointer;}
+  .wire{stroke:var(--muted);stroke-width:3;fill:none;cursor:pointer;}
   .wire:hover{stroke:var(--accent);}
   .wire.selected{stroke:var(--accent);stroke-width:3.5;}
   .wire-draft{stroke:var(--accent);stroke-width:2;stroke-dasharray:5 4;fill:none;pointer-events:none;}
-  .meter-ring{fill:#0d1420;}
+  .meter-ring{fill:var(--panel2);}
   .meter-text{fill:var(--accent);font-family:var(--mono);font-weight:700;font-size:12px;text-anchor:middle;}
 
-  .inspector{border-left:1px solid var(--border);background:#080b11;padding:16px;overflow-y:auto;}
+  .inspector{border-left:1px solid var(--border);background:var(--panel);padding:16px;overflow-y:auto;}
   .inspector h4{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 12px;}
   .insp-empty{color:var(--muted);font-size:13px;line-height:1.6;}
   .field{margin-bottom:12px;}
   .field label{display:block;font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-bottom:5px;}
   .readout-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0;}
-  .readout{background:#0d1420;border:1px solid var(--border);border-radius:8px;padding:9px 10px;}
+  .readout{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:9px 10px;}
   .readout .k{font-family:var(--mono);font-size:10.5px;color:var(--muted);}
   .readout .v{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--accent);}
   .insp-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
@@ -80,6 +80,7 @@
     <div class="sep"></div>
     <button id="btnRun" class="primary">⏸ Pause</button>
     <button id="btnClear">🗑 Clear</button>
+    <button id="btnFullscreen">⛶ Fullscreen</button>
     <div class="sep"></div>
     <button id="btnEx1">🔆 Bulb Circuit</button>
     <button id="btnEx2">⚡ Voltage Divider</button>
@@ -250,21 +251,21 @@ function iconInner(c){
     case 'switch': {
       const closed = !!c.on;
       return `<path class="lead" d="M-40,0 L-14,0"/><path class="lead" d="M14,0 L40,0"/>
-              <circle cx="-14" cy="0" r="3.5" fill="#8a96ac"/><circle cx="14" cy="0" r="3.5" fill="#8a96ac"/>
+              <circle cx="-14" cy="0" r="3.5" fill="var(--muted)"/><circle cx="14" cy="0" r="3.5" fill="var(--muted)"/>
               <path class="icon-line" stroke="${closed?'#2dd4c8':'#f5556e'}" d="M-14,0 L${closed?14:5},${closed?0:-16}"/>`;
     }
     case 'voltmeter':
       return `<path class="lead" d="M-40,0 L-18,0"/><path class="lead" d="M18,0 L40,0"/>
-              <circle cx="0" cy="0" r="18" fill="#0d1420" stroke="#8a96ac" stroke-width="2"/>
-              <text x="0" y="5" text-anchor="middle" font-family="IBM Plex Mono" font-weight="700" font-size="14" fill="#c7d0de">V</text>`;
+              <circle cx="0" cy="0" r="18" fill="var(--panel2)" stroke="var(--muted)" stroke-width="2"/>
+              <text x="0" y="5" text-anchor="middle" font-family="IBM Plex Mono" font-weight="700" font-size="14" fill="var(--text)">V</text>`;
     case 'ammeter':
       return `<path class="lead" d="M-40,0 L-18,0"/><path class="lead" d="M18,0 L40,0"/>
-              <circle cx="0" cy="0" r="18" fill="#0d1420" stroke="#8a96ac" stroke-width="2"/>
-              <text x="0" y="5" text-anchor="middle" font-family="IBM Plex Mono" font-weight="700" font-size="14" fill="#c7d0de">A</text>`;
+              <circle cx="0" cy="0" r="18" fill="var(--panel2)" stroke="var(--muted)" stroke-width="2"/>
+              <text x="0" y="5" text-anchor="middle" font-family="IBM Plex Mono" font-weight="700" font-size="14" fill="var(--text)">A</text>`;
     case 'galvanometer':
       return `<path class="lead" d="M-40,0 L-18,0"/><path class="lead" d="M18,0 L40,0"/>
-              <circle cx="0" cy="0" r="18" fill="#0d1420" stroke="#8a96ac" stroke-width="2"/>
-              <text x="0" y="13" text-anchor="middle" font-family="IBM Plex Mono" font-weight="700" font-size="9" fill="#c7d0de">G</text>
+              <circle cx="0" cy="0" r="18" fill="var(--panel2)" stroke="var(--muted)" stroke-width="2"/>
+              <text x="0" y="13" text-anchor="middle" font-family="IBM Plex Mono" font-weight="700" font-size="9" fill="var(--text)">G</text>
               <g data-needle="1"><line x1="0" y1="0" x2="0" y2="-13" stroke="#2dd4c8" stroke-width="2" stroke-linecap="round"/></g>`;
     case 'battery':
       return `<path class="lead" d="M-40,0 L-10,0"/><path class="lead" d="M10,0 L40,0"/>
@@ -273,7 +274,7 @@ function iconInner(c){
               <text x="-22" y="-14" font-family="IBM Plex Mono" font-size="13" fill="#2dd4c8">+</text>`;
     case 'acsource':
       return `<path class="lead" d="M-40,0 L-18,0"/><path class="lead" d="M18,0 L40,0"/>
-              <circle cx="0" cy="0" r="18" fill="#0d1420" stroke="#8a96ac" stroke-width="2"/>
+              <circle cx="0" cy="0" r="18" fill="var(--panel2)" stroke="var(--muted)" stroke-width="2"/>
               <path class="icon-line" d="M-9,2 Q-5,-9 0,2 Q5,13 9,2"/>`;
     case 'ground':
       return `<path class="lead" d="M0,-28 L0,-8"/>
@@ -606,6 +607,17 @@ document.getElementById('btnClear').onclick = ()=>{
   components=[]; wires=[]; simHistory={}; simTime=0; selected=null;
   render(); renderInspector();
 };
+
+document.getElementById('btnFullscreen').onclick = () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(()=>{});
+  } else {
+    document.exitFullscreen();
+  }
+};
+document.addEventListener('fullscreenchange', () => {
+  document.getElementById('btnFullscreen').textContent = document.fullscreenElement ? '🗗 Exit Fullscreen' : '⛶ Fullscreen';
+});
 
 document.getElementById('btnSave').onclick = ()=>{
   try {
