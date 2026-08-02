@@ -126,36 +126,106 @@ export const EXPERIMENTS = [
     ],
     "pretest": [
       {
-        "q": "Wheatstone bridge balance condition is:",
+        "q": "Wheatstone bridge is primarily used for measuring:",
         "options": [
-          "R1+R2 = R3+R4",
-          "R1/R2 = R3/R4",
-          "R1×R2 = R3×R4",
-          "R1−R2 = R3"
+          "Very low resistance",
+          "Medium resistance (1Ω to 1MΩ)",
+          "Very high resistance",
+          "Inductance"
         ],
         "answer": 1
       },
       {
-        "q": "At balance, the galvanometer reads:",
+        "q": "The balance condition of a Wheatstone bridge is:",
+        "options": [
+          "P/Q = R/S",
+          "P+Q = R+S",
+          "P-Q = R-S",
+          "P*Q = R*S"
+        ],
+        "answer": 0
+      },
+      {
+        "q": "At balance, the current through the galvanometer is:",
         "options": [
           "Maximum",
+          "Minimum",
           "Zero",
-          "Infinity",
-          "Negative"
+          "Infinity"
         ],
-        "answer": 1
+        "answer": 2
+      },
+      {
+        "q": "The sensitivity of a Wheatstone bridge depends on:",
+        "options": [
+          "Only the galvanometer",
+          "Only the battery voltage",
+          "The ratio arms and battery voltage",
+          "The connecting wires"
+        ],
+        "answer": 2
+      },
+      {
+        "q": "Which component is used as a null detector in DC Wheatstone bridge?",
+        "options": [
+          "Oscilloscope",
+          "Voltmeter",
+          "Galvanometer",
+          "Ammeter"
+        ],
+        "answer": 2
       }
     ],
     "posttest": [
       {
-        "q": "Bridge sensitivity increases with:",
+        "q": "If the battery and galvanometer are interchanged at balance condition, the bridge:",
         "options": [
-          "Lower excitation voltage",
-          "Higher excitation voltage",
-          "Removing one arm",
-          "Using DC only"
+          "Becomes unbalanced",
+          "Remains balanced",
+          "Burns out",
+          "Reverses polarity"
         ],
         "answer": 1
+      },
+      {
+        "q": "Wheatstone bridge is NOT suitable for very low resistance measurement because:",
+        "options": [
+          "It requires high voltage",
+          "Contact and lead resistances cause significant errors",
+          "The galvanometer is too sensitive",
+          "It only measures AC"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "To increase the sensitivity of the bridge, the resistance of the arms should be:",
+        "options": [
+          "Very high",
+          "Very low",
+          "Comparable to the unknown resistance",
+          "Zero"
+        ],
+        "answer": 2
+      },
+      {
+        "q": "In an unbalanced Wheatstone bridge, the current through the galvanometer can be found using:",
+        "options": [
+          "Ohm's Law only",
+          "Faraday's Law",
+          "Thevenin's Theorem",
+          "Lenz's Law"
+        ],
+        "answer": 2
+      },
+      {
+        "q": "A Wheatstone bridge is most sensitive when all four arms have:",
+        "options": [
+          "Equal resistance",
+          "Zero resistance",
+          "Infinite resistance",
+          "Different resistances by factor of 10"
+        ],
+        "answer": 0
       }
     ]
   },
@@ -190,34 +260,104 @@ export const EXPERIMENTS = [
       {
         "q": "Thermocouples work on the principle of:",
         "options": [
-          "Piezoelectric effect",
+          "Peltier effect",
           "Seebeck effect",
-          "Hall effect",
-          "Photoelectric effect"
+          "Thomson effect",
+          "Joule heating"
         ],
         "answer": 1
       },
       {
-        "q": "Cold-junction compensation is needed because:",
+        "q": "The Seebeck effect states that an EMF is generated when:",
         "options": [
-          "The hot junction is unstable",
-          "Reference junction temperature affects the reading",
-          "It increases EMF",
-          "It is optional for accuracy"
+          "Two identical metals are heated",
+          "Two dissimilar metals are joined at two junctions at different temperatures",
+          "A current passes through a junction",
+          "A magnetic field is applied"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "What is cold-junction compensation?",
+        "options": [
+          "Cooling the sensor with ice",
+          "Correcting the EMF for the reference junction temperature",
+          "Heating the measuring junction",
+          "Removing the reference junction"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "Thermocouple output is typically in the range of:",
+        "options": [
+          "Microvolts to Millivolts",
+          "Volts",
+          "Kilovolts",
+          "Amperes"
+        ],
+        "answer": 0
+      },
+      {
+        "q": "Which thermocouple type is most common for general purpose (Nickel-Chromium / Nickel-Alumel)?",
+        "options": [
+          "Type J",
+          "Type K",
+          "Type T",
+          "Type S"
         ],
         "answer": 1
       }
     ],
     "posttest": [
       {
-        "q": "Thermocouple output is typically in the range of:",
+        "q": "Compared to RTDs, thermocouples are generally:",
         "options": [
-          "Millivolts",
-          "Kilovolts",
-          "Amperes",
-          "Ohms"
+          "More accurate and slower",
+          "Less accurate but have a wider temperature range and faster response",
+          "More linear",
+          "Only used for cryogenic temperatures"
         ],
-        "answer": 0
+        "answer": 1
+      },
+      {
+        "q": "If the reference junction is at 25°C instead of 0°C, the generated EMF will be:",
+        "options": [
+          "Higher than expected",
+          "Lower than expected",
+          "Exactly the same",
+          "Zero"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "The relationship between temperature and EMF in a thermocouple is:",
+        "options": [
+          "Perfectly linear",
+          "Exponential",
+          "Non-linear over wide ranges",
+          "Inversely proportional"
+        ],
+        "answer": 2
+      },
+      {
+        "q": "Which law allows the use of extension wires of different materials?",
+        "options": [
+          "Law of Homogeneous Metals",
+          "Law of Intermediate Metals",
+          "Law of Intermediate Temperatures",
+          "Ohm's Law"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "A Type K thermocouple produces approximately how much voltage per °C?",
+        "options": [
+          "1 V/°C",
+          "41 µV/°C",
+          "100 mV/°C",
+          "1 nV/°C"
+        ],
+        "answer": 1
       }
     ]
   },
@@ -246,8 +386,110 @@ export const EXPERIMENTS = [
       "IEC 60751 — RTD standard",
       "Doebelin, E.O. — Measurement Systems"
     ],
-    "pretest": [],
-    "posttest": []
+    "pretest": [
+      {
+        "q": "RTD stands for:",
+        "options": [
+          "Real Time Detector",
+          "Resistance Temperature Detector",
+          "Rapid Thermal Diode",
+          "Resistor Tuning Device"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "The most common metal used for industrial RTDs is:",
+        "options": [
+          "Copper",
+          "Nickel",
+          "Platinum",
+          "Gold"
+        ],
+        "answer": 2
+      },
+      {
+        "q": "A Pt100 RTD has a resistance of 100 Ohms at what temperature?",
+        "options": [
+          "100 °C",
+          "0 °C",
+          "25 °C",
+          "-100 °C"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "The temperature coefficient of resistance for platinum is approximately:",
+        "options": [
+          "Negative",
+          "0.00385 Ω/Ω/°C",
+          "0.1 Ω/Ω/°C",
+          "Zero"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "An RTD requires which of the following to measure temperature?",
+        "options": [
+          "A magnetic field",
+          "An excitation current",
+          "A reference junction",
+          "High voltage"
+        ],
+        "answer": 1
+      }
+    ],
+    "posttest": [
+      {
+        "q": "Why is a 3-wire or 4-wire RTD configuration used?",
+        "options": [
+          "To increase the RTD resistance",
+          "To cancel out lead wire resistance errors",
+          "To measure 3 or 4 different temperatures",
+          "To provide mechanical support"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "Compared to a thermocouple, an RTD is:",
+        "options": [
+          "More accurate and more linear",
+          "Faster responding",
+          "Cheaper",
+          "Capable of measuring much higher temperatures (>2000°C)"
+        ],
+        "answer": 0
+      },
+      {
+        "q": "Self-heating in an RTD is caused by:",
+        "options": [
+          "The ambient environment",
+          "The excitation current passing through it",
+          "Friction",
+          "The Seebeck effect"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "At 100°C, a Pt100 RTD will have a resistance of approximately:",
+        "options": [
+          "100 Ω",
+          "138.5 Ω",
+          "200 Ω",
+          "0 Ω"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "Platinum is preferred for RTDs because:",
+        "options": [
+          "It is the cheapest metal",
+          "It has the highest temperature coefficient",
+          "It is chemically stable and highly linear",
+          "It has a negative temperature coefficient"
+        ],
+        "answer": 2
+      }
+    ]
   },
   {
     "id": "thermistor",
@@ -272,8 +514,110 @@ export const EXPERIMENTS = [
     "references": [
       "Doebelin, E.O. — Measurement Systems"
     ],
-    "pretest": [],
-    "posttest": []
+    "pretest": [
+      {
+        "q": "A thermistor is typically made from:",
+        "options": [
+          "Pure Platinum",
+          "Semiconductor ceramic materials",
+          "Copper-Nickel alloys",
+          "Quartz crystals"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "Most common thermistors are NTC, which means:",
+        "options": [
+          "No Temperature Coefficient",
+          "Negative Temperature Coefficient",
+          "Neutral Temperature Coefficient",
+          "Normal Temperature Coefficient"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "In an NTC thermistor, as temperature increases, resistance:",
+        "options": [
+          "Increases linearly",
+          "Decreases exponentially",
+          "Remains constant",
+          "Increases exponentially"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "Compared to RTDs and Thermocouples, Thermistors have:",
+        "options": [
+          "Much lower sensitivity",
+          "Much higher sensitivity over a narrow range",
+          "Perfect linearity",
+          "Higher maximum operating temperatures"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "Thermistors are often used for:",
+        "options": [
+          "Furnace temperature measurement (>1500°C)",
+          "Cold junction compensation and biomedical measurements",
+          "Measuring voltage",
+          "Generating power"
+        ],
+        "answer": 1
+      }
+    ],
+    "posttest": [
+      {
+        "q": "The Steinhart-Hart equation is used to:",
+        "options": [
+          "Calculate power dissipation",
+          "Accurately model the non-linear Resistance-Temperature curve of a thermistor",
+          "Determine the Seebeck coefficient",
+          "Linearize an RTD"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "Which parameter defines the sensitivity of an NTC thermistor?",
+        "options": [
+          "Alpha (α)",
+          "Beta (β) constant",
+          "Gauge factor",
+          "Young's modulus"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "To use a thermistor in a linear circuit, it is often:",
+        "options": [
+          "Heated externally",
+          "Placed in parallel or series with a fixed resistor",
+          "Operated at high voltage",
+          "Cooled to absolute zero"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "A PTC thermistor is one where:",
+        "options": [
+          "Resistance increases with temperature",
+          "Resistance decreases with temperature",
+          "Resistance is independent of temperature",
+          "Phase changes with temperature"
+        ],
+        "answer": 0
+      },
+      {
+        "q": "Thermistors are generally NOT suitable for:",
+        "options": [
+          "Precision medical thermometers",
+          "Battery pack temperature monitoring",
+          "Very wide temperature spans (e.g. -200°C to 1000°C)",
+          "Inrush current limiting"
+        ],
+        "answer": 2
+      }
+    ]
   },
   {
     "id": "photodiode-ldr",
@@ -298,8 +642,110 @@ export const EXPERIMENTS = [
     "references": [
       "Sze, S.M. — Physics of Semiconductor Devices"
     ],
-    "pretest": [],
-    "posttest": []
+    "pretest": [
+      {
+        "q": "LDR stands for:",
+        "options": [
+          "Light Deflection Ray",
+          "Light Dependent Resistor",
+          "Laser Diode Rectifier",
+          "Linear Distance Range"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "The resistance of an LDR:",
+        "options": [
+          "Increases with light intensity",
+          "Decreases with light intensity",
+          "Is independent of light",
+          "Oscillates with light"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "A photodiode is typically operated in:",
+        "options": [
+          "Forward bias",
+          "Reverse bias",
+          "Zero bias only",
+          "AC mode only"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "When light hits a photodiode, it generates:",
+        "options": [
+          "Heat",
+          "Electron-hole pairs, causing a photocurrent",
+          "Magnetic flux",
+          "Resistance"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "Comparing LDR and Photodiode response times:",
+        "options": [
+          "LDR is much faster",
+          "Photodiode is much faster (nanoseconds)",
+          "They are identical",
+          "Neither responds to light changes"
+        ],
+        "answer": 1
+      }
+    ],
+    "posttest": [
+      {
+        "q": "LDRs are typically made from which material?",
+        "options": [
+          "Silicon",
+          "Cadmium Sulfide (CdS)",
+          "Platinum",
+          "Quartz"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "In a photodiode, dark current is:",
+        "options": [
+          "Current flowing when there is maximum light",
+          "Leakage current flowing in reverse bias when there is no light",
+          "Current that emits dark light",
+          "The current required to power the diode"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "Which sensor is better suited for high-speed optical communications?",
+        "options": [
+          "LDR",
+          "Photodiode",
+          "Thermistor",
+          "Strain Gauge"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "The photocurrent in a photodiode is highly:",
+        "options": [
+          "Non-linear with respect to light intensity",
+          "Linear with respect to light intensity",
+          "Dependent on the ambient temperature only",
+          "Unpredictable"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "An LDR's resistance-illuminance curve is typically:",
+        "options": [
+          "Linear",
+          "Logarithmic / Exponential",
+          "A step function",
+          "Constant"
+        ],
+        "answer": 1
+      }
+    ]
   },
   {
     "id": "piezoelectric",
@@ -324,8 +770,110 @@ export const EXPERIMENTS = [
     "references": [
       "Doebelin, E.O. — Measurement Systems"
     ],
-    "pretest": [],
-    "posttest": []
+    "pretest": [
+      {
+        "q": "The Piezoelectric effect is the generation of electrical charge due to:",
+        "options": [
+          "Heat",
+          "Light",
+          "Applied mechanical stress",
+          "Magnetic fields"
+        ],
+        "answer": 2
+      },
+      {
+        "q": "Which of the following materials is naturally piezoelectric?",
+        "options": [
+          "Copper",
+          "Silicon",
+          "Quartz",
+          "Iron"
+        ],
+        "answer": 2
+      },
+      {
+        "q": "Piezoelectric sensors generate an output only when:",
+        "options": [
+          "The applied force is constant (DC)",
+          "The applied force is dynamic or changing (AC)",
+          "The temperature changes",
+          "Placed in a vacuum"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "The output of a bare piezoelectric crystal is a:",
+        "options": [
+          "High current signal",
+          "High voltage, low charge signal",
+          "Low voltage, high current signal",
+          "Magnetic signal"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "A common application for piezoelectric sensors is:",
+        "options": [
+          "Weighing scales",
+          "Vibration and shock measurement",
+          "Temperature measurement",
+          "Light sensing"
+        ],
+        "answer": 1
+      }
+    ],
+    "posttest": [
+      {
+        "q": "Why can't piezoelectric sensors measure static (constant) forces?",
+        "options": [
+          "They break under static load",
+          "The generated charge leaks away through the circuit insulation",
+          "They only respond to gravity",
+          "Static forces generate too much voltage"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "To measure the tiny charge from a piezoelectric sensor, we use a:",
+        "options": [
+          "Voltage divider",
+          "Charge amplifier",
+          "Current transformer",
+          "Wheatstone bridge"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "PZT stands for:",
+        "options": [
+          "Piezo Zinc Titanate",
+          "Lead Zirconate Titanate",
+          "Phosphorus Zinc Tin",
+          "Platinum Zirconium Tungsten"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "The inverse piezoelectric effect is used in:",
+        "options": [
+          "Accelerometers",
+          "Microphones",
+          "Ultrasonic transmitters / actuators",
+          "Thermometers"
+        ],
+        "answer": 2
+      },
+      {
+        "q": "The charge generated (Q) by a piezoelectric crystal is given by Q = d × F, where 'd' is:",
+        "options": [
+          "Distance",
+          "Diameter",
+          "Piezoelectric charge constant",
+          "Density"
+        ],
+        "answer": 2
+      }
+    ]
   },
   {
     "id": "hall-effect",
@@ -349,8 +897,110 @@ export const EXPERIMENTS = [
     "references": [
       "Sze, S.M. — Physics of Semiconductor Devices"
     ],
-    "pretest": [],
-    "posttest": []
+    "pretest": [
+      {
+        "q": "The Hall Effect describes the generation of a voltage across a conductor when:",
+        "options": [
+          "It is heated",
+          "Placed in a transverse magnetic field while carrying current",
+          "Exposed to light",
+          "Stretched physically"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "The generated Hall voltage is proportional to:",
+        "options": [
+          "Only the current",
+          "Only the magnetic field",
+          "Both the current and the magnetic field",
+          "The length of the wire"
+        ],
+        "answer": 2
+      },
+      {
+        "q": "Hall effect sensors are widely used for:",
+        "options": [
+          "Temperature measurement",
+          "Contactless position and speed sensing",
+          "Strain measurement",
+          "Light intensity sensing"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "The Hall voltage is inversely proportional to the:",
+        "options": [
+          "Current density",
+          "Magnetic flux density",
+          "Charge carrier density and material thickness",
+          "Temperature"
+        ],
+        "answer": 2
+      },
+      {
+        "q": "Hall effect sensors are typically made from:",
+        "options": [
+          "Insulators",
+          "Semiconductors (like GaAs or InSb)",
+          "Pure copper",
+          "Ferromagnetic metals"
+        ],
+        "answer": 1
+      }
+    ],
+    "posttest": [
+      {
+        "q": "If the direction of the magnetic field is reversed, the Hall voltage:",
+        "options": [
+          "Remains the same",
+          "Becomes zero",
+          "Reverses polarity",
+          "Doubles"
+        ],
+        "answer": 2
+      },
+      {
+        "q": "A Hall effect sensor can measure DC current in a wire without breaking the circuit by:",
+        "options": [
+          "Measuring the heat generated",
+          "Measuring the magnetic field generated around the wire",
+          "Measuring the voltage drop across the insulation",
+          "Inductive coupling"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "The Hall coefficient (Rh) is related to:",
+        "options": [
+          "The physical size of the magnet",
+          "The type and density of charge carriers in the material",
+          "The color of the material",
+          "The resistance of the connecting wires"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "In a P-type semiconductor, the Hall voltage polarity is:",
+        "options": [
+          "Opposite to that of an N-type semiconductor",
+          "The same as an N-type semiconductor",
+          "Always zero",
+          "Random"
+        ],
+        "answer": 0
+      },
+      {
+        "q": "Which of the following is NOT an application of a Hall effect sensor?",
+        "options": [
+          "Anti-lock braking systems (ABS) speed sensors",
+          "Brushless DC motor commutation",
+          "Smartphone compass",
+          "Measuring optical wavelength"
+        ],
+        "answer": 3
+      }
+    ]
   },
   {
     "id": "load-cell",
@@ -375,8 +1025,110 @@ export const EXPERIMENTS = [
     "references": [
       "Doebelin, E.O. — Measurement Systems"
     ],
-    "pretest": [],
-    "posttest": []
+    "pretest": [
+      {
+        "q": "A strain-gauge load cell measures weight by:",
+        "options": [
+          "Converting mass directly to voltage",
+          "Deforming a structural element to strain the attached gauges",
+          "Using piezoelectric crystals",
+          "Measuring the capacitance of the object"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "Most industrial load cells use which bridge configuration?",
+        "options": [
+          "Quarter-bridge",
+          "Half-bridge",
+          "Full Wheatstone bridge",
+          "Kelvin bridge"
+        ],
+        "answer": 2
+      },
+      {
+        "q": "The output of a standard load cell is usually expressed in:",
+        "options": [
+          "Volts (V)",
+          "Millivolts per Volt (mV/V)",
+          "Amperes (A)",
+          "Ohms (Ω)"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "Why are four active strain gauges used in a full-bridge load cell?",
+        "options": [
+          "To make it cheaper",
+          "To maximize sensitivity and provide automatic temperature compensation",
+          "To increase the resistance",
+          "To allow AC excitation"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "Creep in a load cell refers to:",
+        "options": [
+          "The physical movement of the scale",
+          "The change in output over time while the load remains constant",
+          "The maximum weight it can measure",
+          "The initial zero-balance error"
+        ],
+        "answer": 1
+      }
+    ],
+    "posttest": [
+      {
+        "q": "If a 2 mV/V load cell is excited with 10V, what is the full-scale output voltage?",
+        "options": [
+          "2 mV",
+          "10 mV",
+          "20 mV",
+          "200 mV"
+        ],
+        "answer": 2
+      },
+      {
+        "q": "Non-linearity in a load cell is:",
+        "options": [
+          "The maximum deviation of the calibration curve from a straight line",
+          "The effect of temperature on the output",
+          "The failure of the strain gauge",
+          "The zero offset"
+        ],
+        "answer": 0
+      },
+      {
+        "q": "A load cell must be carefully protected from:",
+        "options": [
+          "Side loading and shock overloads",
+          "DC voltage",
+          "Darkness",
+          "Radio waves"
+        ],
+        "answer": 0
+      },
+      {
+        "q": "Hysteresis in a load cell means:",
+        "options": [
+          "It gets hot during use",
+          "The reading for a given load differs depending on whether the load was increasing or decreasing",
+          "It only measures AC forces",
+          "The output is delayed in time"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "The elastic element inside a bending-beam load cell is usually made of:",
+        "options": [
+          "Plastic",
+          "Glass",
+          "High-strength aluminum or steel alloys",
+          "Copper"
+        ],
+        "answer": 2
+      }
+    ]
   },
   {
     "id": "capacitive-displacement",
@@ -400,8 +1152,110 @@ export const EXPERIMENTS = [
     "references": [
       "Doebelin, E.O. — Measurement Systems"
     ],
-    "pretest": [],
-    "posttest": []
+    "pretest": [
+      {
+        "q": "The capacitance of a parallel plate capacitor is given by C = ?",
+        "options": [
+          "ε*A/d",
+          "ε*d/A",
+          "A/(ε*d)",
+          "d/(ε*A)"
+        ],
+        "answer": 0
+      },
+      {
+        "q": "Capacitive sensors can measure displacement by varying:",
+        "options": [
+          "Only the plate separation distance (d)",
+          "Only the plate overlap area (A)",
+          "The dielectric, distance, or overlap area",
+          "The mass of the plates"
+        ],
+        "answer": 2
+      },
+      {
+        "q": "When the distance (d) between the plates decreases, the capacitance:",
+        "options": [
+          "Decreases",
+          "Increases",
+          "Remains constant",
+          "Becomes zero"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "Capacitive displacement sensors are advantageous because they are:",
+        "options": [
+          "Contacting and high friction",
+          "Non-contacting and offer extremely high resolution",
+          "Immune to stray capacitance",
+          "Very cheap and low precision"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "A typical application of a capacitive displacement sensor is:",
+        "options": [
+          "Measuring fluid flow rate",
+          "Measuring the thickness of a web/sheet during manufacturing",
+          "Measuring high temperatures",
+          "Detecting magnetic fields"
+        ],
+        "answer": 1
+      }
+    ],
+    "posttest": [
+      {
+        "q": "A limitation of capacitive sensors is that they are sensitive to:",
+        "options": [
+          "Magnetic fields",
+          "Changes in environmental humidity (which changes dielectric constant)",
+          "Ambient light",
+          "Gravity"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "To measure capacitance changes, the sensor is typically part of a:",
+        "options": [
+          "DC Wheatstone bridge",
+          "AC bridge or an oscillator circuit",
+          "Charge amplifier",
+          "Thermocouple circuit"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "If a capacitive sensor works by changing the overlap area, its output is:",
+        "options": [
+          "Linearly proportional to displacement",
+          "Inversely proportional to displacement",
+          "Exponential",
+          "Sinusoidal"
+        ],
+        "answer": 0
+      },
+      {
+        "q": "If a capacitive sensor works by changing the distance (d), its output is:",
+        "options": [
+          "Linearly proportional to d",
+          "Inversely proportional to d (non-linear)",
+          "Independent of d",
+          "Zero"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "Guard rings are used in precision capacitive sensors to:",
+        "options": [
+          "Protect the sensor from physical damage",
+          "Eliminate fringing edge effects and ensure a uniform electric field",
+          "Increase the capacitance artificially",
+          "Prevent electric shocks"
+        ],
+        "answer": 1
+      }
+    ]
   },
   {
     "id": "op-amp",
@@ -426,8 +1280,110 @@ export const EXPERIMENTS = [
     "references": [
       "Sedra & Smith — Microelectronic Circuits"
     ],
-    "pretest": [],
-    "posttest": []
+    "pretest": [
+      {
+        "q": "An ideal operational amplifier has an input impedance of:",
+        "options": [
+          "Zero",
+          "100 Ohms",
+          "Infinity",
+          "Negative"
+        ],
+        "answer": 2
+      },
+      {
+        "q": "The open-loop gain of an ideal op-amp is:",
+        "options": [
+          "1",
+          "100",
+          "Zero",
+          "Infinite"
+        ],
+        "answer": 3
+      },
+      {
+        "q": "CMRR stands for:",
+        "options": [
+          "Common Mode Rejection Ratio",
+          "Current Measurement Resistance Ratio",
+          "Closed-loop Maximum Response Rate",
+          "Capacitive Mode Reduction Ratio"
+        ],
+        "answer": 0
+      },
+      {
+        "q": "In an inverting amplifier configuration, if Rin=10kΩ and Rf=100kΩ, the voltage gain is:",
+        "options": [
+          "10",
+          "-10",
+          "11",
+          "-0.1"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "Slew rate defines the op-amp's maximum rate of change of:",
+        "options": [
+          "Input voltage",
+          "Output voltage",
+          "Input bias current",
+          "Offset null"
+        ],
+        "answer": 1
+      }
+    ],
+    "posttest": [
+      {
+        "q": "A high CMRR means the op-amp is very good at:",
+        "options": [
+          "Amplifying high frequencies",
+          "Rejecting noise that appears equally on both inputs",
+          "Driving heavy loads",
+          "Consuming very little power"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "Gain-Bandwidth Product (GBP) implies that:",
+        "options": [
+          "Gain and bandwidth are independent",
+          "As closed-loop gain increases, bandwidth decreases proportionally",
+          "Bandwidth is infinite regardless of gain",
+          "Gain decreases at low frequencies"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "Input offset voltage is defined as:",
+        "options": [
+          "The maximum input voltage allowed",
+          "The voltage required across the input terminals to drive the output to zero volts",
+          "The voltage at the output when inputs are saturated",
+          "The supply voltage"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "In a non-inverting amplifier, if Rin=10kΩ and Rf=100kΩ, the voltage gain is:",
+        "options": [
+          "10",
+          "-10",
+          "11",
+          "-11"
+        ],
+        "answer": 2
+      },
+      {
+        "q": "If an op-amp has a slew rate of 1 V/µs, how long will it take the output to change by 10V?",
+        "options": [
+          "1 µs",
+          "10 µs",
+          "0.1 µs",
+          "100 µs"
+        ],
+        "answer": 1
+      }
+    ]
   },
   {
     "id": "kelvin-bridge",
