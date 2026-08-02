@@ -7,7 +7,7 @@ import {
 , Search, Sun, Moon, Check } from "lucide-react";
 
 import StrainGaugeSim from "./simulations/StrainGaugeSim";
-import UnifiedBridgeSim from "./simulations/UnifiedBridgeSim";
+import UnifiedBridgeSim, { BridgeProcedurePanel, BRIDGES, initBridgeState } from "./simulations/UnifiedBridgeSim";
 
 /* ---------------------------------------------------------------
    DESIGN TOKENS — circuit-board palette: ink navy shell, copper
@@ -684,6 +684,21 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
               <ol style={{ paddingLeft: 20, color: C.ink, lineHeight: 1.9, display: "flex", flexDirection: "column", gap: 6 }}>
                 {exp.procedure.map((s, i) => <li key={i}>{s}</li>)}
               </ol>
+              {/* For bridge experiments: apparatus + formula + observation table + result */}
+              {[
+                "wheatstone-bridge", "kelvin-bridge", "kelvin-double-bridge",
+                "capacitance-comparison-bridge", "maxwell-inductance-bridge",
+                "maxwell-lc-bridge", "hays-bridge", "anderson-bridge",
+                "schering-bridge", "wiens-bridge", "transformer-ratio-bridge"
+              ].includes(exp.id) && (
+                <BridgeProcedurePanel
+                  bridgeId={exp.id}
+                  bridgeState={bridgeSims[exp.id]}
+                  onStateChange={newSt =>
+                    setBridgeSims(prev => ({ ...prev, [exp.id]: newSt }))
+                  }
+                />
+              )}
             </Section>
           )}
 
