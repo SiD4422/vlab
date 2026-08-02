@@ -341,7 +341,7 @@ function render(){
     const valLabel = (def.def!==null) ? `${fmtVal(c.value)}${def.unit}` : '';
     html += `<g class="comp-body ${isSel?'selected':''}" data-role="body" data-comp="${c.id}"
                 transform="translate(${c.x},${c.y}) rotate(${c.rotation||0})">
-        <rect class="body-outline" x="-46" y="-24" width="92" height="48" rx="10" fill="transparent" stroke="transparent"/>
+        <rect class="body-outline" x="-46" y="-24" width="92" height="48" rx="10" fill="transparent" stroke="transparent" pointer-events="all"/>
         ${iconInner(c)}
         ${termHtml}
       </g>
@@ -479,8 +479,9 @@ svg.addEventListener('pointerdown', (e)=>{
   if(target.dataset && target.dataset.role==='terminal'){
     drag = { mode:'wire', from:{compId:target.dataset.comp, t:parseInt(target.dataset.t)}, cur:pt }; return;
   }
-  if(target.dataset && target.dataset.role==='body'){
-    const compId = target.dataset.comp;
+  const compBody = target.closest ? target.closest('.comp-body') : null;
+  if(compBody){
+    const compId = compBody.dataset.comp;
     const c = components.find(x=>x.id===compId);
     if(c.type==='switch'){
       drag = { mode:'move-or-toggle', compId, startPt:pt, origin:{x:c.x,y:c.y}, moved:false };
