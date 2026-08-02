@@ -585,36 +585,34 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
           )}
 
           {tab === "simulation" && (
-            <div>
-              <Section title="Interactive Simulation">
-                {exp.id === "strain-gauge" ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+              {exp.id === "strain-gauge" ? (
+                <Section title="Interactive Simulation">
                   <StrainGaugeSim />
-                ) : [
-                  "wheatstone-bridge", "kelvin-bridge", "kelvin-double-bridge",
-                  "capacitance-comparison-bridge", "maxwell-inductance-bridge",
-                  "maxwell-lc-bridge", "hays-bridge", "anderson-bridge",
-                  "schering-bridge", "wiens-bridge", "transformer-ratio-bridge"
-                ].includes(exp.id) ? (
-                  <UnifiedBridgeSim
-                    bridgeId={exp.id}
-                    bridgeState={bridgeSims[exp.id]}
-                    onStateChange={newSt =>
-                      setBridgeSims(prev => ({ ...prev, [exp.id]: newSt }))
-                    }
-                  />
-                ) : (
-                  <div style={{ padding: "40px 20px", textAlign: "center", color: C.muted, background: "var(--card)", borderRadius: 8, border: `1px solid ${C.border}` }}>
-                    <Activity size={32} color={C.border} style={{ marginBottom: 12 }} />
-                    <div>The interactive simulation for {exp.title} is currently under development.</div>
-                    <div style={{ fontSize: 13, marginTop: 4 }}>Check back soon!</div>
-                  </div>
-                )}
-              </Section>
-              <div style={{ marginTop: 48, paddingTop: 32, borderTop: `2px dashed ${C.border}` }}>
-                <Section title="Freeplay Sandbox">
-                  <CircuitSandbox />
                 </Section>
-              </div>
+              ) : (
+                <>
+                  <Section title="Reference Diagram">
+                    {[
+                      "wheatstone-bridge", "kelvin-bridge", "kelvin-double-bridge",
+                      "capacitance-comparison-bridge", "maxwell-inductance-bridge",
+                      "maxwell-lc-bridge", "hays-bridge", "anderson-bridge",
+                      "schering-bridge", "wiens-bridge", "transformer-ratio-bridge"
+                    ].includes(exp.id) ? (
+                      <UnifiedBridgeSim bridgeId={exp.id} />
+                    ) : (
+                      <div style={{ padding: "40px 20px", textAlign: "center", color: C.muted, background: "var(--card)", borderRadius: 8, border: `1px solid ${C.border}` }}>
+                        <Activity size={32} color={C.border} style={{ marginBottom: 12 }} />
+                        <div>The reference diagram for {exp.title} is currently under development.</div>
+                      </div>
+                    )}
+                  </Section>
+                  
+                  <Section title="Circuit Sandbox Workspace">
+                    <CircuitSandbox />
+                  </Section>
+                </>
+              )}
             </div>
           )}
 
