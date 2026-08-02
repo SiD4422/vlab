@@ -195,10 +195,6 @@ export const BRIDGES = [
  */
 export default function UnifiedBridgeSim({ bridgeId }) {
   const bridge = BRIDGES.find(b => b.id === bridgeId);
-  if (bridge && !graphX && bridge.tabCols.length >= 2) {
-    setGraphX(bridge.tabCols[0].k);
-    setGraphY(bridge.tabCols[1].k);
-  }
 
   if (!bridge) {
     return (
