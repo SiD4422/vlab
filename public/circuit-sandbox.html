@@ -327,8 +327,7 @@ function wirePath(w){
   const ca = components.find(c=>c.id===w.a.compId), cb = components.find(c=>c.id===w.b.compId);
   if(!ca||!cb) return '';
   const p1 = absTerminal(ca,w.a.t), p2 = absTerminal(cb,w.b.t);
-  if(Math.abs(p1.x-p2.x)<1 || Math.abs(p1.y-p2.y)<1) return `M${p1.x},${p1.y} L${p2.x},${p2.y}`;
-  return `M${p1.x},${p1.y} L${p2.x},${p1.y} L${p2.x},${p2.y}`;
+  return `M${p1.x},${p1.y} L${p2.x},${p2.y}`;
 }
 
 function render(){
@@ -572,8 +571,7 @@ function drawWireDraft(){
   if(!ca) return;
   const p1 = absTerminal(ca, drawingWire.from.t);
   const p2 = drawingWire.cur;
-  const midX = (p1.x + p2.x) / 2;
-  svg.insertAdjacentHTML('beforeend', `<path class="wire-draft" id="wireDraft" d="M${p1.x},${p1.y} L${midX},${p1.y} L${midX},${p2.y} L${p2.x},${p2.y}"/>`);
+  svg.insertAdjacentHTML('beforeend', `<path class="wire-draft" id="wireDraft" d="M${p1.x},${p1.y} L${p2.x},${p2.y}"/>`);
 }
 function removeWireDraft(){ const d=document.getElementById('wireDraft'); if(d) d.remove(); }
 
