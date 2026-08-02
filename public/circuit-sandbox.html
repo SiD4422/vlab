@@ -144,7 +144,7 @@ function solveCircuit(components, wires, dt, t, history){
   function stampI(nA,nB,I){ const a=vidx(nA), b=vidx(nB); if(a>=0) z[a]+=I; if(b>=0) z[b]-=I; }
 
   components.forEach(c=>{
-    if(c.type==='ground' || c.type==='switch') return;
+    if(c.type==='ground' || c.type==='switch' || c.type==='junction') return;
     const n1=root(c.id,0), n2=root(c.id,1);
     switch(c.type){
       case 'resistor': case 'bulb': stampG(n1,n2, 1/Math.max(c.value,1e-6)); break;
@@ -168,7 +168,7 @@ function solveCircuit(components, wires, dt, t, history){
   const V = (r)=> r===gndRoot?0:x[nIndex.get(r)];
   const readings = {}, newHistory = {};
   components.forEach(c=>{
-    if(c.type==='ground'){ readings[c.id]={}; return; }
+    if(c.type==='ground' || c.type==='junction'){ readings[c.id]={}; return; }
     if(c.type==='switch'){ readings[c.id]={on:c.on}; return; }
     const n1=root(c.id,0), n2=root(c.id,1); const Vd=V(n1)-V(n2);
     switch(c.type){
@@ -214,10 +214,12 @@ const COMP_TYPES = {
   battery:      {label:'Battery (DC)',  unit:'V',  def:9,    terms:2},
   acsource:     {label:'AC Source',     unit:'V',  def:10,   terms:2, extra:{key:'freq',label:'Frequency',unit:'Hz',def:2}},
   ground:       {label:'Ground',        unit:'',   def:null, terms:1},
+  junction:     {label:'Junction Node', unit:'',   def:null, terms:1},
 };
 
 function localTerminals(type){
   if(type==='ground') return [{dx:0,dy:-28}];
+  if(type==='junction') return [{dx:0,dy:0}];
   return [{dx:-40,dy:0},{dx:40,dy:0}];
 }
 function rotatePt(dx,dy,deg){
@@ -275,6 +277,8 @@ function iconInner(c){
       return `<path class="lead" d="M-40,0 L-18,0"/><path class="lead" d="M18,0 L40,0"/>
               <circle cx="0" cy="0" r="18" fill="var(--panel2)" stroke="var(--muted)" stroke-width="2"/>
               <path class="icon-line" d="M-9,2 Q-5,-9 0,2 Q5,13 9,2"/>`;
+    case 'junction':
+      return `<circle cx="0" cy="0" r="8" fill="var(--muted)"/>`;
     case 'ground':
       return `<path class="lead" d="M0,-28 L0,-8"/>
               <path class="icon-line" d="M-14,-8 L14,-8"/>
@@ -329,7 +333,8 @@ function wirePath(w){
 function render(){
   let html = '';
   wires.forEach(w=>{
-    html += `<path class="wire ${selected&&selected.kind==='wire'&&selected.id===w.id?'selected':''}" data-role="wire" data-id="${w.id}" d="${wirePath(w)}"/>`;
+    html += `<path class="wire-hitbox" data-role="wire" data-w="${w.id}" d="${wirePath(w)}" stroke="transparent" stroke-width="20" fill="none" style="cursor:pointer; pointer-events:all;"/>`;
+    html += `<path class="wire ${selected&&selected.kind==='wire'&&selected.id===w.id?'selected':''}" data-role="wire" data-id="${w.id}" d="${wirePath(w)}" style="pointer-events:none;"/>`;
   });
   components.forEach(c=>{
     const def = COMP_TYPES[c.type];
@@ -371,7 +376,7 @@ function fmtVal(v){
 function renderPalette(){
   const groups = [
     ['Sources', ['battery','acsource','ground']],
-    ['Passive', ['resistor','bulb','capacitor','inductor','switch']],
+    ['Passive', ['resistor','bulb','capacitor','inductor','switch','junction']],
     ['Meters', ['voltmeter','ammeter','galvanometer']],
   ];
   let html='';
@@ -492,7 +497,7 @@ svg.addEventListener('pointerdown', (e)=>{
     render(); renderInspector(); return;
   }
   if(target.dataset && target.dataset.role==='wire'){
-    selected = {kind:'wire', id:target.dataset.id};
+    selected = {kind:'wire', id:(target.dataset.w || target.dataset.id)};
     render(); renderInspector(); return;
   }
   selected = null; render(); renderInspector();
@@ -518,6 +523,18 @@ svg.addEventListener('pointerup', (e)=>{
   if(drag.mode==='wire'){
     if(target.dataset && target.dataset.role==='terminal'){
       addWire(drag.from, {compId:target.dataset.comp, t:parseInt(target.dataset.t)});
+    } else if(target.dataset && target.dataset.role==='wire'){
+      const wId = target.dataset.w;
+      const targetWire = wires.find(w=>w.id===wId);
+      if(targetWire){
+        const dropPt = svgPoint(e);
+        const jId = uid();
+        components.push({id:jId, type:'junction', x:snap(dropPt.x), y:snap(dropPt.y), rotation:0});
+        wires = wires.filter(w=>w.id!==wId);
+        addWire(targetWire.a, {compId:jId, t:0});
+        addWire({compId:jId, t:0}, targetWire.b);
+        addWire(drag.from, {compId:jId, t:0});
+      }
     }
     removeWireDraft(); render();
   }
