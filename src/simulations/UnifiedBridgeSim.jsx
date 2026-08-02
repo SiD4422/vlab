@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
+import { Printer } from 'lucide-react';
 
 /* ─────────────────────────── HELPERS ─────────────────────────── */
 
@@ -193,6 +195,10 @@ export const BRIDGES = [
  */
 export default function UnifiedBridgeSim({ bridgeId }) {
   const bridge = BRIDGES.find(b => b.id === bridgeId);
+  if (bridge && !graphX && bridge.tabCols.length >= 2) {
+    setGraphX(bridge.tabCols[0].k);
+    setGraphY(bridge.tabCols[1].k);
+  }
 
   if (!bridge) {
     return (
@@ -240,6 +246,8 @@ export default function UnifiedBridgeSim({ bridgeId }) {
  * Shows: Apparatus list, Balance Formula, Observation Table, Result.
  */
 export function BridgeProcedurePanel({ bridgeId, bridgeState, onStateChange }) {
+  const [graphX, setGraphX] = useState('');
+  const [graphY, setGraphY] = useState('');
   const bridge = BRIDGES.find(b => b.id === bridgeId);
   if (!bridge) return null;
   const st = bridgeState || initBridgeState(bridge);
@@ -373,6 +381,11 @@ export function BridgeProcedurePanel({ bridgeId, bridgeState, onStateChange }) {
           {st.rows.length > 0 && (
             <>
               <button
+                onClick={() => window.print()}
+                style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, padding: '6px 14px', borderRadius: 7, border: '1px solid var(--teal)', background: 'var(--teal)', color: '#fff', cursor: 'pointer' }}>
+                <Printer size={16} /> Export Lab Report
+              </button>
+              <button
                 onClick={() => {
                   const headers = ['S.No.', ...bridge.tabCols.map(c => c.label || `${c.k}${c.u ? ` (${c.u})` : ''}`)];
                   const rows = st.rows.map((row, i) => [i + 1, ...bridge.tabCols.map(c => row[c.k] !== undefined ? row[c.k] : '')].join(','));
@@ -393,7 +406,52 @@ export function BridgeProcedurePanel({ bridgeId, bridgeState, onStateChange }) {
               </button>
             </>
           )}
+
         </div>
+        
+        {/* Live Graphing Section */}
+        {st.rows.length > 0 && (
+          <div style={{ padding: '16px', borderTop: '1px solid var(--border)', background: 'var(--panel)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink)' }}>Live Graph Analysis</div>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <select value={graphX} onChange={e => setGraphX(e.target.value)} style={{ padding: '4px 8px', fontSize: 12, borderRadius: 4, border: '1px solid var(--border)' }}>
+                  <option value="" disabled>Select X-Axis</option>
+                  {bridge.tabCols.map(c => <option key={c.k} value={c.k}>{c.label || c.k}</option>)}
+                </select>
+                <select value={graphY} onChange={e => setGraphY(e.target.value)} style={{ padding: '4px 8px', fontSize: 12, borderRadius: 4, border: '1px solid var(--border)' }}>
+                  <option value="" disabled>Select Y-Axis</option>
+                  {bridge.tabCols.map(c => <option key={c.k} value={c.k}>{c.label || c.k}</option>)}
+                </select>
+              </div>
+            </div>
+            <div style={{ width: '100%', height: 250 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <ScatterChart margin={{ top: 10, right: 20, bottom: 20, left: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                  <XAxis 
+                    dataKey={graphX} 
+                    type="number" 
+                    name={graphX}
+                    domain={['auto', 'auto']}
+                    tick={{ fontSize: 11, fill: 'var(--muted)' }}
+                    label={{ value: graphX, position: 'insideBottom', offset: -10, fontSize: 12, fill: 'var(--muted)' }}
+                  />
+                  <YAxis 
+                    dataKey={graphY} 
+                    type="number" 
+                    name={graphY}
+                    domain={['auto', 'auto']}
+                    tick={{ fontSize: 11, fill: 'var(--muted)' }}
+                    label={{ value: graphY, angle: -90, position: 'insideLeft', offset: 10, fontSize: 12, fill: 'var(--muted)' }}
+                  />
+                  <RechartsTooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={{ borderRadius: 8, fontSize: 12 }} />
+                  <Scatter name="Readings" data={st.rows.filter(r => r[graphX] !== '' && r[graphY] !== '' && !isNaN(r[graphX]) && !isNaN(r[graphY]))} fill="var(--teal)" line shape="circle" />
+                </ScatterChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Result */}
