@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 
 /* ─────────────────────────── HELPERS ─────────────────────────── */
 
@@ -320,10 +320,54 @@ export default function UnifiedBridgeSim({ bridgeId, bridgeState, onStateChange 
     border: '1px solid var(--border)', cursor: 'pointer', transition: 'all 0.15s',
   };
 
+  // Live graph: keep last 80 rms samples
+  const graphRef = useRef([]);
+  const canvasRef = useRef(null);
+
+  const drawGraph = useCallback((history) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+    // background
+    ctx.fillStyle = 'var(--canvas, #f8fafc)';
+    ctx.fillRect(0, 0, W, H);
+    // zero line
+    ctx.strokeStyle = 'rgba(128,180,160,0.3)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.moveTo(0, H / 2); ctx.lineTo(W, H / 2); ctx.stroke();
+    ctx.setLineDash([]);
+    if (history.length < 2) return;
+    // draw sparkline
+    const max = Math.max(...history.map(Math.abs), 0.01);
+    ctx.strokeStyle = history[history.length - 1] < 0.02 ? '#1f7a72' : '#c1712f';
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    history.forEach((v, i) => {
+      const x = (i / (history.length - 1)) * W;
+      const y = H / 2 - (v / max) * (H / 2 - 6);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    // label
+    const last = history[history.length - 1];
+    ctx.fillStyle = last < 0.02 ? '#1f7a72' : '#c1712f';
+    ctx.font = 'bold 10px ui-monospace,monospace';
+    ctx.fillText(`Δ ${(last * 100).toFixed(1)}%`, 6, 14);
+  }, []);
+
+  useEffect(() => {
+    graphRef.current = [...graphRef.current, rms].slice(-80);
+    drawGraph(graphRef.current);
+  });
+
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24, alignItems: 'start' }}>
 
-      {/* LEFT: Circuit + Gauge */}
+      {/* LEFT: Circuit + Gauge + Live Graph */}
       <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 14, padding: 20 }}>
         <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 14 }}>
           Circuit Diagram
@@ -337,6 +381,17 @@ export default function UnifiedBridgeSim({ bridgeId, bridgeState, onStateChange 
         )}
         <div style={{ marginTop: 20 }}>
           <Gauge rms={rms} signed={signed} detector={bridge.detector} />
+        </div>
+        {/* Live Deviation Graph */}
+        <div style={{ marginTop: 16, border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
+          <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--muted)', padding: '6px 10px', borderBottom: '1px solid var(--border)', background: 'var(--canvas)' }}>
+            Live Deviation Graph
+          </div>
+          <canvas
+            ref={canvasRef}
+            width={280} height={72}
+            style={{ display: 'block', width: '100%', height: 72, background: 'var(--canvas)' }}
+          />
         </div>
       </div>
 
@@ -378,7 +433,6 @@ export default function UnifiedBridgeSim({ bridgeId, bridgeState, onStateChange 
             onClick={() => {
               const fx = fixedLookup(bridge);
               const computed = bridge.compute(st.ctrl, fx);
-              // round computed values to avoid crazy decimals in editable inputs
               Object.keys(computed).forEach(k => {
                 const dec = bridge.hidden.find(h => h.key === k)?.decimals ?? 2;
                 computed[k] = parseFloat(computed[k].toFixed(dec));
@@ -396,7 +450,7 @@ export default function UnifiedBridgeSim({ bridgeId, bridgeState, onStateChange 
             {st.revealed ? 'Hide' : 'Reveal'} True Value
           </button>
           <button style={{ ...btnBase, background: 'transparent', color: 'var(--muted)' }}
-            onClick={() => update({ ...st, rows: [] })}>
+            onClick={() => { update({ ...st, rows: [] }); graphRef.current = []; }}>
             Clear Trials
           </button>
         </div>
@@ -543,7 +597,7 @@ export function BridgeProcedurePanel({ bridgeId, bridgeState, onStateChange }) {
             </tbody>
           </table>
         </div>
-        <div style={{ padding: '10px 16px', borderTop: '1px solid var(--border)', display: 'flex', gap: 10 }}>
+        <div style={{ padding: '10px 16px', borderTop: '1px solid var(--border)', display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           <button
             onClick={addEmptyRow}
             style={{ fontSize: 13, fontWeight: 600, padding: '6px 14px', borderRadius: 7, border: '1px solid var(--border)', background: 'var(--canvas)', color: 'var(--ink)', cursor: 'pointer' }}>
@@ -551,6 +605,20 @@ export function BridgeProcedurePanel({ bridgeId, bridgeState, onStateChange }) {
           </button>
           {st.rows.length > 0 && (
             <>
+              <button
+                onClick={() => {
+                  const headers = ['S.No.', ...bridge.tabCols.map(c => c.label || `${c.k}${c.u ? ` (${c.u})` : ''}`)];
+                  const rows = st.rows.map((row, i) => [i + 1, ...bridge.tabCols.map(c => row[c.k] !== undefined ? row[c.k] : '')].join(','));
+                  const csv = [headers.join(','), ...rows].join('\n');
+                  const blob = new Blob([csv], { type: 'text/csv' });
+                  const a = document.createElement('a');
+                  a.href = URL.createObjectURL(blob);
+                  a.download = `${bridge.id}_observations.csv`;
+                  a.click();
+                }}
+                style={{ fontSize: 13, fontWeight: 600, padding: '6px 14px', borderRadius: 7, border: '1px solid var(--copper)', background: 'transparent', color: 'var(--copper)', cursor: 'pointer' }}>
+                ⬇ Download CSV
+              </button>
               <button
                 onClick={() => update({ ...st, revealed: !st.revealed })}
                 style={{ fontSize: 13, fontWeight: 600, padding: '6px 14px', borderRadius: 7, border: '1px solid var(--teal)', background: 'transparent', color: 'var(--teal)', cursor: 'pointer' }}>

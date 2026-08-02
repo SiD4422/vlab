@@ -4,7 +4,7 @@ import {
   Link2, Target, ArrowLeft, Loader2, CheckCircle2, XCircle, Star,
   ChevronRight, Cpu, Menu, X, Activity,
   GraduationCap, Mail, Phone, MapPin, Shield, Globe, Users, Lock
-, Search, Sun, Moon, Check } from "lucide-react";
+, Search, Sun, Moon, Check, BarChart2, Download } from "lucide-react";
 
 import StrainGaugeSim from "./simulations/StrainGaugeSim";
 import UnifiedBridgeSim, { BridgeProcedurePanel, BRIDGES, initBridgeState } from "./simulations/UnifiedBridgeSim";
@@ -61,7 +61,7 @@ const TABS = [
   { id: "simulation", label: "Simulation", icon: Activity, badge: "BETA" },
   { id: "pretest", label: "Pretest", icon: ClipboardCheck },
   { id: "procedure", label: "Procedure", icon: ListOrdered },
-  { id: "viva", label: "AI Viva Prep", icon: Sparkles, badge: "NEW" },
+  { id: "sandbox", label: "Circuit Sandbox", icon: Zap, badge: "NEW" },
   { id: "posttest", label: "Posttest", icon: ClipboardCheck },
   { id: "references", label: "References", icon: Link2 },
   { id: "feedback", label: "Feedback", icon: MessageSquare },
@@ -118,9 +118,6 @@ function Quiz({ questions, onComplete }) {
         </div>
       ))}
       <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <button onClick={toggleTheme} style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", width: 40, height: 40, borderRadius: "50%", background: "rgba(255,255,255,0.1)" }}>
-              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
         <button
           onClick={() => { setChecked(true); if(onComplete) onComplete(); }}
           disabled={Object.keys(picked).length < questions.length}
@@ -144,92 +141,31 @@ function Quiz({ questions, onComplete }) {
 }
 
 /* ---------------------------------------------------------------
-   AI VIVA PREP
+   CIRCUIT SANDBOX
 --------------------------------------------------------------- */
-function VivaPrep({ exp }) {
-  const [state, setState] = useState({ status: "idle" }); // idle | loading | done | error
-  const [data, setData] = useState(null);
-
-  async function generate() {
-    setState({ status: "loading" });
-    try {
-      const prompt = `You are an engineering professor. Generate 6 viva-voce questions with concise (2-3 sentence) answers for an undergraduate Electrical Engineering lab experiment titled "${exp.title}". Also list 4 key concepts students must know, one short phrase each.
-Return ONLY valid JSON, no markdown, no preamble, in this exact shape:
-{"questions":[{"q":"...","a":"..."}],"concepts":["...","...","...","..."]}`;
-
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-6",
-          max_tokens: 1000,
-          messages: [{ role: "user", content: prompt }],
-        }),
-      });
-      const json = await res.json();
-      const text = (json.content || []).find(b => b.type === "text")?.text || "";
-      const clean = text.replace(/```json|```/g, "").trim();
-      const parsed = JSON.parse(clean);
-      setData(parsed);
-      setState({ status: "done" });
-    } catch (e) {
-      setState({ status: "error" });
-    }
-  }
-
+function CircuitSandbox() {
   return (
-    <div>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-        <div style={{ background: "#f4ece0", color: C.copperDark, padding: "4px 10px", borderRadius: 999, fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", gap: 6 }}>
-          <Sparkles size={13} /> AI-GENERATED
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ background: '#e8f5f3', color: C.teal, padding: '4px 10px', borderRadius: 999, fontSize: 12, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+          <Zap size={13} /> INTERACTIVE
         </div>
-        <span style={{ fontSize: 13, color: C.muted }}>Fresh viva questions for "{exp.title}", generated on demand.</span>
+        <span style={{ fontSize: 13, color: C.muted }}>Build and test real circuits with live physics simulation.</span>
       </div>
-
-      {state.status !== "done" && (
-        <button
-          onClick={generate}
-          disabled={state.status === "loading"}
-          style={{
-            background: C.shell, color: "#fff", border: "none", borderRadius: 8,
-            padding: "11px 22px", fontWeight: 600, fontSize: 14, cursor: "pointer",
-            display: "flex", alignItems: "center", gap: 8,
-          }}
-        >
-          {state.status === "loading" ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
-          {state.status === "loading" ? "Generating…" : "Generate viva questions"}
-        </button>
-      )}
-
-      {state.status === "error" && (
-        <div style={{ marginTop: 14, color: "#c0392b", fontSize: 14 }}>
-          Couldn't generate questions right now. Please try again.
+      <div style={{ border: `1px solid ${C.border}`, borderRadius: 12, overflow: 'hidden', background: '#0a0e14' }}>
+        <div style={{ padding: '8px 14px', background: '#080b11', borderBottom: `1px solid ${C.border}`, fontSize: 12, color: '#8a96ac', fontFamily: 'ui-monospace,monospace', fontWeight: 600 }}>
+          ⚡ CIRCUIT SANDBOX — Drag components, wire them up, and watch the physics simulate live.
         </div>
-      )}
-
-      {state.status === "done" && data && (
-        <div style={{ marginTop: 18, display: "flex", flexDirection: "column", gap: 18 }}>
-          <div>
-            <div style={{ fontWeight: 700, fontSize: 13, color: C.copperDark, marginBottom: 8, letterSpacing: 0.4 }}>KEY CONCEPTS</div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {(data.concepts || []).map((c, i) => (
-                <span key={i} style={{ background: C.canvas, border: `1px solid ${C.border}`, borderRadius: 999, padding: "5px 12px", fontSize: 13, color: C.ink }}>{c}</span>
-              ))}
-            </div>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {(data.questions || []).map((qa, i) => (
-              <details key={i} style={{ border: `1px solid ${C.border}`, borderRadius: 10, padding: "12px 16px", background: C.card }}>
-                <summary style={{ fontWeight: 600, cursor: "pointer", color: C.ink }}>{i + 1}. {qa.q}</summary>
-                <p style={{ marginTop: 8, color: C.muted, fontSize: 14, lineHeight: 1.5 }}>{qa.a}</p>
-              </details>
-            ))}
-          </div>
-          <button onClick={generate} style={{ alignSelf: "flex-start", background: "none", border: `1px solid ${C.border}`, borderRadius: 8, padding: "8px 16px", fontSize: 13, color: C.ink, cursor: "pointer" }}>
-            Regenerate
-          </button>
-        </div>
-      )}
+        <iframe
+          src="/circuit-sandbox.html"
+          style={{ width: '100%', height: '560px', border: 'none', display: 'block' }}
+          title="Circuit Sandbox"
+          allow="fullscreen"
+        />
+      </div>
+      <div style={{ fontSize: 13, color: C.muted, lineHeight: 1.7 }}>
+        <b style={{ color: C.ink }}>How to use:</b> Click a component (Resistor, Battery etc.) from the left panel → click on the grid to place it → drag from a component's terminal dot to another to wire them → watch the live readings update in the Inspector panel on the right. Press <b>R</b> to rotate a selected component, <b>Delete</b> to remove it.
+      </div>
     </div>
   );
 }
@@ -323,8 +259,8 @@ function Home({ onOpen, unlocked, collapsedCategories, toggleCategory, searchQue
       <div className="reveal" style={{ display: "flex", flexWrap: "wrap", gap: 32, padding: "60px 40px", maxWidth: 1200, margin: "0 auto" }}>
         {[
           { icon: Target, title: "Objective-Driven", desc: "Understand real-world deviations by plotting static and dynamic characteristics of ideal sensors." },
-          { icon: Activity, title: "Interactive Simulations", desc: "Tweak physical parameters in real-time and observe immediate graph responses on virtual instruments." },
-          { icon: Sparkles, title: "AI Viva Prep", desc: "Prepare for your practical exams with dynamically generated viva-voce questions and key concepts." }
+          { icon: Activity, title: "Live Graphing & Export", desc: "Watch a live deviation graph update as you balance the bridge. Export your readings as a CSV file for lab reports." },
+          { icon: Zap, title: "Circuit Sandbox", desc: "Build custom circuits with a full drag-and-drop physics simulator — resistors, capacitors, inductors, AC sources, and more." }
         ].map((feature, i) => (
           <div key={i} style={{ flex: "1 1 300px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
             <div style={{ width: 56, height: 56, borderRadius: 16, background: "#e8f5f3", color: C.teal, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
@@ -702,7 +638,7 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
             </Section>
           )}
 
-          {tab === "viva" && <Section title="AI Viva Prep"><VivaPrep exp={exp} /></Section>}
+          {tab === "sandbox" && <Section title="Circuit Sandbox"><CircuitSandbox /></Section>}
 
           {tab === "references" && (
             <Section title="References">
