@@ -48,7 +48,7 @@ function ArmIcon({ type, label, midX, midY, angleDeg, labelDX, labelDY }) {
   );
 }
 
-function CircuitSVG({ cfg }) {
+export function CircuitSVG({ cfg }) {
   const a = [70, 150], b = [240, 40], c = [410, 150], d = [240, 260];
   const mid = (p, q) => [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2];
   const mAB = mid(a, b), mBC = mid(b, c), mAD = mid(a, d), mDC = mid(d, c);
@@ -91,6 +91,7 @@ export const BRIDGES = [
     id: 'wheatstone-bridge', group: 'DC BRIDGES', detector: 'gal', source: 'dc',
     svg: { ab: { type: 'R', label: 'P' }, bc: { type: 'R', label: 'Q' }, ad: { type: 'R', label: 'R' }, dc: { type: 'unknown', label: 'Rx' } },
     formula: 'At balance: P·R<sub>x</sub> = Q·R &nbsp;→&nbsp; <b>R<sub>x</sub> = (Q × R) / P</b>',
+    derivation: '<p>At balance, no current flows through the galvanometer (I<sub>g</sub> = 0). Therefore, the potential at node b equals the potential at node d (V<sub>b</sub> = V<sub>d</sub>).</p><p>By the voltage divider rule for the two parallel branches:<br>V<sub>b</sub> = V<sub>in</sub> × Q / (P + Q)<br>V<sub>d</sub> = V<sub>in</sub> × R<sub>x</sub> / (R + R<sub>x</sub>)</p><p>Equating them:<br>Q / (P + Q) = R<sub>x</sub> / (R + R<sub>x</sub>)</p><p>Cross-multiplying:<br>Q(R + R<sub>x</sub>) = R<sub>x</sub>(P + Q)<br>Q·R + Q·R<sub>x</sub> = P·R<sub>x</sub> + Q·R<sub>x</sub><br>Q·R = P·R<sub>x</sub><br><b>R<sub>x</sub> = (Q × R) / P</b></p>',
     apparatus: ['Wheatstone bridge trainer kit', 'Galvanometer (null detector)', 'DC regulated power supply / battery', 'Resistance boxes P, Q, R', 'Unknown resistor (sealed box)', 'Connecting patch cords', 'Battery key & galvanometer key'],
     fixed: [], hidden: [{ key: 'Rx', label: 'Unknown Resistance Rₓ', unit: 'Ω' }],
     tabCols: [{ k: 'P', u: 'Ω' }, { k: 'Q', u: 'Ω' }, { k: 'R', u: 'Ω' }, { k: 'Rx', u: 'Ω', label: 'Rₓ (measured)' }],
@@ -99,6 +100,7 @@ export const BRIDGES = [
     id: 'kelvin-bridge', group: 'DC BRIDGES', detector: 'gal', source: 'dc',
     svg: { ab: { type: 'R', label: 'P' }, bc: { type: 'R', label: 'Q' }, ad: { type: 'R', label: 'S' }, dc: { type: 'unknown', label: 'Rx' } },
     formula: 'At balance: P·R<sub>x</sub> = Q·S &nbsp;→&nbsp; <b>R<sub>x</sub> = (Q × S) / P</b>',
+    derivation: '<p>The Kelvin bridge is mathematically identical to the Wheatstone bridge, but is practically constructed to measure low resistances.</p><p>At balance (I<sub>g</sub> = 0), V<sub>b</sub> = V<sub>d</sub>.</p><p>V<sub>b</sub> = V<sub>in</sub> × Q / (P + Q)<br>V<sub>d</sub> = V<sub>in</sub> × R<sub>x</sub> / (S + R<sub>x</sub>)</p><p>Equating them:<br>Q / (P + Q) = R<sub>x</sub> / (S + R<sub>x</sub>)<br>Q·S + Q·R<sub>x</sub> = P·R<sub>x</sub> + Q·R<sub>x</sub><br>Q·S = P·R<sub>x</sub><br><b>R<sub>x</sub> = (Q × S) / P</b></p>',
     apparatus: ['Kelvin bridge trainer kit', 'Galvanometer (sensitive, centre-zero)', 'Low-voltage, high-current DC supply', 'Ratio arm resistance boxes P, Q', 'Standard low-resistance decade box S', 'Unknown low resistance (sealed box)', 'Heavy-gauge connecting leads'],
     fixed: [], hidden: [{ key: 'Rx', label: 'Unknown Low Resistance Rₓ', unit: 'Ω' }],
     tabCols: [{ k: 'P', u: 'Ω' }, { k: 'Q', u: 'Ω' }, { k: 'S', u: 'Ω' }, { k: 'Rx', u: 'Ω', label: 'Rₓ (measured)' }],
@@ -195,6 +197,7 @@ export const BRIDGES = [
  */
 export default function UnifiedBridgeSim({ bridgeId }) {
   const bridge = BRIDGES.find(b => b.id === bridgeId);
+  const [showMath, setShowMath] = useState(false);
 
   if (!bridge) {
     return (
@@ -217,11 +220,27 @@ export default function UnifiedBridgeSim({ bridgeId }) {
       </div>
 
       <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 14, padding: 20 }}>
-        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 14 }}>
-          Balance Formula & Info
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--muted)' }}>
+            Balance Formula
+          </div>
+          {bridge.derivation && (
+            <button 
+              onClick={() => setShowMath(!showMath)}
+              style={{ fontSize: 11, fontWeight: 600, background: showMath ? 'var(--teal)' : 'var(--canvas)', color: showMath ? '#fff' : 'var(--teal)', border: '1px solid var(--border)', borderRadius: 6, padding: '4px 8px', cursor: 'pointer', transition: '0.2s' }}>
+              {showMath ? 'Hide Math' : 'Show Math Breakdown'}
+            </button>
+          )}
         </div>
+        
         <div style={{ fontFamily: 'ui-monospace,monospace', fontSize: 14, color: 'var(--teal)', lineHeight: 1.9, marginBottom: 16 }}
           dangerouslySetInnerHTML={{ __html: bridge.formula }} />
+          
+        {showMath && bridge.derivation && (
+          <div style={{ background: '#f8fafc', padding: '12px 16px', borderRadius: 8, border: '1px dashed var(--border)', color: 'var(--ink)', fontSize: 13, lineHeight: 1.6, marginBottom: 16 }}
+            dangerouslySetInnerHTML={{ __html: bridge.derivation }} />
+        )}
+        
         {bridge.extraNote && (
           <div style={{ color: 'var(--muted)', fontSize: 12.5, lineHeight: 1.55, borderTop: '1px dashed var(--border)', paddingTop: 12 }}
             dangerouslySetInnerHTML={{ __html: bridge.extraNote }} />

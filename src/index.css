@@ -145,61 +145,45 @@ code {
 
 
 
-/* --- Lab Report Print Styles --- */
-@media print {
-  body {
-    background: #fff !important;
-    color: #000 !important;
-  }
-  
-  /* Hide sidebar and navigation */
-  #root > div > div:first-child {
-    display: none !important;
-  }
-  
-  /* Hide internal tab navigation */
-  nav {
-    display: none !important;
+  .formula-box, .table-header {
+    background: var(--shellSoft);
+    color: #e2e8f0;
   }
 
-  /* Make main container block-level for printing */
-  #root > div {
-    display: block !important;
-    height: auto !important;
-    overflow: visible !important;
-  }
-  #root > div > div:last-child {
-    display: block !important;
-    width: 100% !important;
-    height: auto !important;
-    overflow: visible !important;
-    padding: 0 !important;
-  }
+  /* --- Lab Report Print Styles --- */
+  @media print {
+    body {
+      background: #fff !important;
+      color: #000 !important;
+    }
+    
+    .no-print { display: none !important; }
+    
+    .print-report-container {
+      display: block !important;
+      width: 100% !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      color: #000 !important;
+      background: #fff !important;
+    }
 
-  /* Hide header with guide button */
-  #root > div > div:last-child > header {
-    display: none !important;
-  }
+    .print-report-container * {
+      color: #000 !important;
+      background: transparent !important;
+    }
 
-  /* Hide all buttons (Download CSV, Clear, Add Row, Export, etc) */
-  button {
-    display: none !important;
-  }
-  
-  /* Hide the inputs in table and just show text */
-  input[type="number"] {
-    border: none !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-  }
+    .print-report-container img {
+      max-width: 100% !important;
+      height: auto !important;
+    }
 
-  /* Avoid page breaks inside sections */
-  table {
-    page-break-inside: avoid;
-  }
-  
-  .recharts-wrapper {
-    page-break-inside: avoid;
+    .recharts-wrapper, table, tr, .print-section, .snapshot-card {
+      page-break-inside: avoid;
+    }
+    
+    .print-section {
+      margin-bottom: 30px;
+    }
   }
 }

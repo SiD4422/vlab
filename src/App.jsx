@@ -1,15 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
 import {
   Zap, BookOpen, ClipboardCheck, ListOrdered, Sparkles, MessageSquare,
   Link2, Target, ArrowLeft, Loader2, CheckCircle2, XCircle, Star,
   ChevronRight, Cpu, Menu, X, Activity,
-  GraduationCap, Mail, Phone, MapPin, Shield, Globe, Users, Lock
-, Search, Sun, Moon, Check, BarChart2, Download } from "lucide-react";
+  GraduationCap, Mail, Phone, MapPin, Shield, Globe, Users, Lock, LogOut,
+  Search, Sun, Moon, Check, BarChart2, Download, Eye, Camera, FileText } from "lucide-react";
 
 import StrainGaugeSim from "./simulations/StrainGaugeSim";
-import UnifiedBridgeSim, { BridgeProcedurePanel, BRIDGES, initBridgeState } from "./simulations/UnifiedBridgeSim";
+import UnifiedBridgeSim, { BridgeProcedurePanel, BRIDGES, initBridgeState, CircuitSVG } from "./simulations/UnifiedBridgeSim";
+import LoginScreen from "./LoginScreen";
+import { auth } from "./services/firebase";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 
 /* ---------------------------------------------------------------
    DESIGN TOKENS — circuit-board palette: ink navy shell, copper
@@ -64,6 +67,7 @@ const TABS = [
   { id: "pretest", label: "Pretest", icon: ClipboardCheck },
   { id: "procedure", label: "Procedure", icon: ListOrdered },
   { id: "posttest", label: "Posttest", icon: ClipboardCheck },
+  { id: "report", label: "Lab Report", icon: FileText },
   { id: "references", label: "References", icon: Link2 },
   { id: "feedback", label: "Feedback", icon: MessageSquare },
 ];
@@ -144,20 +148,55 @@ function Quiz({ questions, onComplete }) {
 /* ---------------------------------------------------------------
    CIRCUIT SANDBOX
 --------------------------------------------------------------- */
-function CircuitSandbox() {
+function CircuitSandbox({ onCapture, onRecord }) {
+  const iframeRef = useRef(null);
+  
+  const handleCapture = () => {
+    if (iframeRef.current && iframeRef.current.contentWindow) {
+      iframeRef.current.contentWindow.postMessage({ type: 'CAPTURE_SNAPSHOT' }, '*');
+    }
+  };
+
+  const handleRecord = () => {
+    if (iframeRef.current && iframeRef.current.contentWindow) {
+      iframeRef.current.contentWindow.postMessage({ type: 'RECORD_READING' }, '*');
+    }
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{ background: '#e8f5f3', color: C.teal, padding: '4px 10px', borderRadius: 999, fontSize: 12, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
-          <Zap size={13} /> INTERACTIVE
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ background: '#e8f5f3', color: C.teal, padding: '4px 10px', borderRadius: 999, fontSize: 12, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Zap size={13} /> INTERACTIVE
+          </div>
+          <span style={{ fontSize: 13, color: C.muted }}>Build and test real circuits with live physics simulation.</span>
         </div>
-        <span style={{ fontSize: 13, color: C.muted }}>Build and test real circuits with live physics simulation.</span>
       </div>
       <div style={{ border: `1px solid ${C.border}`, borderRadius: 12, overflow: 'hidden', background: '#0a0e14' }}>
-        <div style={{ padding: '8px 14px', background: '#080b11', borderBottom: `1px solid ${C.border}`, fontSize: 12, color: '#8a96ac', fontFamily: 'ui-monospace,monospace', fontWeight: 600 }}>
-          ⚡ CIRCUIT SANDBOX — Drag components, wire them up, and watch the physics simulate live.
+        <div style={{ padding: '8px 14px', background: '#080b11', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ fontSize: 12, color: '#8a96ac', fontFamily: 'ui-monospace,monospace', fontWeight: 600 }}>
+            ⚡ CIRCUIT SANDBOX — Drag components, wire them up, and watch the physics simulate live.
+          </div>
+          <div style={{ display: 'flex', gap: 10 }}>
+            {onRecord && (
+              <button 
+                onClick={handleRecord}
+                style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', padding: '4px 10px', borderRadius: 6, border: '1px solid #1f7a72', background: 'transparent', color: '#1f7a72', cursor: 'pointer' }}>
+                <CheckCircle2 size={12} /> Add Blank Row
+              </button>
+            )}
+            {onCapture && (
+              <button 
+                onClick={handleCapture}
+                style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', padding: '4px 10px', borderRadius: 6, border: '1px solid #1f7a72', background: '#1f7a72', color: '#fff', cursor: 'pointer' }}>
+                <Camera size={12} /> Capture Snapshot
+              </button>
+            )}
+          </div>
         </div>
         <iframe
+          ref={iframeRef}
           src="/circuit-sandbox.html"
           style={{ width: '100%', height: '560px', border: 'none', display: 'block' }}
           title="Circuit Sandbox"
@@ -495,6 +534,39 @@ function Team() {
    EXPERIMENT DETAIL
 --------------------------------------------------------------- */
 function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCompleted, bridgeSims, setBridgeSims }) {
+  useEffect(() => {
+    const handleMessage = (e) => {
+      if (!e.data || !e.data.type) return;
+      if (e.data.type === 'SNAPSHOT_RESULT') {
+        setBridgeSims(prev => {
+          const current = prev[exp.id] || { rows: [], snapshots: [] };
+          return {
+            ...prev,
+            [exp.id]: {
+              ...current,
+              snapshots: [...(current.snapshots || []), { id: Date.now(), svg: e.data.svgDataUrl, graph: e.data.graphDataUrl }]
+            }
+          };
+        });
+        alert('Circuit captured and added to your Lab Report!');
+      } else if (e.data.type === 'READING_RESULT') {
+        // Since the sandbox is free-form, we cannot reliably map arbitrary 
+        // resistors to bridge arms (P, Q, S, R). We simply add a blank row 
+        // for the student to manually record their meter readings.
+        let newRow = { id: Date.now() };
+        setBridgeSims(prev => {
+          const current = prev[exp.id] || { rows: [], snapshots: [] };
+          return {
+            ...prev,
+            [exp.id]: { ...current, rows: [...current.rows, newRow] }
+          };
+        });
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [exp.id, setBridgeSims]);
+
   const startTour = () => {
     const driverObj = driver({
       showProgress: true,
@@ -633,33 +705,43 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
                   <StrainGaugeSim />
                 </Section>
               ) : (
-                <>
-                  <Section title="Reference Diagram" id="tour-reference">
-                    {[
-                      "wheatstone-bridge", "kelvin-bridge", "kelvin-double-bridge",
-                      "capacitance-comparison-bridge", "maxwell-inductance-bridge",
-                      "maxwell-lc-bridge", "hays-bridge", "anderson-bridge",
-                      "schering-bridge", "wiens-bridge", "transformer-ratio-bridge"
-                    ].includes(exp.id) ? (
-                      <UnifiedBridgeSim bridgeId={exp.id} />
-                    ) : (
-                      <div style={{ padding: "40px 20px", textAlign: "center", color: C.muted, background: "var(--card)", borderRadius: 8, border: `1px solid ${C.border}` }}>
-                        <Activity size={32} color={C.border} style={{ marginBottom: 12 }} />
-                        <div>The reference diagram for {exp.title} is currently under development.</div>
-                      </div>
-                    )}
-                  </Section>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
+                  <div>
+                    <Section title="Reference Diagram" id="tour-reference">
+                      {[
+                        "wheatstone-bridge", "kelvin-bridge", "kelvin-double-bridge",
+                        "capacitance-comparison-bridge", "maxwell-inductance-bridge",
+                        "maxwell-lc-bridge", "hays-bridge", "anderson-bridge",
+                        "schering-bridge", "wiens-bridge", "transformer-ratio-bridge"
+                      ].includes(exp.id) ? (
+                        <UnifiedBridgeSim bridgeId={exp.id} />
+                      ) : (
+                        <div style={{ padding: "40px 20px", textAlign: "center", color: C.muted, background: "var(--card)", borderRadius: 8, border: `1px solid ${C.border}` }}>
+                          <Activity size={32} color={C.border} style={{ marginBottom: 12 }} />
+                          <div>The reference diagram for {exp.title} is currently under development.</div>
+                        </div>
+                      )}
+                    </Section>
+                  </div>
                   
-                  <Section title="Circuit Sandbox Workspace" id="tour-sandbox">
-                    <CircuitSandbox />
-                  </Section>
-                </>
+                  <div>
+                    <Section title="Circuit Sandbox Workspace" id="tour-sandbox">
+                      <CircuitSandbox onCapture={() => {}} onRecord={() => {}} />
+                    </Section>
+                  </div>
+                </div>
               )}
             </div>
           )}
 
           {tab === "pretest" && <Section title="Pretest"><Quiz questions={exp.pretest} /></Section>}
-          {tab === "posttest" && <Section title="Posttest"><Quiz questions={exp.posttest} onComplete={markCompleted} /></Section>}
+          {tab === "posttest" && (
+            <Section title="Posttest">
+              <Quiz questions={exp.posttest} onComplete={markCompleted} />
+              <VivaPrep questions={exp.viva} />
+            </Section>
+          )}
+          {tab === "report" && <LabReportTab exp={exp} bridgeState={bridgeSims[exp.id]} setBridgeSims={setBridgeSims} />}
 
           {tab === "procedure" && (
             <Section title="Procedure">
@@ -774,14 +856,35 @@ export default function App() {
   const [unlocked, setUnlocked] = useState(false);
   const [collapsedCategories, setCollapsedCategories] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
-  // Persistent bridge sim state — keyed by exp.id, survives sidebar navigation
   const [bridgeSims, setBridgeSims] = useState({});
-  const [completed, setCompleted] = useState(() => JSON.parse(localStorage.getItem('vlab_completed') || '[]'));
+  const [completed, setCompleted] = useState([]);
   const [theme, setTheme] = useState(() => localStorage.getItem('vlab_theme') || 'light');
+  const [user, setUser] = useState(null);
+  const [authInitialized, setAuthInitialized] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem('vlab_completed', JSON.stringify(completed));
-  }, [completed]);
+    if (!auth) {
+      // Fallback if firebase is broken (e.g. invalid keys)
+      setAuthInitialized(true);
+      return;
+    }
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        setUser({
+          email: firebaseUser.email,
+          name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
+          avatar: firebaseUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.email}`,
+          uid: firebaseUser.uid
+        });
+      } else {
+        setUser(null);
+      }
+      setAuthInitialized(true);
+    });
+    return () => unsubscribe();
+  }, []);
+
+
 
   useEffect(() => {
     localStorage.setItem('vlab_theme', theme);
@@ -834,11 +937,21 @@ export default function App() {
     setView("detail");
   }
 
+  if (!authInitialized) {
+    return <div style={{ height: '100vh', width: '100vw', background: 'var(--shell)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Loader2 className="spin" color="var(--teal)" size={32} /></div>;
+  }
+
+  if (!user) {
+    return <LoginScreen onLogin={setUser} />;
+  }
+
   return (
     <div style={{ background: C.canvas, minHeight: "100vh", fontFamily: "ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif" }}>
+      
+      
+      <div id="app-ui">
       {/* Sticky Navbar */}
-      <div style={{ 
-        position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
+      <div className="no-print" style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
         background: (scrolled || view !== "home") ? "rgba(18, 24, 38, 0.85)" : "transparent",
         backdropFilter: (scrolled || view !== "home") ? "blur(12px)" : "none",
         borderBottom: (scrolled || view !== "home") ? `3px solid ${C.copper}` : "3px solid transparent",
@@ -937,8 +1050,7 @@ export default function App() {
       )}
 
       {/* Sidebar Menu */}
-      <div style={{
-        position: "fixed", top: 0, left: menuOpen ? 0 : "-350px", width: "350px", height: "100vh",
+      <div className="no-print" style={{ position: "fixed", top: 0, left: menuOpen ? 0 : "-350px", width: "350px", height: "100vh",
         background: "rgba(18, 24, 38, 0.75)", backdropFilter: "blur(24px)", zIndex: 1000, transition: "left 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
         borderRight: "1px solid rgba(255,255,255,0.08)",
         boxShadow: menuOpen ? "20px 0 40px rgba(0,0,0,0.5)" : "none",
@@ -1029,9 +1141,228 @@ export default function App() {
                 </div>
               );
             })}
-    </div>
-  </div>
+          </div>
+          </div>
+        </div>
+        
+        {/* User Profile */}
+        <div style={{ marginTop: "auto", padding: "24px", borderTop: "1px solid rgba(255,255,255,0.08)", background: "rgba(0,0,0,0.2)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <img src={user?.avatar} alt="Avatar" style={{ width: 40, height: 40, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.1)", background: "var(--shellSoft)" }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ color: "#fff", fontSize: 14, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user?.name}</div>
+              <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user?.email}</div>
+            </div>
+            <button 
+              onClick={() => {
+                if(window.confirm("Are you sure you want to sign out?")) {
+                  if (auth) {
+                    signOut(auth);
+                  } else {
+                    setUser(null);
+                  }
+                }
+              }}
+              title="Sign Out"
+              style={{ background: "rgba(255,255,255,0.1)", border: "none", color: "#fff", cursor: "pointer", width: 32, height: 32, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.2s" }}
+            >
+              <LogOut size={14} />
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
+
+
+/* ---------------------------------------------------------------
+   LAB REPORT TAB
+--------------------------------------------------------------- */
+function LabReportTab({ exp, bridgeState, setBridgeSims }) {
+  if (!exp) return null;
+  const bridge = BRIDGES ? BRIDGES.find(b => b.id === exp.id) : null;
+  
+  const updateRow = (idx, key, val) => {
+    if (!setBridgeSims) return;
+    setBridgeSims(prev => {
+      const current = prev[exp.id] || { rows: [], snapshots: [] };
+      const newRows = [...current.rows];
+      newRows[idx] = { ...newRows[idx], [key]: val };
+      return { ...prev, [exp.id]: { ...current, rows: newRows } };
+    });
+  };
+
+  const deleteSnapshot = (idx) => {
+    if (!setBridgeSims) return;
+    if (!window.confirm("Are you sure you want to delete this snapshot?")) return;
+    setBridgeSims(prev => {
+      const current = prev[exp.id] || { rows: [], snapshots: [] };
+      const newSnaps = current.snapshots.filter((_, i) => i !== idx);
+      return { ...prev, [exp.id]: { ...current, snapshots: newSnaps } };
+    });
+  };
+  
+  return (
+    <div className="print-report-container" style={{ padding: "40px", fontFamily: "var(--sans)", color: C.ink, background: C.card, borderRadius: 12, border: `1px solid ${C.border}`, minHeight: "100vh" }}>
+      <div className="no-print" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 20 }}>
+        <button onClick={() => window.print()} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px', background: C.teal, color: '#fff', border: 'none', borderRadius: 8, fontWeight: 600, cursor: 'pointer' }}>
+          <Download size={16} /> Export Lab Report
+        </button>
+      </div>
+
+      <div className="print-section" style={{ borderBottom: `2px solid ${C.border}`, paddingBottom: 20, marginBottom: 30, textAlign: "center" }}>
+        <h1 style={{ margin: "0 0 10px 0", fontSize: 24, fontWeight: "bold" }}>LABORATORY RECORD</h1>
+        <h2 style={{ margin: 0, fontSize: 18, fontWeight: "normal", color: C.muted }}>Experiment: {exp.title}</h2>
+      </div>
+
+      <div className="print-section">
+        <h3 style={{ fontSize: 16, borderBottom: `1px solid ${C.border}`, paddingBottom: 4, color: C.copper }}>1. Aim</h3>
+        <p style={{ fontSize: 14 }}>{exp.aim}</p>
+      </div>
+
+      <div className="print-section">
+        <h3 style={{ fontSize: 16, borderBottom: `1px solid ${C.border}`, paddingBottom: 4, color: C.copper }}>2. Theory</h3>
+        <ul style={{ fontSize: 14, paddingLeft: 20 }}>
+          {exp.theory.map((p, i) => <li key={i} style={{ marginBottom: 6 }}>{p}</li>)}
+        </ul>
+      </div>
+
+      {bridge && (
+        <div className="print-section">
+          <h3 style={{ fontSize: 16, borderBottom: `1px solid ${C.border}`, paddingBottom: 4, color: C.copper }}>3. Circuit Diagram & Formula</h3>
+          <div style={{ display: "flex", gap: 30, alignItems: "center", margin: "20px 0", flexWrap: "wrap" }}>
+            <div style={{ flex: 1, minWidth: 300, border: `1px solid ${C.border}`, padding: 20, background: C.canvas, borderRadius: 8 }}>
+              <CircuitSVG cfg={{ ...bridge.svg, detector: bridge.detector, source: bridge.source }} />
+            </div>
+            <div style={{ flex: 1, minWidth: 300, fontSize: 14 }}>
+              <strong>Balance Formula:</strong>
+              <div className="formula-box" dangerouslySetInnerHTML={{ __html: bridge.formula }} style={{ marginTop: 10, padding: 10, border: `1px solid ${C.border}`, borderRadius: 8 }} />
+              {(bridge.fixed || []).map((fx, i) => (
+                <div key={i} style={{ marginTop: 10, color: C.muted }}>Given: {fx.label} = {fx.value} {fx.unit}</div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {bridgeState && bridgeState.snapshots && bridgeState.snapshots.length > 0 && (
+        <div className="print-section">
+          <h3 style={{ fontSize: 16, borderBottom: `1px solid ${C.border}`, paddingBottom: 4, color: C.copper }}>4. Circuit Snapshots</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20, marginTop: 20 }}>
+            {bridgeState.snapshots.map((snap, i) => (
+              <div key={snap.id} className="snapshot-card" style={{ border: `1px solid ${C.border}`, borderRadius: 8, padding: 16, background: C.canvas, position: 'relative' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <h4 style={{ margin: 0, fontSize: 14, color: C.muted }}>Observation #{i + 1}</h4>
+                  <button className="no-print" onClick={() => deleteSnapshot(i)} style={{ background: 'transparent', border: 'none', color: '#c0392b', cursor: 'pointer', padding: 4 }}>
+                    <X size={16} />
+                  </button>
+                </div>
+                <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+                  {snap.svg && (
+                    <div style={{ flex: 2, minWidth: 200, border: `1px solid ${C.border}`, background: '#fff' }}>
+                      <img src={snap.svg} alt="Circuit" style={{ width: '100%', display: 'block' }} />
+                    </div>
+                  )}
+                  {snap.graph && (
+                    <div style={{ flex: 1, minWidth: 200, border: `1px solid ${C.border}`, background: '#050d1a' }}>
+                      <img src={snap.graph} alt="Oscilloscope Graph" style={{ width: '100%', display: 'block' }} />
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {bridgeState && bridgeState.rows && bridgeState.rows.length > 0 && bridge && (
+        <div className="print-section">
+          <h3 style={{ fontSize: 16, borderBottom: `1px solid ${C.border}`, paddingBottom: 4, color: C.copper }}>5. Observation Table</h3>
+          <table style={{ width: "100%", borderCollapse: "collapse", marginTop: 20, fontSize: 13, textAlign: 'left' }}>
+            <thead>
+              <tr className="table-header">
+                <th style={{ border: `1px solid ${C.border}`, padding: 12 }}>S.No.</th>
+                {bridge.tabCols.map(c => (
+                  <th key={c.k} style={{ border: `1px solid ${C.border}`, padding: 12 }}>{c.label || `${c.k}${c.u ? ` (${c.u})` : ''}`}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {bridgeState.rows.map((row, i) => (
+                <tr key={row.id || i}>
+                  <td style={{ border: `1px solid ${C.border}`, padding: 10 }}>{i + 1}</td>
+                  {bridge.tabCols.map(c => {
+                    let val = row[c.k] !== undefined ? row[c.k] : "";
+                    return (
+                      <td key={c.k} style={{ border: `1px solid ${C.border}`, padding: 4 }}>
+                        <input 
+                          type="text" 
+                          value={val} 
+                          onChange={(e) => updateRow(i, c.k, e.target.value)}
+                          style={{ 
+                            width: "100%", background: "transparent", border: "none", color: "inherit",
+                            fontFamily: "inherit", fontSize: "inherit", padding: 6, outline: "none"
+                          }} 
+                        />
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <div className="print-section" style={{ marginTop: 60, paddingTop: 20, borderTop: `1px solid ${C.border}`, display: "flex", justifyContent: "space-between" }}>
+        <div>
+          <div style={{ color: C.muted }}>Date: ____________________</div>
+        </div>
+        <div>
+          <div style={{ color: C.muted }}>Signature: ____________________</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+/* ---------------------------------------------------------------
+   VIVA PREP (SELF-ASSESSMENT)
+--------------------------------------------------------------- */
+function VivaPrep({ questions }) {
+  const [revealed, setRevealed] = useState({});
+  if (!questions || questions.length === 0) return null;
+
+  return (
+    <div style={{ marginTop: 40, borderTop: `1px dashed var(--border)`, paddingTop: 32 }}>
+      <h3 style={{ margin: "0 0 8px 0", fontSize: 20, color: "var(--ink)" }}>Viva Prep (Self-Assessment)</h3>
+      <p style={{ color: "var(--muted)", fontSize: 14, marginBottom: 24 }}>Test your conceptual understanding before your lab viva. Try to answer out loud before revealing the answer.</p>
+      
+      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        {questions.map((q, i) => (
+          <div key={i} style={{ background: "var(--card)", border: `1px solid var(--border)`, borderRadius: 12, padding: 16 }}>
+            <div style={{ fontWeight: 600, color: "var(--ink)", fontSize: 15, marginBottom: 8, display: "flex", gap: 12 }}>
+              <span style={{ color: "var(--teal)" }}>Q{i+1}.</span>
+              <span>{q.question}</span>
+            </div>
+            
+            {revealed[i] ? (
+              <div style={{ padding: 12, background: "var(--canvas)", borderRadius: 8, fontSize: 14, color: "var(--muted)", marginTop: 12, borderLeft: `3px solid var(--teal)` }}>
+                {q.answer}
+              </div>
+            ) : (
+              <button 
+                onClick={() => setRevealed(prev => ({ ...prev, [i]: true }))}
+                style={{ background: "transparent", border: `1px solid var(--border)`, color: "var(--muted)", padding: "6px 12px", borderRadius: 6, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+                <Eye size={14} /> Reveal Answer
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+

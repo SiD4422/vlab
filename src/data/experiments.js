@@ -130,6 +130,20 @@ export const EXPERIMENTS = [
         ],
         "answer": 2
       }
+    ],
+    "viva": [
+      {
+        "question": "Why is the Kelvin Bridge specifically suited for its typical measurements over simpler methods?",
+        "answer": "This setup is designed to eliminate common sources of error (like lead resistance for low values, or stray capacitance for high frequencies) that simpler methods like the Wheatstone bridge or direct multimeter readings suffer from."
+      },
+      {
+        "question": "What would happen to the balance condition if the source voltage was doubled?",
+        "answer": "The balance condition would remain completely unaffected. Bridge balance depends only on the ratio of the impedances in the arms, not on the excitation voltage. However, the sensitivity of the galvanometer deflection when slightly unbalanced would increase."
+      },
+      {
+        "question": "Why do we use an AC source for measuring inductance or capacitance instead of DC?",
+        "answer": "DC cannot measure reactance. Inductors act as short circuits and capacitors act as open circuits to steady DC. AC provides a time-varying signal (jωL and 1/jωC) allowing us to measure their AC impedances."
+      }
     ]
   },
   {
@@ -261,6 +275,20 @@ export const EXPERIMENTS = [
           "1 nano-ohm"
         ],
         "answer": 2
+      }
+    ],
+    "viva": [
+      {
+        "question": "Why is the Kelvin Double Bridge specifically suited for its typical measurements over simpler methods?",
+        "answer": "This setup is designed to eliminate common sources of error (like lead resistance for low values, or stray capacitance for high frequencies) that simpler methods like the Wheatstone bridge or direct multimeter readings suffer from."
+      },
+      {
+        "question": "What would happen to the balance condition if the source voltage was doubled?",
+        "answer": "The balance condition would remain completely unaffected. Bridge balance depends only on the ratio of the impedances in the arms, not on the excitation voltage. However, the sensitivity of the galvanometer deflection when slightly unbalanced would increase."
+      },
+      {
+        "question": "Why do we use an AC source for measuring inductance or capacitance instead of DC?",
+        "answer": "DC cannot measure reactance. Inductors act as short circuits and capacitors act as open circuits to steady DC. AC provides a time-varying signal (jωL and 1/jωC) allowing us to measure their AC impedances."
       }
     ]
   },
@@ -395,6 +423,20 @@ export const EXPERIMENTS = [
         ],
         "answer": 2
       }
+    ],
+    "viva": [
+      {
+        "question": "Why is the Capacitance Comparison Bridge specifically suited for its typical measurements over simpler methods?",
+        "answer": "This setup is designed to eliminate common sources of error (like lead resistance for low values, or stray capacitance for high frequencies) that simpler methods like the Wheatstone bridge or direct multimeter readings suffer from."
+      },
+      {
+        "question": "What would happen to the balance condition if the source voltage was doubled?",
+        "answer": "The balance condition would remain completely unaffected. Bridge balance depends only on the ratio of the impedances in the arms, not on the excitation voltage. However, the sensitivity of the galvanometer deflection when slightly unbalanced would increase."
+      },
+      {
+        "question": "Why do we use an AC source for measuring inductance or capacitance instead of DC?",
+        "answer": "DC cannot measure reactance. Inductors act as short circuits and capacitors act as open circuits to steady DC. AC provides a time-varying signal (jωL and 1/jωC) allowing us to measure their AC impedances."
+      }
     ]
   },
   {
@@ -527,6 +569,20 @@ export const EXPERIMENTS = [
         ],
         "answer": 0
       }
+    ],
+    "viva": [
+      {
+        "question": "Why is the Maxwell’s Inductance Bridge specifically suited for its typical measurements over simpler methods?",
+        "answer": "This setup is designed to eliminate common sources of error (like lead resistance for low values, or stray capacitance for high frequencies) that simpler methods like the Wheatstone bridge or direct multimeter readings suffer from."
+      },
+      {
+        "question": "What would happen to the balance condition if the source voltage was doubled?",
+        "answer": "The balance condition would remain completely unaffected. Bridge balance depends only on the ratio of the impedances in the arms, not on the excitation voltage. However, the sensitivity of the galvanometer deflection when slightly unbalanced would increase."
+      },
+      {
+        "question": "Why do we use an AC source for measuring inductance or capacitance instead of DC?",
+        "answer": "DC cannot measure reactance. Inductors act as short circuits and capacitors act as open circuits to steady DC. AC provides a time-varying signal (jωL and 1/jωC) allowing us to measure their AC impedances."
+      }
     ]
   },
   {
@@ -656,6 +712,20 @@ export const EXPERIMENTS = [
           "1/R4"
         ],
         "answer": 0
+      }
+    ],
+    "viva": [
+      {
+        "question": "Why is the Maxwell’s Inductance-Capacitance Bridge specifically suited for its typical measurements over simpler methods?",
+        "answer": "This setup is designed to eliminate common sources of error (like lead resistance for low values, or stray capacitance for high frequencies) that simpler methods like the Wheatstone bridge or direct multimeter readings suffer from."
+      },
+      {
+        "question": "What would happen to the balance condition if the source voltage was doubled?",
+        "answer": "The balance condition would remain completely unaffected. Bridge balance depends only on the ratio of the impedances in the arms, not on the excitation voltage. However, the sensitivity of the galvanometer deflection when slightly unbalanced would increase."
+      },
+      {
+        "question": "Why do we use an AC source for measuring inductance or capacitance instead of DC?",
+        "answer": "DC cannot measure reactance. Inductors act as short circuits and capacitors act as open circuits to steady DC. AC provides a time-varying signal (jωL and 1/jωC) allowing us to measure their AC impedances."
       }
     ]
   },
@@ -787,6 +857,20 @@ export const EXPERIMENTS = [
         ],
         "answer": 1
       }
+    ],
+    "viva": [
+      {
+        "question": "Why is the Hay’s Bridge specifically suited for its typical measurements over simpler methods?",
+        "answer": "This setup is designed to eliminate common sources of error (like lead resistance for low values, or stray capacitance for high frequencies) that simpler methods like the Wheatstone bridge or direct multimeter readings suffer from."
+      },
+      {
+        "question": "What would happen to the balance condition if the source voltage was doubled?",
+        "answer": "The balance condition would remain completely unaffected. Bridge balance depends only on the ratio of the impedances in the arms, not on the excitation voltage. However, the sensitivity of the galvanometer deflection when slightly unbalanced would increase."
+      },
+      {
+        "question": "Why do we use an AC source for measuring inductance or capacitance instead of DC?",
+        "answer": "DC cannot measure reactance. Inductors act as short circuits and capacitors act as open circuits to steady DC. AC provides a time-varying signal (jωL and 1/jωC) allowing us to measure their AC impedances."
+      }
     ]
   },
   {
@@ -916,6 +1000,20 @@ export const EXPERIMENTS = [
           "Dependent on frequency"
         ],
         "answer": 1
+      }
+    ],
+    "viva": [
+      {
+        "question": "Why is the Anderson Bridge specifically suited for its typical measurements over simpler methods?",
+        "answer": "This setup is designed to eliminate common sources of error (like lead resistance for low values, or stray capacitance for high frequencies) that simpler methods like the Wheatstone bridge or direct multimeter readings suffer from."
+      },
+      {
+        "question": "What would happen to the balance condition if the source voltage was doubled?",
+        "answer": "The balance condition would remain completely unaffected. Bridge balance depends only on the ratio of the impedances in the arms, not on the excitation voltage. However, the sensitivity of the galvanometer deflection when slightly unbalanced would increase."
+      },
+      {
+        "question": "Why do we use an AC source for measuring inductance or capacitance instead of DC?",
+        "answer": "DC cannot measure reactance. Inductors act as short circuits and capacitors act as open circuits to steady DC. AC provides a time-varying signal (jωL and 1/jωC) allowing us to measure their AC impedances."
       }
     ]
   },
@@ -1048,6 +1146,20 @@ export const EXPERIMENTS = [
         ],
         "answer": 1
       }
+    ],
+    "viva": [
+      {
+        "question": "Why is the Schering Bridge specifically suited for its typical measurements over simpler methods?",
+        "answer": "This setup is designed to eliminate common sources of error (like lead resistance for low values, or stray capacitance for high frequencies) that simpler methods like the Wheatstone bridge or direct multimeter readings suffer from."
+      },
+      {
+        "question": "What would happen to the balance condition if the source voltage was doubled?",
+        "answer": "The balance condition would remain completely unaffected. Bridge balance depends only on the ratio of the impedances in the arms, not on the excitation voltage. However, the sensitivity of the galvanometer deflection when slightly unbalanced would increase."
+      },
+      {
+        "question": "Why do we use an AC source for measuring inductance or capacitance instead of DC?",
+        "answer": "DC cannot measure reactance. Inductors act as short circuits and capacitors act as open circuits to steady DC. AC provides a time-varying signal (jωL and 1/jωC) allowing us to measure their AC impedances."
+      }
     ]
   },
   {
@@ -1178,6 +1290,20 @@ export const EXPERIMENTS = [
         ],
         "answer": 0
       }
+    ],
+    "viva": [
+      {
+        "question": "Why is the Wien’s Bridge specifically suited for its typical measurements over simpler methods?",
+        "answer": "This setup is designed to eliminate common sources of error (like lead resistance for low values, or stray capacitance for high frequencies) that simpler methods like the Wheatstone bridge or direct multimeter readings suffer from."
+      },
+      {
+        "question": "What would happen to the balance condition if the source voltage was doubled?",
+        "answer": "The balance condition would remain completely unaffected. Bridge balance depends only on the ratio of the impedances in the arms, not on the excitation voltage. However, the sensitivity of the galvanometer deflection when slightly unbalanced would increase."
+      },
+      {
+        "question": "Why do we use an AC source for measuring inductance or capacitance instead of DC?",
+        "answer": "DC cannot measure reactance. Inductors act as short circuits and capacitors act as open circuits to steady DC. AC provides a time-varying signal (jωL and 1/jωC) allowing us to measure their AC impedances."
+      }
     ]
   },
   {
@@ -1306,6 +1432,20 @@ export const EXPERIMENTS = [
           "Detector sensitivity"
         ],
         "answer": 1
+      }
+    ],
+    "viva": [
+      {
+        "question": "Why is the Transformer Ratio Bridge specifically suited for its typical measurements over simpler methods?",
+        "answer": "This setup is designed to eliminate common sources of error (like lead resistance for low values, or stray capacitance for high frequencies) that simpler methods like the Wheatstone bridge or direct multimeter readings suffer from."
+      },
+      {
+        "question": "What would happen to the balance condition if the source voltage was doubled?",
+        "answer": "The balance condition would remain completely unaffected. Bridge balance depends only on the ratio of the impedances in the arms, not on the excitation voltage. However, the sensitivity of the galvanometer deflection when slightly unbalanced would increase."
+      },
+      {
+        "question": "Why do we use an AC source for measuring inductance or capacitance instead of DC?",
+        "answer": "DC cannot measure reactance. Inductors act as short circuits and capacitors act as open circuits to steady DC. AC provides a time-varying signal (jωL and 1/jωC) allowing us to measure their AC impedances."
       }
     ]
   }

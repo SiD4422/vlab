@@ -90,7 +90,7 @@
     border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,.5);
     font-family:var(--mono); color:#e2e8f0;
     display:none; flex-direction:column; overflow:hidden;
-    resize:both; min-width:360px; min-height:260px;
+    resize:both; min-width:360px; min-height:260px; height: 320px;
   }
   #osc-panel.open{display:flex;}
   .osc-topbar{
@@ -132,6 +132,9 @@
     <button id="btnRun" class="primary">⏸ Pause</button>
     <button id="btnClear">🗑 Clear</button>
     <button id="btnFullscreen">⛶ Fullscreen</button>
+    <div class="sep"></div>
+    <button id="btnRecordLab" style="color: #20c997; border-color: #20c997;">✅ Record</button>
+    <button id="btnCaptureLab" style="background: #1f7a72; color: #fff; border-color: #1f7a72;">📸 Capture</button>
 
     <button id="btnSave">💾 Save</button>
     <button id="btnLoad">📂 Load</button>
@@ -684,7 +687,11 @@ function tick(now){
     simHistory = res.history;
     simTime += PHYS_DT;
   }
-  if(res){ applyReadings(res.readings); if(window._oscUpdate) window._oscUpdate(res.readings, simTime); }
+  if(res){ 
+    applyReadings(res.readings); 
+    window._lastReadings = res.readings;
+    if(window._oscUpdate) window._oscUpdate(res.readings, simTime); 
+  }
 }
 
 function applyReadings(readings){
@@ -784,6 +791,7 @@ function loadExample(comps, ws){
   const TIME_WINDOW = 4; // seconds to show
 
   let channels = [];
+  window._oscChannels = channels;
   let frozen = false;
   let oscOpen = false;
   let animId = null;
@@ -907,6 +915,9 @@ function loadExample(comps, ws){
     footer.appendChild(ro);
   }
 
+  // Expose draw function so we can force a redraw during snapshot if canvas was 0x0
+  window._oscDraw = draw;
+
   // ── canvas resize ─────────────────────────────────────────────────
   function resizeCanvas(){
     canvas.width = panel.clientWidth;
@@ -921,6 +932,7 @@ function loadExample(comps, ws){
 
   function draw(){
     const W=canvas.width, H=canvas.height;
+    if(W === 0 || H === 0) return;
     ctx.clearRect(0,0,W,H);
 
     // background gradient
@@ -1042,6 +1054,87 @@ function loadExample(comps, ws){
 renderPalette();
 render();
 renderInspector();
+
+// ── Inter-frame Communication for Lab Report ───────────────────────
+function doCaptureSnapshot() {
+  try {
+    // 1. Capture SVG
+    const svgEl = document.getElementById('canvas');
+    let svgStr = new XMLSerializer().serializeToString(svgEl);
+    if (!svgStr.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
+      svgStr = svgStr.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+    }
+    
+    // Inject styles for SVG rendering
+    const styles = `
+      <style>
+        .wire { stroke: #94a3b8; stroke-width: 3px; fill: none; }
+        .lead { stroke: #94a3b8; stroke-width: 2.5px; fill: none; }
+        .icon-line { stroke: #0f172a; stroke-width: 2.2px; fill: none; stroke-linecap: round; }
+        .terminal { fill: #94a3b8; stroke: #fff; stroke-width: 1.5px; }
+        .label-name { fill: #94a3b8; font-family: monospace; font-size: 10.5px; text-anchor: middle; }
+        .label-val { fill: #0f172a; font-family: monospace; font-size: 10.5px; text-anchor: middle; font-weight: 600; }
+        .label-read { fill: #0d9488; font-family: monospace; font-size: 11px; text-anchor: middle; font-weight: 700; }
+      </style>
+    `;
+    svgStr = svgStr.replace('>', '>' + styles);
+    
+    const svgDataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
+    
+    // 2. Capture Oscilloscope (Always capture to maintain the 2-column layout in the Lab Report)
+    const oscCanvas = document.getElementById('osc-canvas');
+    let graphDataUrl = null;
+    if (oscCanvas) {
+      // If the panel is closed, its width is 0. We temporarily force a size to capture the "No channels" state.
+      const originalWidth = oscCanvas.width;
+      const originalHeight = oscCanvas.height;
+      if (originalWidth === 0 || originalHeight === 0) {
+        oscCanvas.width = 420;
+        oscCanvas.height = 190;
+        // Trigger a synchronous draw to fill the temporary canvas
+        if (typeof window._oscDraw === 'function') window._oscDraw();
+      }
+      graphDataUrl = oscCanvas.toDataURL('image/png');
+      
+      // Restore original dimensions if we altered them
+      if (originalWidth === 0 || originalHeight === 0) {
+        oscCanvas.width = originalWidth;
+        oscCanvas.height = originalHeight;
+      }
+    }
+    
+    // 3. Send back to parent
+    window.parent.postMessage({
+      type: 'SNAPSHOT_RESULT',
+      svgDataUrl,
+      graphDataUrl
+    }, '*');
+  } catch (err) {
+    console.error("Snapshot failed:", err);
+  }
+}
+
+function doRecordReading() {
+  if (window._lastReadings) {
+    window.parent.postMessage({
+      type: 'READING_RESULT',
+      readings: window._lastReadings
+    }, '*');
+  }
+}
+
+// Listen for messages from parent
+window.addEventListener('message', (e) => {
+  if (e.data && e.data.type === 'CAPTURE_SNAPSHOT') {
+    doCaptureSnapshot();
+  } else if (e.data && e.data.type === 'RECORD_READING') {
+    doRecordReading();
+  }
+});
+
+// Bind internal buttons to trigger the exact same logic directly
+document.getElementById('btnCaptureLab').onclick = doCaptureSnapshot;
+document.getElementById('btnRecordLab').onclick = doRecordReading;
 
 requestAnimationFrame(tick);
 </script>
