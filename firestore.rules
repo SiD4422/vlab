@@ -1,0 +1,130 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+  
+    // ---------------------------------------------------------
+    // USERS
+    // ---------------------------------------------------------
+    match /users/{userId} {
+      function isValidTeacherAdd(oldData, newData) {
+        let classDoc = getAfter(/databases/$(database)/documents/classes/$(newData.lastJoinedClassId)).data;
+        let addedTeacher = classDoc.teacherUid;
+        let isEnrolled = request.auth.uid in classDoc.studentUids;
+        let oldArray = ('enrolledTeacherUids' in oldData) ? oldData.enrolledTeacherUids : [];
+        let newArray = ('enrolledTeacherUids' in newData) ? newData.enrolledTeacherUids : [];
+        
+        return isEnrolled 
+          && newArray.hasAll(oldArray)
+          && newArray.size() <= oldArray.size() + 1
+          && (
+               newArray.size() == oldArray.size() 
+               || addedTeacher in newArray
+             );
+      }
+
+      // Users can read their own profile, OR teachers can read a student if they share a class
+      allow read: if request.auth != null 
+        && (request.auth.uid == userId 
+            || ('enrolledTeacherUids' in resource.data && request.auth.uid in resource.data.enrolledTeacherUids));
+      
+      // Users can only create their own profile
+      allow create: if request.auth != null && request.auth.uid == userId;
+      
+      // Students update their own profiles (including adding to enrolledTeacherUids)
+      // Teachers can update a student's profile ONLY to remove themselves from enrolledTeacherUids
+      allow update: if request.auth != null 
+        && (
+          (
+            request.auth.uid == userId 
+            && request.resource.data.role == resource.data.role
+            && (
+              !('enrolledTeacherUids' in request.resource.data.diff(resource.data).affectedKeys()) 
+              || isValidTeacherAdd(resource.data, request.resource.data)
+            )
+          )
+          ||
+          (
+            get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher'
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['enrolledTeacherUids'])
+            && resource.data.enrolledTeacherUids.hasAll(request.resource.data.enrolledTeacherUids)
+            && resource.data.enrolledTeacherUids.size() == request.resource.data.enrolledTeacherUids.size() + 1
+            && !(request.auth.uid in request.resource.data.enrolledTeacherUids)
+            && request.auth.uid in resource.data.enrolledTeacherUids
+          )
+        );
+    }
+    
+    // ---------------------------------------------------------
+    // CLASSES
+    // ---------------------------------------------------------
+    match /classes/{classId} {
+      // Teachers can read/write their own classes
+      allow create: if request.auth != null 
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher'
+        && request.resource.data.teacherUid == request.auth.uid;
+        
+      allow update, delete: if request.auth != null 
+        && resource.data.teacherUid == request.auth.uid;
+      
+      // Students can get any class (to join via exact inviteCode ID)
+      allow get: if request.auth != null;
+      
+      // Students can only list classes they are enrolled in, teachers can list their own
+      allow list: if request.auth != null 
+        && (
+          (request.auth.uid in resource.data.studentUids) || 
+          resource.data.teacherUid == request.auth.uid
+        );
+        
+      // Students can update a class ONLY to append their own UID to the studentUids array
+      allow update: if request.auth != null 
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'student'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['studentUids'])
+        && request.resource.data.studentUids.hasAll(resource.data.studentUids)
+        && request.resource.data.studentUids.size() == resource.data.studentUids.size() + 1
+        && request.auth.uid in request.resource.data.studentUids;
+    }
+    
+    // ---------------------------------------------------------
+    // SUBMISSIONS
+    // ---------------------------------------------------------
+    match /submissions/{submissionId} {
+      function getClassDoc(classId) {
+        return get(/databases/$(database)/documents/classes/$(classId));
+      }
+
+      // Students can create their own submissions, but cannot set a teacherScore
+      allow create: if request.auth != null 
+        && request.resource.data.studentUid == request.auth.uid
+        && (!('teacherScore' in request.resource.data) || request.resource.data.teacherScore == null)
+        && request.resource.data.teacherUid == getClassDoc(request.resource.data.classId).data.teacherUid
+        && request.auth.uid in getClassDoc(request.resource.data.classId).data.studentUids;
+        
+      // Students can update their own submissions (resubmit), but ONLY if it hasn't been graded yet
+      // and they cannot sneak in a teacherScore.
+      allow update: if request.auth != null 
+        && request.auth.uid == resource.data.studentUid
+        && resource.data.status == 'completed'
+        && (!('teacherScore' in resource.data) || resource.data.teacherScore == null)
+        && (!('teacherScore' in request.resource.data) || request.resource.data.teacherScore == null)
+        && request.auth.uid in getClassDoc(request.resource.data.classId).data.studentUids;
+        
+      // Students can read their own submissions
+      allow read: if request.auth != null 
+        && resource.data.studentUid == request.auth.uid;
+        
+      // Teachers can read submissions that belong to their class (using denormalized teacherUid)
+      allow read: if request.auth != null 
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher'
+        && resource.data.teacherUid == request.auth.uid;
+        
+      // Teachers can grade (update) submissions that belong to their class, 
+      // but ONLY the teacherScore and status fields. No full document overwrites!
+      allow update: if request.auth != null 
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher'
+        && resource.data.teacherUid == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['teacherScore', 'status']);
+    }
+  }
+}

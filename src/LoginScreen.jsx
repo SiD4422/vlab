@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, updateProfile } from 'firebase/auth';
-import { auth, googleProvider } from './services/firebase';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { auth, googleProvider, db } from './services/firebase';
 import './LoginScreen.css';
 
 export default function LoginScreen({ onLogin }) {
@@ -10,6 +11,10 @@ export default function LoginScreen({ onLogin }) {
   const [fullName, setFullName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [role, setRole] = useState('student'); // Default role
+  const [registrationNo, setRegistrationNo] = useState('');
+  const [department, setDepartment] = useState('');
+  const [section, setSection] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,20 +26,43 @@ export default function LoginScreen({ onLogin }) {
         // Sign Up
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         await updateProfile(userCredential.user, { displayName: fullName });
+        
+        // Write user document to Firestore
+        await setDoc(doc(db, 'users', userCredential.user.uid), {
+          uid: userCredential.user.uid,
+          name: fullName,
+          email: userCredential.user.email,
+          role: role,
+          ...(role === 'student' ? {
+            registrationNo,
+            department,
+            section
+          } : {
+            department
+          })
+        });
+
         onLogin({
           email: userCredential.user.email,
           name: fullName,
           avatar: userCredential.user.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userCredential.user.email}`,
-          uid: userCredential.user.uid
+          uid: userCredential.user.uid,
+          role: role
         });
       } else {
         // Sign In
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        
+        // Fetch role from Firestore
+        const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
+        const userRole = userDoc.exists() ? userDoc.data().role : 'student';
+
         onLogin({
           email: userCredential.user.email,
           name: userCredential.user.displayName || userCredential.user.email.split('@')[0],
           avatar: userCredential.user.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userCredential.user.email}`,
-          uid: userCredential.user.uid
+          uid: userCredential.user.uid,
+          role: userRole
         });
       }
     } catch (err) {
@@ -50,11 +78,39 @@ export default function LoginScreen({ onLogin }) {
     setError('');
     try {
       const userCredential = await signInWithPopup(auth, googleProvider);
+      
+      // Check if user document exists
+      const userDocRef = doc(db, 'users', userCredential.user.uid);
+      const userDoc = await getDoc(userDocRef);
+      
+      let currentRole = role;
+      if (!userDoc.exists()) {
+        // If they don't exist, create them with the currently selected role
+        // For Google Auth, if they sign in without clicking sign up first, they default to student unless we add a role picker
+        // We will just use the currently selected `role` state
+        await setDoc(userDocRef, {
+          uid: userCredential.user.uid,
+          name: userCredential.user.displayName || userCredential.user.email.split('@')[0],
+          email: userCredential.user.email,
+          role: currentRole,
+          ...(currentRole === 'student' ? {
+            registrationNo: '',
+            department: '',
+            section: ''
+          } : {
+            department: ''
+          })
+        });
+      } else {
+        currentRole = userDoc.data().role;
+      }
+
       onLogin({
         email: userCredential.user.email,
         name: userCredential.user.displayName,
         avatar: userCredential.user.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userCredential.user.email}`,
-        uid: userCredential.user.uid
+        uid: userCredential.user.uid,
+        role: currentRole
       });
     } catch (err) {
       console.error("Google Auth Error:", err);
@@ -81,19 +137,48 @@ export default function LoginScreen({ onLogin }) {
       <div style={{ position: 'relative', zIndex: 10 }}>
         <div className="login-container">
           <div className="login-heading">{isSignUp ? "Create Account" : "Sign In"}</div>
-          {error && <div style={{ background: 'rgba(220, 38, 38, 0.1)', border: '1px solid rgba(220, 38, 38, 0.3)', color: '#ef4444', padding: '10px 14px', borderRadius: 8, fontSize: 13, marginTop: 15, textAlign: 'center' }}>{error}</div>}
+          
+          <div style={{ display: 'flex', gap: 10, marginBottom: 20, justifyContent: 'center' }}>
+            <button 
+              type="button"
+              onClick={() => setRole('student')}
+              style={{ 
+                flex: 1, padding: '8px', borderRadius: 8, cursor: 'pointer', border: '1px solid',
+                background: role === 'student' ? 'var(--teal)' : 'var(--canvas)',
+                borderColor: role === 'student' ? 'var(--teal)' : 'var(--border)',
+                color: role === 'student' ? '#fff' : 'var(--muted)',
+                fontWeight: 600, transition: 'all 0.2s'
+              }}>
+              I am a Student
+            </button>
+            <button 
+              type="button"
+              onClick={() => setRole('teacher')}
+              style={{ 
+                flex: 1, padding: '8px', borderRadius: 8, cursor: 'pointer', border: '1px solid',
+                background: role === 'teacher' ? 'var(--copper)' : 'var(--canvas)',
+                borderColor: role === 'teacher' ? 'var(--copper)' : 'var(--border)',
+                color: role === 'teacher' ? '#fff' : 'var(--muted)',
+                fontWeight: 600, transition: 'all 0.2s'
+              }}>
+              I am a Teacher
+            </button>
+          </div>
+
+          {error && <div style={{ background: 'rgba(220, 38, 38, 0.1)', border: '1px solid rgba(220, 38, 38, 0.3)', color: '#ef4444', padding: '10px 14px', borderRadius: 8, fontSize: 13, marginBottom: 15, textAlign: 'center' }}>{error}</div>}
         <form onSubmit={handleSubmit} className="login-form">
           {isSignUp && (
-            <input 
-              required={isSignUp}
-              className="login-input" 
-              type="text" 
-              name="fullName" 
-              id="fullName" 
-              placeholder="Full Name"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-            />
+            <input type="text" placeholder="Full Name" value={fullName} onChange={e => setFullName(e.target.value)} className="login-input" required />
+          )}
+          {isSignUp && role === 'student' && (
+            <>
+              <input type="text" placeholder="Registration Number" value={registrationNo} onChange={e => setRegistrationNo(e.target.value)} className="login-input" required />
+              <input type="text" placeholder="Department" value={department} onChange={e => setDepartment(e.target.value)} className="login-input" required />
+              <input type="text" placeholder="Section" value={section} onChange={e => setSection(e.target.value)} className="login-input" required />
+            </>
+          )}
+          {isSignUp && role === 'teacher' && (
+            <input type="text" placeholder="Department" value={department} onChange={e => setDepartment(e.target.value)} className="login-input" required />
           )}
           <input 
             required 

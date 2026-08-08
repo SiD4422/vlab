@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getFirestore, initializeFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCli8_QsZSqt-LURHpgjNMV91wV5nYHFec",
@@ -14,14 +15,21 @@ const firebaseConfig = {
 let app;
 let authService;
 let googleProviderService;
+let firestoreDb;
 
 try {
   app = initializeApp(firebaseConfig);
   authService = getAuth(app);
   googleProviderService = new GoogleAuthProvider();
+  
+  // Force long-polling to bypass WebSocket blocks (common cause of infinite hangs)
+  firestoreDb = initializeFirestore(app, {
+    experimentalForceLongPolling: true
+  });
 } catch (error) {
   console.error("Firebase initialization error:", error);
 }
 
 export const auth = authService;
 export const googleProvider = googleProviderService;
+export const db = firestoreDb;

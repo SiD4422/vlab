@@ -1,24 +1,28 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
 import {
   Zap, BookOpen, ClipboardCheck, ListOrdered, Sparkles, MessageSquare,
   Link2, Target, ArrowLeft, Loader2, CheckCircle2, XCircle, Star,
-  ChevronRight, Cpu, Menu, X, Activity,
-  GraduationCap, Mail, Phone, MapPin, Shield, Globe, Users, Lock, LogOut,
-  Search, Sun, Moon, Check, BarChart2, Download, Eye, Camera, FileText } from "lucide-react";
-
+  ChevronRight, ChevronDown, Cpu, Menu, X, Activity,
+  GraduationCap, Mail, Phone, MapPin, Shield, Globe, Users, Lock, LogOut, User,
+  Search, Sun, Moon, Check, BarChart2, Download, Eye, Camera, FileText, Bot,
+  Calculator, Trophy, AlertTriangle, HelpCircle, Building, IdCard, Printer } from "lucide-react";
 import StrainGaugeSim from "./simulations/StrainGaugeSim";
 import UnifiedBridgeSim, { BridgeProcedurePanel, BRIDGES, initBridgeState, CircuitSVG } from "./simulations/UnifiedBridgeSim";
 import LoginScreen from "./LoginScreen";
-import { auth } from "./services/firebase";
+import TeacherDashboard from "./TeacherDashboard";
+import Profile from "./Profile";
+import AIChatbot from "./AIChatbot";
+import { auth, db } from "./services/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
+import { doc, getDoc, collection, query, where, getDocs, updateDoc, arrayUnion, setDoc, writeBatch } from "firebase/firestore";
 
 /* ---------------------------------------------------------------
    DESIGN TOKENS — circuit-board palette: ink navy shell, copper
    accent (component/trace color), teal secondary, warm paper canvas
 --------------------------------------------------------------- */
-const C = {
+export const C = {
   shell: "var(--shell)",
   shellSoft: "var(--shellSoft)",
   canvas: "var(--canvas)",
@@ -148,20 +152,33 @@ function Quiz({ questions, onComplete }) {
 /* ---------------------------------------------------------------
    CIRCUIT SANDBOX
 --------------------------------------------------------------- */
-function CircuitSandbox({ onCapture, onRecord }) {
+function CircuitSandbox({ expId, bridgeState, setBridgeSims }) {
   const iframeRef = useRef(null);
-  
-  const handleCapture = () => {
-    if (iframeRef.current && iframeRef.current.contentWindow) {
-      iframeRef.current.contentWindow.postMessage({ type: 'CAPTURE_SNAPSHOT' }, '*');
-    }
-  };
 
-  const handleRecord = () => {
-    if (iframeRef.current && iframeRef.current.contentWindow) {
-      iframeRef.current.contentWindow.postMessage({ type: 'RECORD_READING' }, '*');
-    }
-  };
+  useEffect(() => {
+    const handleMessage = (e) => {
+      if (!e.origin || e.origin !== window.location.origin) return; // Security check
+      const data = e.data;
+      if (!data) return;
+
+      if (data.type === 'SNAPSHOT_RESULT') {
+        setBridgeSims(prev => ({
+          ...prev,
+          [expId]: {
+            ...prev[expId],
+            labActivity: {
+              ...prev[expId]?.labActivity,
+              circuitImg: data.svgDataUrl,
+              scopeImg: data.graphDataUrl,
+              analysisData: data.analysisData,
+            }
+          }
+        }));
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [expId, setBridgeSims]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -174,27 +191,7 @@ function CircuitSandbox({ onCapture, onRecord }) {
         </div>
       </div>
       <div style={{ border: `1px solid ${C.border}`, borderRadius: 12, overflow: 'hidden', background: '#0a0e14' }}>
-        <div style={{ padding: '8px 14px', background: '#080b11', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ fontSize: 12, color: '#8a96ac', fontFamily: 'ui-monospace,monospace', fontWeight: 600 }}>
-            ⚡ CIRCUIT SANDBOX — Drag components, wire them up, and watch the physics simulate live.
-          </div>
-          <div style={{ display: 'flex', gap: 10 }}>
-            {onRecord && (
-              <button 
-                onClick={handleRecord}
-                style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', padding: '4px 10px', borderRadius: 6, border: '1px solid #1f7a72', background: 'transparent', color: '#1f7a72', cursor: 'pointer' }}>
-                <CheckCircle2 size={12} /> Add Blank Row
-              </button>
-            )}
-            {onCapture && (
-              <button 
-                onClick={handleCapture}
-                style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', padding: '4px 10px', borderRadius: 6, border: '1px solid #1f7a72', background: '#1f7a72', color: '#fff', cursor: 'pointer' }}>
-                <Camera size={12} /> Capture Snapshot
-              </button>
-            )}
-          </div>
-        </div>
+
         <iframe
           ref={iframeRef}
           src="/circuit-sandbox.html"
@@ -213,7 +210,51 @@ function CircuitSandbox({ onCapture, onRecord }) {
 /* ---------------------------------------------------------------
    HOME
 --------------------------------------------------------------- */
-function Home({ onOpen, unlocked, collapsedCategories, toggleCategory, searchQuery, setSearchQuery, completed }) {
+
+function Home({ user, enrolledClass, setEnrolledClass, onOpen, unlocked, collapsedCategories, toggleCategory, searchQuery, setSearchQuery, completed }) {
+  const [inviteCode, setInviteCode] = useState('');
+  const [joining, setJoining] = useState(false);
+
+  const joinClass = async (e) => {
+    e.preventDefault();
+    if (!inviteCode.trim()) return;
+    setJoining(true);
+    try {
+      const code = inviteCode.trim().toUpperCase();
+      const classDocRef = doc(db, 'classes', code);
+      const classDoc = await getDoc(classDocRef);
+      
+      if (!classDoc.exists()) {
+        alert("Invalid invite code.");
+      } else {
+        const batch = writeBatch(db);
+        
+        // 1. Add student to class
+        batch.update(classDocRef, {
+          studentUids: arrayUnion(user.uid)
+        });
+        
+        // 2. Add teacher to student's enrolledTeacherUids
+        const userDocRef = doc(db, 'users', user.uid);
+        batch.update(userDocRef, {
+          enrolledTeacherUids: arrayUnion(classDoc.data().teacherUid),
+          lastJoinedClassId: classDoc.id
+        });
+        
+        await batch.commit();
+        
+        setEnrolledClass({ id: classDoc.id, ...classDoc.data() });
+        setInviteCode('');
+        alert("Successfully joined " + classDoc.data().className + "!");
+      }
+    } catch (e) {
+      console.error("Error joining class:", e);
+      alert("Failed to join class.");
+    } finally {
+      setJoining(false);
+    }
+  };
+
   return (
     <div style={{ background: C.canvas, minHeight: "100vh" }}>
       {/* Hero Section */}
@@ -221,7 +262,7 @@ function Home({ onOpen, unlocked, collapsedCategories, toggleCategory, searchQue
         backgroundColor: C.shell,
         padding: "40px",
         textAlign: "center",
-        borderBottom: `1px solid ${C.border2}`,
+        borderBottom: `1px solid ${C.border}`,
         position: "relative",
         overflow: "hidden",
         minHeight: "calc(100vh - 72px)", // 72px is roughly the height of the top navbar
@@ -314,6 +355,42 @@ function Home({ onOpen, unlocked, collapsedCategories, toggleCategory, searchQue
 
       {/* Experiments Grid */}
       <div id="experiments-grid" className="reveal" style={{ padding: "20px 40px 80px", maxWidth: 1200, margin: "0 auto" }}>
+        
+        {/* LMS Class Join UI - Relocated to Student Dashboard Banner */}
+        <div className="premium-panel" style={{ width: '100%', marginBottom: 40, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 20, padding: '24px 32px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{ width: 48, height: 48, borderRadius: 24, background: 'var(--teal-soft)', color: 'var(--teal)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <GraduationCap size={24} />
+            </div>
+            <div>
+              <div className="panel-title" style={{ fontSize: 18 }}>Student Portal</div>
+              <div className="panel-subtitle">
+                {enrolledClass ? `You are currently enrolled in ${enrolledClass.className}.` : "Join a class to submit your lab records."}
+              </div>
+            </div>
+          </div>
+          
+          {enrolledClass ? (
+            <div className="status-badge graded" style={{ padding: '8px 16px', fontSize: 14 }}>
+              <CheckCircle2 size={16} /> Enrolled
+            </div>
+          ) : (
+            <form onSubmit={joinClass} className="create-bar" style={{ margin: 0, width: 'auto' }}>
+              <input 
+                type="text" 
+                placeholder="INVITE CODE (VLAB-XYZ)"
+                value={inviteCode}
+                onChange={e => setInviteCode(e.target.value.toUpperCase())}
+                className="create-input"
+                style={{ width: 240, textTransform: 'uppercase' }}
+              />
+              <button type="submit" disabled={joining} className="create-btn">
+                {joining ? <Loader2 className="spin" size={16} /> : <Link2 size={16} />} Join Class
+              </button>
+            </form>
+          )}
+        </div>
+
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 32 }}>
           <div>
             <h2 style={{ fontSize: 32, fontWeight: 800, color: C.ink, margin: "0 0 8px" }}>Available Experiments</h2>
@@ -335,85 +412,75 @@ function Home({ onOpen, unlocked, collapsedCategories, toggleCategory, searchQue
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 40 }}>
-          {[
-            { title: "DC Bridges", filter: exp => exp.id === "wheatstone-bridge" || exp.id.includes("kelvin") },
-            { title: "AC Bridges", filter: exp => exp.tag.startsWith("AC-") },
-            { title: "Sensors & Transducers", filter: exp => exp.id !== "wheatstone-bridge" && !exp.id.includes("kelvin") && !exp.tag.startsWith("AC-") }
-          ].map(category => {
-            const isCollapsed = collapsedCategories[category.title];
-            return (
-            <div key={category.title}>
-              <div 
-                onClick={() => toggleCategory(category.title)}
-                style={{ 
-                  display: "flex", alignItems: "center", justifyContent: "space-between", 
-                  cursor: "pointer", borderBottom: `2px solid ${C.border}`, paddingBottom: 8, marginBottom: 16 
-                }}
-              >
-                <h3 style={{ fontSize: 20, fontWeight: 700, color: C.ink, margin: 0 }}>{category.title}</h3>
-                <ChevronRight 
-                  size={20} 
-                  color={C.muted} 
+          {EXPERIMENTS.filter(e => e.title.toLowerCase().includes(searchQuery.toLowerCase()) || e.tag.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 ? (
+            <div className="empty-state" style={{ borderRadius: 16 }}>
+              <div className="empty-icon-wrap"><Search size={32} /></div>
+              <h4>No matching modules</h4>
+              <p>Try adjusting your search terms.</p>
+            </div>
+          ) : (
+            [
+              { title: "DC Bridges", filter: exp => exp.id === "wheatstone-bridge" || exp.id.includes("kelvin") },
+              { title: "AC Bridges", filter: exp => exp.tag.startsWith("AC-") },
+              { title: "Sensors & Transducers", filter: exp => exp.id !== "wheatstone-bridge" && !exp.id.includes("kelvin") && !exp.tag.startsWith("AC-") }
+            ].map(category => {
+              const isCollapsed = collapsedCategories[category.title];
+              const categoryExps = EXPERIMENTS.filter(category.filter).filter(e => e.title.toLowerCase().includes(searchQuery.toLowerCase()) || e.tag.toLowerCase().includes(searchQuery.toLowerCase()));
+              
+              if (categoryExps.length === 0) return null;
+              
+              return (
+              <div key={category.title}>
+                <div 
+                  onClick={() => toggleCategory(category.title)}
                   style={{ 
-                    transform: isCollapsed ? "rotate(0deg)" : "rotate(90deg)", 
-                    transition: "transform 0.2s ease" 
-                  }} 
-                />
-              </div>
-              {!isCollapsed && (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 24 }}>
-                {EXPERIMENTS.filter(category.filter).filter(e => e.title.toLowerCase().includes(searchQuery.toLowerCase()) || e.tag.toLowerCase().includes(searchQuery.toLowerCase())).map(exp => {
-                  const isLocked = false;
+                    display: "flex", alignItems: "center", justifyContent: "space-between", 
+                    cursor: "pointer", borderBottom: `2px solid var(--border)`, paddingBottom: 8, marginBottom: 16 
+                  }}
+                >
+                  <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--ink)', margin: 0 }}>{category.title}</h3>
+                  <ChevronRight 
+                    size={20} 
+                    color="var(--muted)" 
+                    style={{ 
+                      transform: isCollapsed ? "rotate(0deg)" : "rotate(90deg)", 
+                      transition: "transform 0.2s ease" 
+                    }} 
+                  />
+                </div>
+                {!isCollapsed && (
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 24 }}>
+                  {categoryExps.map(exp => {
+                    const isLocked = false;
                   return (
             <button
               key={exp.id}
               onClick={() => { if(!isLocked) onOpen(exp.id); }}
+              className="class-card"
               style={{
-                textAlign: "left", background: isLocked ? "rgba(240, 242, 245, 0.8)" : "rgba(255, 255, 255, 0.7)", backdropFilter: "blur(10px)",
-                border: `1px solid rgba(255, 255, 255, 0.8)`, borderRadius: 16, padding: "24px",
-                cursor: isLocked ? "not-allowed" : "pointer", display: "flex", flexDirection: "column", gap: 12,
-                boxShadow: "0 4px 20px rgba(0, 0, 0, 0.03)", transition: "all 0.25s ease",
-                opacity: isLocked ? 0.7 : 1
-              }}
-              onMouseEnter={e => {
-                if(isLocked) return;
-                e.currentTarget.style.transform = "translateY(-4px)";
-                e.currentTarget.style.boxShadow = "0 12px 30px rgba(0, 0, 0, 0.08)";
-                e.currentTarget.style.background = "#ffffff";
-                const arrow = e.currentTarget.querySelector('.exp-arrow');
-                if(arrow) {
-                  arrow.style.transform = "translateX(4px)";
-                  arrow.style.color = C.copper;
-                }
-              }}
-              onMouseLeave={e => {
-                if(isLocked) return;
-                e.currentTarget.style.transform = "none";
-                e.currentTarget.style.boxShadow = "0 4px 20px rgba(0, 0, 0, 0.03)";
-                e.currentTarget.style.background = "rgba(255, 255, 255, 0.7)";
-                const arrow = e.currentTarget.querySelector('.exp-arrow');
-                if(arrow) {
-                  arrow.style.transform = "none";
-                  arrow.style.color = C.muted;
-                }
+                textAlign: "left",
+                cursor: isLocked ? "not-allowed" : "pointer",
+                display: "flex", flexDirection: "column", gap: 12,
+                opacity: isLocked ? 0.7 : 1,
+                border: 'none', // Override button defaults
+                background: 'var(--card)'
               }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", width: "100%" }}>
-                <span style={{
-                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontSize: 12, fontWeight: 700,
-                  color: isLocked ? C.muted : C.teal, background: isLocked ? "#e2e8f0" : "#e8f5f3", padding: "4px 10px", borderRadius: 6,
-                }}>{exp.tag}</span>
+                <span className={isLocked ? "status-badge pending" : "status-badge graded"} style={{ fontSize: 12 }}>
+                  {exp.tag}
+                </span>
                 {!isLocked && <StarRating rating={RATINGS[exp.id] ?? 4} size={14} />}
-                {isLocked && <Lock size={16} color={C.muted} />}
+                {isLocked && <Lock size={16} color="var(--muted)" />}
               </div>
-              <div style={{ fontWeight: 800, color: C.ink, fontSize: 18, lineHeight: 1.3, marginTop: 4 }}>{exp.title}</div>
-              <div style={{ color: C.muted, fontSize: 14, lineHeight: 1.6, flex: 1 }}>{exp.aim}</div>
+              <div style={{ fontWeight: 800, color: 'var(--ink)', fontSize: 18, lineHeight: 1.3, marginTop: 4 }}>{exp.title}</div>
+              <div style={{ color: 'var(--muted)', fontSize: 14, lineHeight: 1.6, flex: 1 }}>{exp.aim}</div>
               
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12, borderTop: `1px solid ${C.border}`, paddingTop: 16, width: "100%" }}>
-                <span style={{ fontSize: 13, fontWeight: 600, color: isLocked ? C.muted : C.ink }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12, borderTop: `1px solid var(--border)`, paddingTop: 16, width: "100%" }}>
+                <span style={{ fontSize: 13, fontWeight: 600, color: isLocked ? 'var(--muted)' : 'var(--ink)' }}>
                   {isLocked ? "Module Locked" : "Launch lab module"}
                 </span>
-                {!isLocked && <ArrowLeft className="exp-arrow" size={16} color={C.muted} style={{ transform: "rotate(180deg)", transition: "all 0.2s ease" }} />}
+                {!isLocked && <ArrowLeft className="exp-arrow" size={16} color="var(--muted)" style={{ transform: "rotate(180deg)", transition: "all 0.2s ease" }} />}
               </div>
             </button>
           );
@@ -421,10 +488,11 @@ function Home({ onOpen, unlocked, collapsedCategories, toggleCategory, searchQue
               </div>
               )}
             </div>
-          )})}
+          );
+        })
+      )}
         </div>
       </div>
-
       
     </div>
   );
@@ -533,7 +601,7 @@ function Team() {
 /* ---------------------------------------------------------------
    EXPERIMENT DETAIL
 --------------------------------------------------------------- */
-function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCompleted, bridgeSims, setBridgeSims }) {
+function Detail({ user, enrolledClass, exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCompleted, bridgeSims, setBridgeSims }) {
   useEffect(() => {
     const handleMessage = (e) => {
       if (!e.data || !e.data.type) return;
@@ -595,7 +663,7 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
   return (
     <div>
       {/* Top Breadcrumb Header */}
-      <div style={{ background: "#fff", borderBottom: `1px solid ${C.border}`, padding: "20px 60px", display: "flex", alignItems: "center", gap: 12, fontSize: 14, color: C.muted }}>
+      <div className="no-print" style={{ background: "#fff", borderBottom: `1px solid ${C.border}`, padding: "20px 60px", display: "flex", alignItems: "center", gap: 12, fontSize: 14, color: C.muted }}>
         <button onClick={onBack} style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "none", color: C.teal, fontWeight: 600, cursor: "pointer", fontSize: 14, padding: 0 }}>
           <ArrowLeft size={16} /> Course Overview
         </button>
@@ -605,7 +673,7 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
 
       <div style={{ display: "flex", gap: 40, padding: "40px 60px 80px", alignItems: "flex-start", maxWidth: 1400, margin: "0 auto" }}>
         {/* sidebar */}
-        <div style={{
+        <div className="app-sidebar" style={{
           width: sidebarOpen ? 240 : 0, overflow: "hidden", flexShrink: 0, transition: "width 0.15s",
           position: "sticky", top: 116,
         }} id="tour-tabs">
@@ -623,17 +691,17 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
                   onClick={() => setTab(t.id)}
                   style={{
                     display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderRadius: 8,
-                    background: isActive ? "#f0fdfa" : "transparent", 
-                    color: isActive ? "#0f766e" : "#64748b",
+                    background: isActive ? "var(--teal-soft)" : "transparent", 
+                    color: isActive ? "var(--teal)" : "var(--ink-soft)",
                     border: "none", cursor: "pointer", fontSize: 15, fontWeight: isActive ? 700 : 500, textAlign: "left",
                     transition: "all 0.2s ease"
                   }}
-                  onMouseEnter={e => { if(!isActive) e.currentTarget.style.background = "#f8fafc"; }}
+                  onMouseEnter={e => { if(!isActive) e.currentTarget.style.background = "var(--bg)"; }}
                   onMouseLeave={e => { if(!isActive) e.currentTarget.style.background = "transparent"; }}
                 >
-                  <Icon size={18} style={{ color: isActive ? "#0d9488" : "#94a3b8" }} />
+                  <Icon size={18} style={{ color: isActive ? "var(--teal)" : "var(--ink-soft)" }} />
                   <span style={{ flex: 1 }}>{t.label}</span>
-                  {t.badge && !isActive && <span style={{ fontSize: 10, background: "#fef3c7", color: "#d97706", padding: "2px 6px", borderRadius: 4, fontWeight: 800 }}>{t.badge}</span>}
+                  {t.badge && !isActive && <span style={{ fontSize: 10, background: "var(--copper-soft)", color: "var(--copper)", padding: "2px 6px", borderRadius: 4, fontWeight: 800 }}>{t.badge}</span>}
                 </button>
               );
             })}
@@ -642,20 +710,20 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
 
         {/* content */}
         {/* content */}
-        <div style={{ flex: 1, minWidth: 0, background: "#fff", border: `1px solid #e2e8f0`, borderRadius: 16, padding: "56px 64px", boxShadow: "0 10px 30px rgba(0,0,0,0.02)" }}>
+        <div className="premium-panel" style={{ flex: 1, minWidth: 0, padding: "56px 64px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-            <span style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontSize: 13, fontWeight: 700, color: "#475569", background: "#f1f5f9", border: "1px solid #e2e8f0", padding: "4px 10px", borderRadius: 6 }}>{exp.tag}</span>
-            <span style={{ fontSize: 13, fontWeight: 600, color: "#94a3b8" }}>Required Module</span>
+            <span className="status-badge pending" style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", padding: "4px 10px", borderRadius: 6 }}>{exp.tag}</span>
+            <span className="text-muted" style={{ fontSize: 13, fontWeight: 600 }}>Required Module</span>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", margin: "0 0 32px" }}>
-            <h2 style={{ fontSize: 36, fontWeight: 800, color: "#0f172a", margin: 0, letterSpacing: -0.5 }}>{exp.title}</h2>
+            <h2 style={{ fontSize: 36, fontWeight: 800, color: "var(--ink)", margin: 0, letterSpacing: -0.5 }}>{exp.title}</h2>
             {tab === "simulation" && exp.id !== "strain-gauge" && (
               <button
                 onClick={startTour}
+                className="manage-btn"
                 style={{
                   display: "flex", alignItems: "center", gap: 8, padding: "10px 16px",
-                  background: C.teal, color: "#fff", border: "none", borderRadius: 8,
-                  fontWeight: 600, fontSize: 14, cursor: "pointer", boxShadow: "0 4px 12px rgba(13, 148, 136, 0.3)"
+                  fontSize: 14
                 }}
               >
                 <Sparkles size={16} /> Guide Me
@@ -726,7 +794,7 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
                   
                   <div>
                     <Section title="Circuit Sandbox Workspace" id="tour-sandbox">
-                      <CircuitSandbox onCapture={() => {}} onRecord={() => {}} />
+                      <CircuitSandbox expId={exp.id} bridgeState={bridgeSims[exp.id]} setBridgeSims={setBridgeSims} />
                     </Section>
                   </div>
                 </div>
@@ -738,10 +806,10 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
           {tab === "posttest" && (
             <Section title="Posttest">
               <Quiz questions={exp.posttest} onComplete={markCompleted} />
-              <VivaPrep questions={exp.viva} />
+              <VivaPrep exp={exp} bridgeState={bridgeSims[exp.id]} setBridgeSims={setBridgeSims} />
             </Section>
           )}
-          {tab === "report" && <LabReportTab exp={exp} bridgeState={bridgeSims[exp.id]} setBridgeSims={setBridgeSims} />}
+          {tab === "report" && <LabReportTab user={user} enrolledClass={enrolledClass} exp={exp} bridgeState={bridgeSims[exp.id]} setBridgeSims={setBridgeSims} />}
 
           {tab === "procedure" && (
             <Section title="Procedure">
@@ -861,6 +929,7 @@ export default function App() {
   const [theme, setTheme] = useState(() => localStorage.getItem('vlab_theme') || 'light');
   const [user, setUser] = useState(null);
   const [authInitialized, setAuthInitialized] = useState(false);
+  const [enrolledClass, setEnrolledClass] = useState(null);
 
   useEffect(() => {
     if (!auth) {
@@ -874,8 +943,33 @@ export default function App() {
           email: firebaseUser.email,
           name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
           avatar: firebaseUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.email}`,
-          uid: firebaseUser.uid
+          uid: firebaseUser.uid,
+          role: 'student' // temporary default
         });
+
+        // Fetch role and other profile data asynchronously
+        getDoc(doc(db, 'users', firebaseUser.uid)).then(userDoc => {
+          let role = 'student';
+          if (userDoc.exists()) {
+            const data = userDoc.data();
+            role = data.role || 'student';
+            setUser(prev => prev ? { 
+              ...prev, 
+              role,
+              name: data.name || prev.name,
+              avatar: data.avatar || prev.avatar
+            } : null);
+          }
+          if (role === 'student') {
+            const classQ = query(collection(db, 'classes'), where('studentUids', 'array-contains', firebaseUser.uid));
+            getDocs(classQ).then(classSnap => {
+              if (!classSnap.empty) {
+                setEnrolledClass({ id: classSnap.docs[0].id, ...classSnap.docs[0].data() });
+              }
+            }).catch(e => console.error("Error fetching class:", e));
+          }
+        }).catch(e => console.error("Error fetching user data:", e));
+
       } else {
         setUser(null);
       }
@@ -927,7 +1021,7 @@ export default function App() {
       observer.disconnect();
       clearTimeout(observerTimeout);
     };
-  }, [view]);
+  }, [view, user]);
 
   const active = EXPERIMENTS.find(e => e.id === activeId);
 
@@ -938,11 +1032,19 @@ export default function App() {
   }
 
   if (!authInitialized) {
-    return <div style={{ height: '100vh', width: '100vw', background: 'var(--shell)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Loader2 className="spin" color="var(--teal)" size={32} /></div>;
+    return (
+      <div style={{ display: 'flex', height: '100vh', width: '100vw', alignItems: 'center', justifyContent: 'center', background: '#000' }}>
+        <Loader2 className="spin" size={32} color="var(--teal)" />
+      </div>
+    );
   }
 
   if (!user) {
     return <LoginScreen onLogin={setUser} />;
+  }
+
+  if (user.role === 'teacher') {
+    return <TeacherDashboard user={user} onLogout={() => signOut(auth)} onUpdate={(updatedUser) => setUser(updatedUser)} />;
   }
 
   return (
@@ -974,7 +1076,6 @@ export default function App() {
           </div>
           <div style={{ display: "flex", gap: 28, fontSize: 14, color: "#c3c9d6", fontWeight: 600 }}>
             <span style={{ color: view === "home" ? "#fff" : "#c3c9d6", cursor: "pointer" }} onClick={() => setView("home")}>Home</span>
-            <span style={{ cursor: "pointer" }}>About Lab</span>
             <a href="#" onClick={(e) => { e.preventDefault(); setView("team"); }} style={{ color: view === "team" ? "#fff" : "#c3c9d6", cursor: "pointer", textDecoration: "none" }}>Developers</a>
             <button onClick={() => setUnlocked(!unlocked)} style={{ display: "none" }}>Toggle</button>
           </div>
@@ -982,17 +1083,21 @@ export default function App() {
       </div>
 
       {view === "home" ? (
-        <Home onOpen={openExperiment} unlocked={unlocked} collapsedCategories={collapsedCategories} toggleCategory={toggleCategory} searchQuery={searchQuery} setSearchQuery={setSearchQuery} completed={completed} />
+        <Home user={user} enrolledClass={enrolledClass} setEnrolledClass={setEnrolledClass} onOpen={openExperiment} unlocked={unlocked} collapsedCategories={collapsedCategories} toggleCategory={toggleCategory} searchQuery={searchQuery} setSearchQuery={setSearchQuery} completed={completed} />
       ) : view === "detail" && active ? (
         <div style={{ paddingTop: 76 }}>
-          <Detail exp={active} tab={tab} setTab={setTab} onBack={() => setView("home")} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} markCompleted={() => markCompleted(active.id)} bridgeSims={bridgeSims} setBridgeSims={setBridgeSims} />
+          <Detail user={user} enrolledClass={enrolledClass} exp={active} tab={tab} setTab={setTab} onBack={() => setView("home")} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} markCompleted={() => markCompleted(active.id)} bridgeSims={bridgeSims} setBridgeSims={setBridgeSims} />
         </div>
       ) : view === "team" ? (
         <Team />
+      ) : view === "profile" ? (
+        <div style={{ paddingTop: 76 }}>
+          <Profile user={user} onUpdate={(updatedUser) => setUser(updatedUser)} />
+        </div>
       ) : null}
 
       {/* Official Footer */}
-      <div style={{ background: C.shell, color: "#c3c9d6", borderTop: `4px solid ${C.copper}` }}>
+      <div className="no-print" style={{ background: C.shell, color: "#c3c9d6", borderTop: `4px solid ${C.copper}` }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "60px 40px", display: "flex", flexWrap: "wrap", gap: 60, justifyContent: "space-between" }}>
           
           {/* Branding & Contact */}
@@ -1054,7 +1159,7 @@ export default function App() {
         background: "rgba(18, 24, 38, 0.75)", backdropFilter: "blur(24px)", zIndex: 1000, transition: "left 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
         borderRight: "1px solid rgba(255,255,255,0.08)",
         boxShadow: menuOpen ? "20px 0 40px rgba(0,0,0,0.5)" : "none",
-        display: "flex", flexDirection: "column", overflowY: "auto"
+        display: "flex", flexDirection: "column"
       }}>
         <div style={{ padding: "32px 24px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `1px solid rgba(255,255,255,0.08)` }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -1065,9 +1170,16 @@ export default function App() {
           </div>
           <button onClick={() => setMenuOpen(false)} style={{ background: "rgba(255,255,255,0.1)", border: "none", color: "#fff", cursor: "pointer", width: 32, height: 32, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.2s" }}><X size={18} /></button>
         </div>
-        
-
-        <div style={{ padding: "24px" }}>
+                <div className="sidebar-scroll" style={{ padding: "24px", flex: 1, overflowY: "auto", minHeight: 0 }}>
+          <div style={{ marginBottom: 20 }}>
+            <button 
+              onClick={() => { setView("profile"); setMenuOpen(false); }} 
+              style={{ width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", background: view === "profile" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, color: "#fff", fontSize: 15, fontWeight: 700, cursor: "pointer", transition: "all 0.2s" }}
+            >
+              <User size={18} color={C.teal} />
+              My Profile
+            </button>
+          </div>
           <div style={{ marginBottom: 20 }}>
             <h4 style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, fontWeight: 800, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 12 }}>Curriculum</h4>
             <div style={{ position: "relative" }}>
@@ -1118,15 +1230,17 @@ export default function App() {
                       return (
                         <button
                           key={exp.id}
+                          className="sidebar-item"
                           onClick={() => { if(!isLocked) { setActiveId(exp.id); setView("detail"); if(window.innerWidth < 1024) setSidebarOpen(false); } }}
                           style={{
                             textAlign: "left", padding: "10px 14px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.05)",
                             background: activeId === exp.id ? "rgba(255, 255, 255, 0.1)" : "transparent",
                             cursor: isLocked ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: 12,
-                            opacity: isLocked ? 0.5 : 1, transition: "background 0.2s ease"
+                            opacity: isLocked ? 0.5 : 1, transition: "all 0.2s ease",
+                            transform: "translateX(0)"
                           }}
                         >
-                          <div style={{ 
+                          <div className="sidebar-icon" style={{ 
                             width: 26, height: 26, borderRadius: 6, background: isCompleted ? C.teal : "rgba(255,255,255,0.1)", color: "#fff", 
                             display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 800 
                           }}>
@@ -1143,7 +1257,6 @@ export default function App() {
             })}
           </div>
           </div>
-        </div>
         
         {/* User Profile */}
         <div style={{ marginTop: "auto", padding: "24px", borderTop: "1px solid rgba(255,255,255,0.08)", background: "rgba(0,0,0,0.2)" }}>
@@ -1170,7 +1283,11 @@ export default function App() {
             </button>
           </div>
         </div>
+        </div>
       </div>
+      
+      {/* Global AI Chatbot Widget */}
+      {view === 'detail' && active && <AIChatbot currentExperiment={active.title} />}
     </div>
   );
 }
@@ -1179,7 +1296,51 @@ export default function App() {
 /* ---------------------------------------------------------------
    LAB REPORT TAB
 --------------------------------------------------------------- */
-function LabReportTab({ exp, bridgeState, setBridgeSims }) {
+function AccordionSection({ title, icon: Icon, color, children, defaultOpen = false }) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+  
+  // Use a class "print-force-open" which we will define in CSS to force display:block during print
+  return (
+    <div className="report-accordion" style={{ border: `1px solid ${C.border}`, borderRadius: 12, marginBottom: 16, overflow: 'hidden', background: C.card }}>
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="no-print"
+        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ width: 32, height: 32, borderRadius: '50%', background: `${color}20`, color: color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Icon size={18} strokeWidth={2.5} />
+          </div>
+          <span style={{ fontSize: 16, fontWeight: 600, color: C.ink }}>{title}</span>
+        </div>
+        <ChevronDown size={20} color={C.muted} style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
+      </button>
+      
+      {/* Print-only header since the button is hidden during print */}
+      <div className="print-only" style={{ display: 'none', alignItems: 'center', gap: 12, padding: '16px 20px', borderBottom: `1px solid ${C.border}` }}>
+        <div style={{ width: 32, height: 32, borderRadius: '50%', background: `${color}20`, color: color, display: 'flex', alignItems: 'center', justifyContent: 'center', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+          <Icon size={18} strokeWidth={2.5} />
+        </div>
+        <span style={{ fontSize: 16, fontWeight: 600, color: C.ink }}>{title}</span>
+      </div>
+
+      <div className={`accordion-content ${isOpen ? 'open' : ''} print-force-open`} style={{ display: isOpen ? 'block' : 'none', borderTop: isOpen ? `1px solid ${C.border}` : 'none' }}>
+        <div style={{ padding: '20px' }}>
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+function LabReportTab({ user, enrolledClass, exp, bridgeState, setBridgeSims }) {
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [aiConclusion, setAiConclusion] = useState('');
+  const [generatingConclusion, setGeneratingConclusion] = useState(false);
+
+
   if (!exp) return null;
   const bridge = BRIDGES ? BRIDGES.find(b => b.id === exp.id) : null;
   
@@ -1203,125 +1364,400 @@ function LabReportTab({ exp, bridgeState, setBridgeSims }) {
     });
   };
   
+  const submitToTeacher = async () => {
+    if (!enrolledClass) {
+      alert("You must join a class first from the Home dashboard to submit your report.");
+      return;
+    }
+    if (exp.viva && (!bridgeState?.vivaSubmitted)) {
+      if (!window.confirm("You have not submitted the Viva Quiz yet. Do you want to submit your lab report anyway? (Your Viva score will be recorded as 0).")) {
+        return;
+      }
+    }
+    
+    setSubmitting(true);
+    
+    // Pull real viva score from bridgeState
+    const vivaScore = bridgeState?.vivaScore || 0;
+    const vivaResponses = bridgeState?.vivaResponses || {};
+    
+    const submissionId = `${user.uid}_${exp.id}`;
+    const payload = {
+      studentUid: user.uid,
+      studentName: user.name,
+      studentAvatar: user.avatar,
+      classId: enrolledClass.id,
+      teacherUid: enrolledClass.teacherUid,
+      experimentId: exp.id,
+      experimentName: exp.title,
+      vivaScore: vivaScore,
+      vivaResponses: vivaResponses,
+      teacherScore: null,
+      labData: bridgeState || {},
+      submittedAt: new Date().toISOString(),
+      status: 'completed'
+    };
+
+    try {
+      const submissionRef = doc(db, 'submissions', submissionId);
+      const existingDoc = await getDoc(submissionRef);
+      
+      if (existingDoc.exists()) {
+        const data = existingDoc.data();
+        if (data.teacherScore !== null && data.teacherScore !== undefined) {
+          alert("This lab report has already been graded by your teacher. You cannot overwrite it.");
+          setSubmitting(false);
+          return;
+        }
+        if (!window.confirm("You have already submitted this lab report. Do you want to overwrite your previous submission?")) {
+          setSubmitting(false);
+          return;
+        }
+      }
+
+      await setDoc(submissionRef, payload);
+      setSubmitted(true);
+      alert("Lab report successfully submitted to " + enrolledClass.className + "!");
+    } catch (e) {
+      console.error("Submission error:", e);
+      alert("Failed to submit report.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const generateAIConclusion = async () => {
+    const apiKey = localStorage.getItem('gemini_api_key');
+    if (!apiKey) {
+      alert("Please configure your Gemini API Key in the Strict Examiner AI Chatbot (bottom right) first.");
+      return;
+    }
+    
+    if (!bridgeState?.rows || bridgeState.rows.length === 0) {
+      alert("Please add some readings to your observation table first!");
+      return;
+    }
+
+    setGeneratingConclusion(true);
+    try {
+      const readings = JSON.stringify(bridgeState.rows);
+      const prompt = `You are a helpful lab assistant. The student just finished the experiment "${exp.title}". Here are their observation table readings: ${readings}. Write a professional, concise 1-2 paragraph conclusion that summarizes these specific findings and the underlying principle. Return ONLY the conclusion text.`;
+
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.4, maxOutputTokens: 300 }
+        })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error?.message);
+      
+      setAiConclusion(data.candidates[0].content.parts[0].text);
+    } catch (e) {
+      console.error(e);
+      alert("Failed to generate conclusion: " + e.message);
+    } finally {
+      setGeneratingConclusion(false);
+    }
+  };
+
   return (
-    <div className="print-report-container" style={{ padding: "40px", fontFamily: "var(--sans)", color: C.ink, background: C.card, borderRadius: 12, border: `1px solid ${C.border}`, minHeight: "100vh" }}>
-      <div className="no-print" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 20 }}>
-        <button onClick={() => window.print()} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px', background: C.teal, color: '#fff', border: 'none', borderRadius: 8, fontWeight: 600, cursor: 'pointer' }}>
-          <Download size={16} /> Export Lab Report
-        </button>
+    <div className="print-report-container" style={{ padding: "40px", fontFamily: "var(--sans)", color: C.ink, background: C.card, borderRadius: 12, minHeight: "100vh", position: "relative" }}>
+      
+      {/* Top Header Row */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingBottom: 24, marginBottom: 32 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#dcfce7', color: '#166534', padding: '12px 20px', borderRadius: 12, minWidth: 120 }}>
+          <div style={{ fontSize: 18, fontWeight: 700 }}>DC-02</div>
+          <div style={{ fontSize: 12, opacity: 0.8, marginTop: 4 }}>Required Module</div>
+        </div>
+        
+        <div style={{ textAlign: 'center', flex: 1, padding: '0 20px' }}>
+          <h1 style={{ margin: "0 0 4px 0", fontSize: 28, fontWeight: 800, color: C.ink }}>{exp.title}</h1>
+          <h2 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: 700, letterSpacing: '0.1em', color: '#059669' }}>LABORATORY RECORD</h2>
+          <div style={{ fontSize: 15, color: C.muted }}>Experiment: {exp.title}</div>
+        </div>
+        
+        <div className="no-print" style={{ display: 'flex', gap: 12 }}>
+          <button onClick={() => window.print()} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px', border: `1px solid ${C.border}`, borderRadius: 8, background: 'transparent', color: C.ink, fontWeight: 600, cursor: 'pointer' }}>
+            <Printer size={16} /> Print
+          </button>
+          <button onClick={() => window.print()} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px', border: 'none', borderRadius: 8, background: '#059669', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>
+            <Download size={16} /> Download PDF
+          </button>
+        </div>
       </div>
 
-      <div className="print-section" style={{ borderBottom: `2px solid ${C.border}`, paddingBottom: 20, marginBottom: 30, textAlign: "center" }}>
-        <h1 style={{ margin: "0 0 10px 0", fontSize: 24, fontWeight: "bold" }}>LABORATORY RECORD</h1>
-        <h2 style={{ margin: 0, fontSize: 18, fontWeight: "normal", color: C.muted }}>Experiment: {exp.title}</h2>
+      {/* Student Details Row */}
+      <div style={{ display: 'flex', gap: 24, marginBottom: 32, padding: '24px 32px', border: `1px solid ${C.border}`, borderRadius: 12 }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 600, color: C.ink, marginBottom: 8 }}>
+            <User size={16} color={C.muted} /> Name
+          </div>
+          <input type="text" defaultValue={user?.name || ""} style={{ width: '100%', border: 'none', borderBottom: `1px solid ${C.border}`, padding: '4px 0', outline: 'none', background: 'transparent', fontSize: 15, color: C.ink }} />
+        </div>
+        <div style={{ flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 600, color: C.ink, marginBottom: 8 }}>
+            <GraduationCap size={16} color={C.muted} /> Class
+          </div>
+          <input type="text" defaultValue={user?.class || ""} style={{ width: '100%', border: 'none', borderBottom: `1px solid ${C.border}`, padding: '4px 0', outline: 'none', background: 'transparent', fontSize: 15, color: C.ink }} />
+        </div>
+        <div style={{ flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 600, color: C.ink, marginBottom: 8 }}>
+            <Building size={16} color={C.muted} /> Department
+          </div>
+          <input type="text" defaultValue={user?.department || ""} style={{ width: '100%', border: 'none', borderBottom: `1px solid ${C.border}`, padding: '4px 0', outline: 'none', background: 'transparent', fontSize: 15, color: C.ink }} />
+        </div>
+        <div style={{ flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 600, color: C.ink, marginBottom: 8 }}>
+            <IdCard size={16} color={C.muted} /> Registration No.
+          </div>
+          <input type="text" defaultValue={user?.regNo || ""} style={{ width: '100%', border: 'none', borderBottom: `1px solid ${C.border}`, padding: '4px 0', outline: 'none', background: 'transparent', fontSize: 15, color: C.ink }} />
+        </div>
       </div>
 
-      <div className="print-section">
-        <h3 style={{ fontSize: 16, borderBottom: `1px solid ${C.border}`, paddingBottom: 4, color: C.copper }}>1. Aim</h3>
-        <p style={{ fontSize: 14 }}>{exp.aim}</p>
-      </div>
+      <AccordionSection title="1. Aim" icon={Target} color="#10b981" defaultOpen={false}>
+        <p style={{ margin: 0, fontSize: 15, lineHeight: 1.6, color: C.ink }}>{exp.aim}</p>
+      </AccordionSection>
 
-      <div className="print-section">
-        <h3 style={{ fontSize: 16, borderBottom: `1px solid ${C.border}`, paddingBottom: 4, color: C.copper }}>2. Theory</h3>
-        <ul style={{ fontSize: 14, paddingLeft: 20 }}>
-          {exp.theory.map((p, i) => <li key={i} style={{ marginBottom: 6 }}>{p}</li>)}
+      <AccordionSection title="2. Theory" icon={BookOpen} color="#3b82f6" defaultOpen={false}>
+        <ul style={{ margin: 0, paddingLeft: 20, fontSize: 15, lineHeight: 1.6, color: C.ink }}>
+          {exp.theory.map((p, i) => <li key={i} style={{ marginBottom: 8 }}>{p}</li>)}
         </ul>
-      </div>
+      </AccordionSection>
 
       {bridge && (
-        <div className="print-section">
-          <h3 style={{ fontSize: 16, borderBottom: `1px solid ${C.border}`, paddingBottom: 4, color: C.copper }}>3. Circuit Diagram & Formula</h3>
-          <div style={{ display: "flex", gap: 30, alignItems: "center", margin: "20px 0", flexWrap: "wrap" }}>
-            <div style={{ flex: 1, minWidth: 300, border: `1px solid ${C.border}`, padding: 20, background: C.canvas, borderRadius: 8 }}>
-              <CircuitSVG cfg={{ ...bridge.svg, detector: bridge.detector, source: bridge.source }} />
-            </div>
-            <div style={{ flex: 1, minWidth: 300, fontSize: 14 }}>
-              <strong>Balance Formula:</strong>
-              <div className="formula-box" dangerouslySetInnerHTML={{ __html: bridge.formula }} style={{ marginTop: 10, padding: 10, border: `1px solid ${C.border}`, borderRadius: 8 }} />
-              {(bridge.fixed || []).map((fx, i) => (
-                <div key={i} style={{ marginTop: 10, color: C.muted }}>Given: {fx.label} = {fx.value} {fx.unit}</div>
-              ))}
-            </div>
-          </div>
-        </div>
+        <>
+          <AccordionSection title="3. Circuit Diagram" icon={Zap} color="#a855f7" defaultOpen={false}>
+             <div style={{ maxWidth: 600, margin: '0 auto' }}>
+                <CircuitSVG cfg={{ ...bridge.svg, detector: bridge.detector, source: bridge.source }} />
+             </div>
+          </AccordionSection>
+
+          <AccordionSection title="4. Formula" icon={Sparkles} color="#f59e0b" defaultOpen={false}>
+             <div style={{ display: 'flex', gap: 40, alignItems: 'center' }}>
+               <div dangerouslySetInnerHTML={{ __html: bridge.formula }} style={{ fontSize: 24, padding: 20, background: '#fff', borderRadius: 8, border: `1px solid ${C.border}` }} />
+               <div style={{ borderLeft: `2px solid ${C.border}`, paddingLeft: 20, color: C.muted, fontSize: 14, lineHeight: 1.8 }}>
+                 {(bridge.fixed || []).map((fx, i) => (
+                   <div key={i}>{fx.k} = {fx.label}</div>
+                 ))}
+                 {bridge.tabCols.map((c, i) => (
+                   <div key={`c${i}`}>{c.k} = {c.label || c.k}</div>
+                 ))}
+               </div>
+             </div>
+          </AccordionSection>
+        </>
       )}
 
-      {bridgeState && bridgeState.snapshots && bridgeState.snapshots.length > 0 && (
-        <div className="print-section">
-          <h3 style={{ fontSize: 16, borderBottom: `1px solid ${C.border}`, paddingBottom: 4, color: C.copper }}>4. Circuit Snapshots</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20, marginTop: 20 }}>
-            {bridgeState.snapshots.map((snap, i) => (
-              <div key={snap.id} className="snapshot-card" style={{ border: `1px solid ${C.border}`, borderRadius: 8, padding: 16, background: C.canvas, position: 'relative' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                  <h4 style={{ margin: 0, fontSize: 14, color: C.muted }}>Observation #{i + 1}</h4>
-                  <button className="no-print" onClick={() => deleteSnapshot(i)} style={{ background: 'transparent', border: 'none', color: '#c0392b', cursor: 'pointer', padding: 4 }}>
-                    <X size={16} />
-                  </button>
+      {/* 5. Lab Activity */}
+      <AccordionSection title="5. Lab Activity" icon={Activity} color="#3b82f6" defaultOpen={true}>
+        {bridgeState && bridgeState.labActivity ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            {/* Snapshot & Scope Images */}
+            <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+              {bridgeState.labActivity.circuitImg && (
+                <div style={{ flex: '1 1 400px' }}>
+                  <h4 style={{ margin: '0 0 12px 0', color: C.ink }}>Circuit Snapshot</h4>
+                  <img src={bridgeState.labActivity.circuitImg} alt="Circuit" style={{ width: '100%', borderRadius: 8, border: `1px solid ${C.border}`, background: '#ffffff' }} />
                 </div>
-                <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-                  {snap.svg && (
-                    <div style={{ flex: 2, minWidth: 200, border: `1px solid ${C.border}`, background: '#fff' }}>
-                      <img src={snap.svg} alt="Circuit" style={{ width: '100%', display: 'block' }} />
-                    </div>
-                  )}
-                  {snap.graph && (
-                    <div style={{ flex: 1, minWidth: 200, border: `1px solid ${C.border}`, background: '#050d1a' }}>
-                      <img src={snap.graph} alt="Oscilloscope Graph" style={{ width: '100%', display: 'block' }} />
-                    </div>
-                  )}
+              )}
+              {bridgeState.labActivity.scopeImg && (
+                <div style={{ flex: '1 1 300px' }}>
+                  <h4 style={{ margin: '0 0 12px 0', color: C.ink }}>Oscilloscope Trace</h4>
+                  <img src={bridgeState.labActivity.scopeImg} alt="Scope" style={{ width: '100%', borderRadius: 8, border: `1px solid ${C.border}`, background: '#050d1a' }} />
                 </div>
+              )}
+            </div>
+
+            {/* Analysis Structured Data */}
+            {bridgeState.labActivity.analysisData && bridgeState.labActivity.analysisData.components && (
+              <div>
+                <h4 style={{ margin: '0 0 12px 0', color: C.ink }}>Live Analysis (Structured)</h4>
+                {!bridgeState.labActivity.analysisData.readings || Object.keys(bridgeState.labActivity.analysisData.readings).length === 0 ? (
+                  <div style={{ padding: 16, background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 8, color: '#991b1b', fontSize: 14 }}>
+                    Circuit was incomplete or unsolved at the time of capture.
+                  </div>
+                ) : (
+                  <div style={{ padding: 16, background: 'var(--canvas)', borderRadius: 8, border: `1px solid var(--border)` }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 24 }}>
+                      <div>
+                        <strong style={{ display: 'block', marginBottom: 12, color: C.muted, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Sources (V, I)</strong>
+                        {bridgeState.labActivity.analysisData.components.filter(c => ['battery', 'acsource'].includes(c.type)).map(s => {
+                          const r = bridgeState.labActivity.analysisData.readings[s.id] || {};
+                          return <div key={s.id} style={{ fontSize: 13, marginBottom: 8, display: 'flex', justifyContent: 'space-between' }}><span>{s.type} ({s.value}V)</span> <span style={{ fontWeight: 600 }}>{r.I ? Math.abs(r.I).toFixed(3) + 'A' : '0A'}</span></div>;
+                        })}
+                      </div>
+                      <div>
+                        <strong style={{ display: 'block', marginBottom: 12, color: C.muted, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Passive Components (V, I)</strong>
+                        {bridgeState.labActivity.analysisData.components.filter(c => !['ground', 'junction', 'switch', 'battery', 'acsource'].includes(c.type)).map(c => {
+                          const r = bridgeState.labActivity.analysisData.readings[c.id] || {};
+                          return (
+                            <div key={c.id} style={{ fontSize: 13, display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', padding: '4px 0' }}>
+                              <span>{c.type}</span>
+                              <div style={{ display: 'flex', gap: 16 }}>
+                                <span style={{ color: C.teal }}>{r.V ? Math.abs(r.V).toFixed(2) + 'V' : '-'}</span>
+                                <span style={{ color: C.copper }}>{r.I ? (Math.abs(r.I)*1000).toFixed(1) + 'mA' : '-'}</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-            ))}
+            )}
           </div>
-        </div>
-      )}
+        ) : (
+          <div style={{ fontSize: 14, color: C.muted, fontStyle: 'italic', padding: '16px 0' }}>
+            No lab activity captured yet. Build your circuit in the Simulation tab and click Capture.
+          </div>
+        )}
+      </AccordionSection>
 
-      {bridgeState && bridgeState.rows && bridgeState.rows.length > 0 && bridge && (
-        <div className="print-section">
-          <h3 style={{ fontSize: 16, borderBottom: `1px solid ${C.border}`, paddingBottom: 4, color: C.copper }}>5. Observation Table</h3>
-          <table style={{ width: "100%", borderCollapse: "collapse", marginTop: 20, fontSize: 13, textAlign: 'left' }}>
-            <thead>
-              <tr className="table-header">
-                <th style={{ border: `1px solid ${C.border}`, padding: 12 }}>S.No.</th>
-                {bridge.tabCols.map(c => (
-                  <th key={c.k} style={{ border: `1px solid ${C.border}`, padding: 12 }}>{c.label || `${c.k}${c.u ? ` (${c.u})` : ''}`}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {bridgeState.rows.map((row, i) => (
-                <tr key={row.id || i}>
-                  <td style={{ border: `1px solid ${C.border}`, padding: 10 }}>{i + 1}</td>
-                  {bridge.tabCols.map(c => {
-                    let val = row[c.k] !== undefined ? row[c.k] : "";
-                    return (
-                      <td key={c.k} style={{ border: `1px solid ${C.border}`, padding: 4 }}>
-                        <input 
-                          type="text" 
-                          value={val} 
-                          onChange={(e) => updateRow(i, c.k, e.target.value)}
-                          style={{ 
-                            width: "100%", background: "transparent", border: "none", color: "inherit",
-                            fontFamily: "inherit", fontSize: "inherit", padding: 6, outline: "none"
-                          }} 
-                        />
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      {/* 6. Calculations */}
+      <AccordionSection title="6. Calculations" icon={Calculator} color="#10b981" defaultOpen={false}>
+        {bridgeState && bridgeState.rows && bridgeState.rows.length > 0 && bridge ? (
+          <>
+            <div style={{ fontSize: 15, marginBottom: 16 }}>Using the formula: <span dangerouslySetInnerHTML={{ __html: bridge.formula }} style={{ display: 'inline-block', verticalAlign: 'middle', marginLeft: 8 }} /></div>
+            <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
+              {bridgeState.rows.map((row, i) => {
+                return (
+                  <div key={i} style={{ flex: 1, minWidth: 200 }}>
+                    <div style={{ fontWeight: 600, marginBottom: 8 }}>Trial {i + 1}:</div>
+                    <div style={{ color: C.muted, lineHeight: 1.6 }}>
+                      {bridge.tabCols.map(c => `${c.k} = ${row[c.k] || 0}`).join(', ')}<br/>
+                      Result: {row.result ? row.result : 'Recorded in table'}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        ) : (
+          <div style={{ fontSize: 14, color: C.muted, fontStyle: 'italic', padding: '16px 0' }}>
+            No calculations available. Perform trials in the Simulation tab first.
+          </div>
+        )}
+      </AccordionSection>
 
-      <div className="print-section" style={{ marginTop: 60, paddingTop: 20, borderTop: `1px solid ${C.border}`, display: "flex", justifyContent: "space-between" }}>
-        <div>
-          <div style={{ color: C.muted }}>Date: ____________________</div>
-        </div>
-        <div>
-          <div style={{ color: C.muted }}>Signature: ____________________</div>
-        </div>
+      {/* 7. Observation Table */}
+      <AccordionSection title="7. Observation Table" icon={BarChart2} color="#ec4899" defaultOpen={false}>
+        {bridgeState && bridgeState.rows && bridgeState.rows.length > 0 && bridge ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+            {/* Trial Readings Sub-section */}
+            <div>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14, textAlign: 'center' }}>
+                  <thead>
+                    <tr style={{ background: '#f8fafc' }}>
+                      <th style={{ border: `1px solid ${C.border}`, padding: '12px 16px', color: C.muted, fontWeight: 600 }}>Trial No.</th>
+                      {bridge.tabCols.map(c => (
+                        <th key={c.k} style={{ border: `1px solid ${C.border}`, padding: '12px 16px', color: C.ink, fontWeight: 600 }}>
+                          {c.label || `${c.k} (${c.u || ''})`}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {bridgeState.rows.map((row, i) => (
+                      <tr key={row.id || i}>
+                        <td style={{ border: `1px solid ${C.border}`, padding: '12px 16px', fontWeight: 600 }}>{i + 1}.</td>
+                        {bridge.tabCols.map(c => (
+                          <td key={c.k} style={{ border: `1px solid ${C.border}`, padding: '12px 16px' }}>
+                            <input 
+                              type="text" 
+                              value={row[c.k] !== undefined ? row[c.k] : ""} 
+                              onChange={(e) => updateRow(i, c.k, e.target.value)}
+                              style={{ width: "100%", background: "transparent", border: "none", color: "inherit", fontFamily: "inherit", fontSize: "inherit", textAlign: "center", outline: "none" }} 
+                            />
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+          </div>
+        ) : (
+          <div style={{ fontSize: 14, color: C.muted, fontStyle: 'italic', padding: '16px 0' }}>
+            No readings recorded. Use the Record button in the Simulation tab to populate this table.
+          </div>
+        )}
+      </AccordionSection>
+
+      {/* 8. Result */}
+      <AccordionSection title="8. Result" icon={Trophy} color="#14b8a6" defaultOpen={false}>
+        {bridgeState && bridgeState.rows && bridgeState.rows.length > 0 && bridge ? (
+          <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', padding: 16, borderRadius: 8, color: '#065f46', fontSize: 15 }}>
+            The calculated values have been recorded. Averages can be derived from the table above.
+          </div>
+        ) : (
+          <div style={{ fontSize: 14, color: C.muted, fontStyle: 'italic', padding: '16px 0' }}>
+            Result is pending completion of the lab trials.
+          </div>
+        )}
+      </AccordionSection>
+
+      <AccordionSection title="9. Viva Questions" icon={HelpCircle} color="#ec4899" defaultOpen={false}>
+        {!bridgeState?.vivaSubmitted ? (
+          <VivaPrep hideTitle={true} exp={exp} bridgeState={bridgeState} setBridgeSims={setBridgeSims} />
+        ) : (
+          exp.viva && exp.viva[0].options ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              <div style={{ fontWeight: 600, color: C.ink, marginBottom: 8 }}>
+                Score: {bridgeState.vivaCorrectCount} / {exp.viva.length}
+              </div>
+              {exp.viva.map((q, i) => {
+                const selectedIdx = bridgeState?.vivaResponses?.[q.id];
+                const isCorrect = selectedIdx === q.correctIndex;
+                const hasAnswered = selectedIdx !== undefined;
+
+                return (
+                  <div key={q.id} style={{ borderBottom: `1px solid ${C.border}`, paddingBottom: 16 }}>
+                    <div style={{ fontWeight: 600, color: C.ink, fontSize: 14, marginBottom: 8 }}>
+                      Q{i+1}. {q.question}
+                    </div>
+                    {hasAnswered ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: isCorrect ? '#059669' : '#dc2626' }}>
+                        {isCorrect ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
+                        <span>{q.options[selectedIdx]}</span>
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: 14, color: C.muted, fontStyle: 'italic' }}>No answer recorded.</div>
+                    )}
+                    {hasAnswered && !isCorrect && (
+                      <div style={{ fontSize: 13, color: C.muted, marginTop: 4 }}>
+                        Correct Answer: {q.options[q.correctIndex]}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <ul style={{ margin: 0, paddingLeft: 20, fontSize: 15, lineHeight: 1.6, color: C.ink }}>
+              {exp.viva ? exp.viva.map((v, i) => <li key={i} style={{ marginBottom: 8 }}>{v.question}</li>) : (
+                <li>Refer to the manual for viva questions.</li>
+              )}
+            </ul>
+          )
+        )}
+      </AccordionSection>
+      
+      <div className="no-print" style={{ display: 'flex', justifyContent: 'center', marginTop: 40 }}>
+        {enrolledClass && (
+          <button 
+            onClick={submitToTeacher} 
+            disabled={submitting || submitted}
+            className="create-btn"
+            style={{ opacity: submitted ? 0.6 : 1, cursor: submitted ? 'default' : 'pointer', padding: '12px 32px', fontSize: 16, borderRadius: 999 }}
+          >
+            {submitting ? <Loader2 className="spin" size={16} /> : <CheckCircle2 size={16} />} 
+            {submitted ? 'Report Submitted' : 'Submit Lab Report to Teacher'}
+          </button>
+        )}
       </div>
     </div>
   );
@@ -1331,38 +1767,313 @@ function LabReportTab({ exp, bridgeState, setBridgeSims }) {
 /* ---------------------------------------------------------------
    VIVA PREP (SELF-ASSESSMENT)
 --------------------------------------------------------------- */
-function VivaPrep({ questions }) {
+function VivaPrep({ exp, bridgeState, setBridgeSims, hideTitle = false }) {
   const [revealed, setRevealed] = useState({});
+  const questions = exp.viva;
   if (!questions || questions.length === 0) return null;
 
-  return (
-    <div style={{ marginTop: 40, borderTop: `1px dashed var(--border)`, paddingTop: 32 }}>
-      <h3 style={{ margin: "0 0 8px 0", fontSize: 20, color: "var(--ink)" }}>Viva Prep (Self-Assessment)</h3>
-      <p style={{ color: "var(--muted)", fontSize: 14, marginBottom: 24 }}>Test your conceptual understanding before your lab viva. Try to answer out loud before revealing the answer.</p>
-      
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        {questions.map((q, i) => (
-          <div key={i} style={{ background: "var(--card)", border: `1px solid var(--border)`, borderRadius: 12, padding: 16 }}>
-            <div style={{ fontWeight: 600, color: "var(--ink)", fontSize: 15, marginBottom: 8, display: "flex", gap: 12 }}>
-              <span style={{ color: "var(--teal)" }}>Q{i+1}.</span>
-              <span>{q.question}</span>
-            </div>
-            
-            {revealed[i] ? (
-              <div style={{ padding: 12, background: "var(--canvas)", borderRadius: 8, fontSize: 14, color: "var(--muted)", marginTop: 12, borderLeft: `3px solid var(--teal)` }}>
-                {q.answer}
+  const isMCQ = questions[0].options !== undefined;
+
+  if (!isMCQ) {
+    return (
+      <div style={hideTitle ? {} : { marginTop: 40, borderTop: `1px dashed var(--border)`, paddingTop: 32 }}>
+        {!hideTitle && <h3 style={{ margin: "0 0 8px 0", fontSize: 20, color: "var(--ink)" }}>Viva Prep (Self-Assessment)</h3>}
+        {!hideTitle && <p style={{ color: "var(--muted)", fontSize: 14, marginBottom: 24 }}>Test your conceptual understanding before your lab viva. Try to answer out loud before revealing the answer.</p>}
+        
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {questions.map((q, i) => (
+            <div key={i} style={{ background: "var(--card)", border: `1px solid var(--border)`, borderRadius: 12, padding: 16 }}>
+              <div style={{ fontWeight: 600, color: "var(--ink)", fontSize: 15, marginBottom: 8, display: "flex", gap: 12 }}>
+                <span style={{ color: "var(--teal)" }}>Q{i+1}.</span>
+                <span>{q.question}</span>
               </div>
-            ) : (
-              <button 
-                onClick={() => setRevealed(prev => ({ ...prev, [i]: true }))}
-                style={{ background: "transparent", border: `1px solid var(--border)`, color: "var(--muted)", padding: "6px 12px", borderRadius: 6, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
-                <Eye size={14} /> Reveal Answer
-              </button>
-            )}
-          </div>
-        ))}
+              
+              {revealed[i] ? (
+                <div style={{ padding: 12, background: "var(--canvas)", borderRadius: 8, fontSize: 14, color: "var(--muted)", marginTop: 12, borderLeft: `3px solid var(--teal)` }}>
+                  {q.answer}
+                </div>
+              ) : (
+                <button 
+                  onClick={() => setRevealed(prev => ({ ...prev, [i]: true }))}
+                  style={{ background: "transparent", border: `1px solid var(--border)`, color: "var(--muted)", padding: "6px 12px", borderRadius: 6, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+                  <Eye size={14} /> Reveal Answer
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return <VivaMCQ questions={questions} exp={exp} bridgeState={bridgeState} setBridgeSims={setBridgeSims} hideTitle={hideTitle} />;
+}
+
+/* One-question-at-a-time MCQ with timer + shuffled options */
+function VivaMCQ({ questions, exp, bridgeState, setBridgeSims, hideTitle }) {
+  const TIMER_SECONDS = 30;
+  const QUESTIONS_PER_SESSION = 5;
+
+  // Load question pool (30 Qs) lazily; fall back to base 5 if not ready
+  const [pool, setPool] = useState(null);
+  useEffect(() => {
+    import('./data/vivaPool.js').then(m => {
+      const p = m.default?.[exp.id];
+      setPool(p && p.length >= QUESTIONS_PER_SESSION ? p : null);
+    }).catch(() => setPool(null));
+  }, [exp.id]);
+
+  // Pick 5 random questions from the pool each session (stable per mount)
+  const sessionQuestions = useMemo(() => {
+    const src = pool || questions;
+    if (src.length <= QUESTIONS_PER_SESSION) return src;
+    // Seeded shuffle using current minute so it changes every minute but is stable during the test
+    const seed = Math.floor(Date.now() / 60000);
+    const arr = [...src];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = ((seed * 9301 + 49297) % 233280 + i * 1299709) % (i + 1);
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr.slice(0, QUESTIONS_PER_SESSION);
+  }, [pool, questions]);
+
+  // Shuffle options once per session (per question)
+  const shuffled = useMemo(() => sessionQuestions.map(q => {
+    const indices = q.options.map((_, i) => i);
+    const seed2 = (q.id || '').split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+    for (let i = indices.length - 1; i > 0; i--) {
+      const j = (seed2 * 7 + i * 13) % (i + 1);
+      [indices[i], indices[j]] = [indices[j], indices[i]];
+    }
+    return { ...q, shuffledOptions: indices.map(idx => q.options[idx]), shuffledToOriginal: indices };
+  }), [sessionQuestions]);
+
+  // ─── State ───────────────────────────────────────────────────────────────
+  const [started, setStarted] = useState(false);
+  const [current, setCurrent] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(TIMER_SECONDS);
+  const [timedOut, setTimedOut] = useState(false);
+  const [done, setDone] = useState(false); // all questions answered/timed out
+
+  const responses = bridgeState?.vivaResponses || {};
+  const submitted = bridgeState?.vivaSubmitted || false;
+  const answeredCount = Object.keys(responses).length;
+
+  const q = shuffled[current] || shuffled[0];
+
+  // ─── Per-question countdown (only runs after started) ────────────────────
+  useEffect(() => {
+    if (!started || submitted || done) return;
+    setTimeLeft(TIMER_SECONDS);
+    setTimedOut(false);
+    const interval = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setTimedOut(true);
+          // Mark as timed-out (-1 sentinel) if not answered
+          if (responses[q.id] === undefined) {
+            setBridgeSims && setBridgeSims(prev2 => {
+              const cur = prev2[exp.id] || {};
+              return { ...prev2, [exp.id]: { ...cur, vivaResponses: { ...(cur.vivaResponses || {}), [q.id]: -1 } } };
+            });
+          }
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [current, started, submitted, done]);
+
+  // Auto-advance after timeout
+  useEffect(() => {
+    if (!timedOut || submitted) return;
+    const t = setTimeout(() => {
+      if (current < shuffled.length - 1) {
+        setCurrent(c => c + 1);
+      } else {
+        setDone(true);
+      }
+    }, 1500);
+    return () => clearTimeout(t);
+  }, [timedOut]);
+
+  // ─── Handlers ────────────────────────────────────────────────────────────
+  const handleSelect = (shuffledIdx) => {
+    if (submitted || responses[q.id] !== undefined || timedOut) return;
+    const originalIdx = q.shuffledToOriginal[shuffledIdx];
+    setBridgeSims && setBridgeSims(prev => {
+      const cur = prev[exp.id] || {};
+      return { ...prev, [exp.id]: { ...cur, vivaResponses: { ...(cur.vivaResponses || {}), [q.id]: originalIdx } } };
+    });
+    // Auto-advance
+    setTimeout(() => {
+      if (current < shuffled.length - 1) setCurrent(c => c + 1);
+      else setDone(true);
+    }, 700);
+  };
+
+  const handleSubmit = () => {
+    let correctCount = 0;
+    shuffled.forEach(q => { if (responses[q.id] === q.correctIndex) correctCount++; });
+    const finalScore = Math.round((correctCount / shuffled.length) * 3);
+    setBridgeSims && setBridgeSims(prev => {
+      const cur = prev[exp.id] || {};
+      return { ...prev, [exp.id]: { ...cur, vivaSubmitted: true, vivaScore: finalScore, vivaCorrectCount: correctCount } };
+    });
+  };
+
+  if (submitted) return null;
+
+  const timerPct = (timeLeft / TIMER_SECONDS) * 100;
+  const timerColor = timeLeft > 15 ? '#10b981' : timeLeft > 7 ? '#f59e0b' : '#ef4444';
+
+  // ─── START SCREEN ─────────────────────────────────────────────────────────
+  if (!started) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 16px', gap: 20, textAlign: 'center' }}>
+        <div style={{ fontSize: 48 }}>🎯</div>
+        <div style={{ fontWeight: 800, fontSize: 22, color: 'var(--ink)' }}>Viva Quiz</div>
+        <div style={{ color: 'var(--muted)', fontSize: 14, maxWidth: 420, lineHeight: 1.7 }}>
+          You will be shown <strong>{QUESTIONS_PER_SESSION} questions</strong> randomly selected from a large pool.<br/>
+          Each question has a <strong style={{ color: '#ef4444' }}>⏱ {TIMER_SECONDS}-second timer</strong>. The timer starts the moment you press Start and runs until the last question. Unanswered questions are marked wrong.
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%', maxWidth: 320, background: 'var(--canvas)', borderRadius: 12, padding: '16px 20px', border: '1px solid var(--border)', textAlign: 'left' }}>
+          {[
+            '📚 Questions sampled fresh each session',
+            '⏱ 30 seconds per question',
+            '🔀 Answer options are shuffled',
+            '⚡ Auto-advances on timeout',
+          ].map((t, i) => <div key={i} style={{ fontSize: 13, color: 'var(--muted)' }}>{t}</div>)}
+        </div>
+        <button onClick={() => setStarted(true)} style={{ marginTop: 8, padding: '13px 40px', borderRadius: 999, border: 'none', background: 'var(--teal)', color: '#fff', fontWeight: 800, fontSize: 16, cursor: 'pointer', boxShadow: '0 4px 18px rgba(20,184,166,0.35)', transition: 'transform 0.15s' }}
+          onMouseEnter={e => e.target.style.transform='scale(1.05)'} onMouseLeave={e => e.target.style.transform='scale(1)'}>
+          🚀 Start Test
+        </button>
+      </div>
+    );
+  }
+
+  // ─── DONE SCREEN ──────────────────────────────────────────────────────────
+  if (done) {
+    const correct = shuffled.filter(q => responses[q.id] === q.correctIndex).length;
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 16px', gap: 20, textAlign: 'center' }}>
+        <div style={{ fontSize: 48 }}>{correct >= 4 ? '🏆' : correct >= 2 ? '👍' : '📖'}</div>
+        <div style={{ fontWeight: 800, fontSize: 22, color: 'var(--ink)' }}>Quiz Complete!</div>
+        <div style={{ fontSize: 32, fontWeight: 900, color: 'var(--teal)' }}>{correct} / {shuffled.length}</div>
+        <div style={{ color: 'var(--muted)', fontSize: 14 }}>
+          {correct === shuffled.length ? 'Perfect score! Excellent preparation.' : correct >= 3 ? 'Good understanding. Review the missed concepts.' : 'Review the theory and try again during your next session.'}
+        </div>
+        {/* Quick review */}
+        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10, textAlign: 'left' }}>
+          {shuffled.map((sq, i) => {
+            const ans = responses[sq.id];
+            const isCorrect = ans === sq.correctIndex;
+            const timedout = ans === -1;
+            return (
+              <div key={i} style={{ background: isCorrect ? '#ecfdf5' : '#fef2f2', border: `1px solid ${isCorrect ? '#a7f3d0' : '#fca5a5'}`, borderRadius: 10, padding: '12px 16px' }}>
+                <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--ink)', marginBottom: 6 }}>Q{i + 1}. {sq.question}</div>
+                <div style={{ fontSize: 12, color: isCorrect ? '#065f46' : '#991b1b' }}>
+                  {timedout ? '⏱ Timed out' : isCorrect ? `✓ ${sq.shuffledOptions[sq.shuffledToOriginal.indexOf(ans)]}` : `✗ Your answer: ${ans >= 0 ? sq.shuffledOptions[sq.shuffledToOriginal.indexOf(ans)] : '-'}`}
+                </div>
+                {!isCorrect && <div style={{ fontSize: 12, color: '#059669', marginTop: 4 }}>✓ Correct: {sq.options[sq.correctIndex]}</div>}
+              </div>
+            );
+          })}
+        </div>
+        <button onClick={handleSubmit} style={{ padding: '12px 36px', borderRadius: 999, border: 'none', background: 'var(--teal)', color: '#fff', fontWeight: 800, fontSize: 15, cursor: 'pointer' }}>
+          ✓ Save Score &amp; Close
+        </button>
+      </div>
+    );
+  }
+
+  // ─── QUESTION SCREEN ──────────────────────────────────────────────────────
+  return (
+    <div>
+      {/* Progress */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+        <div style={{ flex: 1, height: 6, background: 'var(--border)', borderRadius: 99, overflow: 'hidden' }}>
+          <div style={{ width: `${(answeredCount / shuffled.length) * 100}%`, height: '100%', background: 'var(--teal)', borderRadius: 99, transition: 'width 0.4s' }} />
+        </div>
+        <span style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 600, whiteSpace: 'nowrap' }}>{answeredCount} / {shuffled.length} answered</span>
+      </div>
+
+      {/* Card */}
+      <div style={{ background: 'var(--card)', border: `1px solid var(--border)`, borderRadius: 14, padding: 24, position: 'relative', overflow: 'hidden' }}>
+        {/* Timer stripe */}
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 5, background: 'var(--border)', overflow: 'hidden' }}>
+          <div style={{ width: `${timerPct}%`, height: '100%', background: timerColor, transition: 'width 1s linear, background 0.3s' }} />
+        </div>
+
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, marginTop: 4 }}>
+          <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
+            Question {current + 1} of {shuffled.length}
+          </span>
+          <span style={{ fontSize: 14, fontWeight: 900, color: timerColor, fontFamily: 'monospace' }}>
+            ⏱ {timeLeft}s {timedOut && <span style={{ color: '#ef4444', fontSize: 11 }}> — Time Up!</span>}
+          </span>
+        </div>
+
+        {/* Question */}
+        <div style={{ fontWeight: 700, color: 'var(--ink)', fontSize: 15, lineHeight: 1.65, marginBottom: 22 }}>
+          {q.question}
+        </div>
+
+        {/* Options */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {q.shuffledOptions.map((opt, si) => {
+            const originalIdx = q.shuffledToOriginal[si];
+            const isSelected = responses[q.id] === originalIdx;
+            const alreadyAnswered = responses[q.id] !== undefined;
+            const locked = alreadyAnswered || timedOut;
+            return (
+              <label key={si} onClick={() => !locked && handleSelect(si)} style={{
+                display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px',
+                border: `1.5px solid ${isSelected ? '#10b981' : 'var(--border)'}`,
+                borderRadius: 9, background: isSelected ? '#ecfdf5' : 'transparent',
+                color: isSelected ? '#065f46' : locked ? 'var(--muted)' : 'var(--ink)',
+                cursor: locked ? 'not-allowed' : 'pointer',
+                opacity: locked && !isSelected ? 0.5 : 1,
+                transition: 'all 0.18s',
+              }}>
+                <input type="radio" name={q.id} checked={isSelected} readOnly disabled={locked} style={{ margin: 0, accentColor: 'var(--teal)', flexShrink: 0 }} />
+                <span style={{ flex: 1, fontSize: 14 }}>{opt}</span>
+                {isSelected && <CheckCircle2 size={16} color="#10b981" />}
+              </label>
+            );
+          })}
+        </div>
+
+        {/* Nav */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 20 }}>
+          <button onClick={() => setCurrent(c => Math.max(0, c - 1))} disabled={current === 0}
+            style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--muted)', cursor: current === 0 ? 'not-allowed' : 'pointer', opacity: current === 0 ? 0.4 : 1, fontWeight: 600, fontSize: 13 }}>
+            ← Back
+          </button>
+          {current < shuffled.length - 1
+            ? <button onClick={() => setCurrent(c => c + 1)} style={{ padding: '8px 20px', borderRadius: 8, border: 'none', background: 'var(--teal)', color: '#fff', cursor: 'pointer', fontWeight: 700, fontSize: 13 }}>Next →</button>
+            : <button onClick={() => setDone(true)} style={{ padding: '8px 20px', borderRadius: 8, border: 'none', background: '#6366f1', color: '#fff', cursor: 'pointer', fontWeight: 700, fontSize: 13 }}>Finish →</button>
+          }
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 14, justifyContent: 'center' }}>
+        {shuffled.map((sq, i) => {
+          const ans = responses[sq.id];
+          const done = ans !== undefined;
+          return (
+            <button key={i} onClick={() => setCurrent(i)} style={{ width: 32, height: 32, borderRadius: '50%', border: `2px solid ${i === current ? 'var(--teal)' : done ? '#10b981' : 'var(--border)'}`, background: done ? '#ecfdf5' : i === current ? 'var(--canvas)' : 'transparent', fontWeight: 700, fontSize: 12, cursor: 'pointer', color: i === current ? 'var(--teal)' : done ? '#065f46' : 'var(--muted)' }}>
+              {i + 1}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
 }
+
 

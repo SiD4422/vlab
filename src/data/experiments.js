@@ -133,18 +133,61 @@ export const EXPERIMENTS = [
     ],
     "viva": [
       {
-        "question": "Why is the Kelvin Bridge specifically suited for its typical measurements over simpler methods?",
-        "answer": "This setup is designed to eliminate common sources of error (like lead resistance for low values, or stray capacitance for high frequencies) that simpler methods like the Wheatstone bridge or direct multimeter readings suffer from."
+            "id": "kb_q1",
+            "question": "Why is the Kelvin Bridge preferred over the Wheatstone Bridge for measuring very low resistances (below 1 Ω)?",
+            "options": [
+                  "It uses a higher voltage source to push more current.",
+                  "It eliminates the effect of lead and contact resistances.",
+                  "It does not require a galvanometer to find the balance point.",
+                  "It amplifies the small resistance values electronically."
+            ],
+            "correctIndex": 1
       },
       {
-        "question": "What would happen to the balance condition if the source voltage was doubled?",
-        "answer": "The balance condition would remain completely unaffected. Bridge balance depends only on the ratio of the impedances in the arms, not on the excitation voltage. However, the sensitivity of the galvanometer deflection when slightly unbalanced would increase."
+            "id": "kb_q2",
+            "question": "How does doubling the DC excitation voltage affect the balance condition of the bridge?",
+            "options": [
+                  "The balance point shifts exactly to the middle of the slide wire.",
+                  "The bridge becomes unbalanced and requires recalibration.",
+                  "The balance condition remains completely unaffected.",
+                  "The measured unknown resistance value is halved."
+            ],
+            "correctIndex": 2
       },
       {
-        "question": "Why do we use an AC source for measuring inductance or capacitance instead of DC?",
-        "answer": "DC cannot measure reactance. Inductors act as short circuits and capacitors act as open circuits to steady DC. AC provides a time-varying signal (jωL and 1/jωC) allowing us to measure their AC impedances."
+            "id": "kb_q3",
+            "question": "What is the primary purpose of the slide wire in a practical Kelvin Bridge setup?",
+            "options": [
+                  "To act as a variable voltage divider for the power supply.",
+                  "To balance the bridge and precisely read the fractional resistance ratio.",
+                  "To limit the current flowing through the sensitive galvanometer.",
+                  "To cancel out external magnetic fields."
+            ],
+            "correctIndex": 1
+      },
+      {
+            "id": "kb_q4",
+            "question": "What defines a low resistance measurement typically suited for this bridge?",
+            "options": [
+                  "Resistances between 1 kΩ and 100 kΩ.",
+                  "Resistances between 10 Ω and 100 Ω.",
+                  "Resistances below 1 Ω.",
+                  "Purely inductive components."
+            ],
+            "correctIndex": 2
+      },
+      {
+            "id": "kb_q5",
+            "question": "What error occurs if thermoelectric EMFs are present in the bridge circuit, and how is it mitigated?",
+            "options": [
+                  "It causes false balance points; eliminated by taking the average of readings with reversed battery polarity.",
+                  "It melts the slide wire; eliminated by using AC instead of DC.",
+                  "It causes the galvanometer to freeze; mitigated by adding a series capacitor.",
+                  "It increases the lead resistance; mitigated by using thicker wires."
+            ],
+            "correctIndex": 0
       }
-    ]
+]
   },
   {
     "id": "kelvin-double-bridge",
@@ -279,18 +322,61 @@ export const EXPERIMENTS = [
     ],
     "viva": [
       {
-        "question": "Why is the Kelvin Double Bridge specifically suited for its typical measurements over simpler methods?",
-        "answer": "This setup is designed to eliminate common sources of error (like lead resistance for low values, or stray capacitance for high frequencies) that simpler methods like the Wheatstone bridge or direct multimeter readings suffer from."
+            "id": "kdb_q1",
+            "question": "In a Kelvin Double Bridge, why is a second set of ratio arms (inner arms p and q) used?",
+            "options": [
+                  "To increase the maximum resistance limit that can be measured.",
+                  "To provide a backup measurement path if the main arms fail.",
+                  "To cancel out the effect of the connecting lead (yoke) resistance between the standard and unknown resistors.",
+                  "To double the sensitivity of the galvanometer."
+            ],
+            "correctIndex": 2
       },
       {
-        "question": "What would happen to the balance condition if the source voltage was doubled?",
-        "answer": "The balance condition would remain completely unaffected. Bridge balance depends only on the ratio of the impedances in the arms, not on the excitation voltage. However, the sensitivity of the galvanometer deflection when slightly unbalanced would increase."
+            "id": "kdb_q2",
+            "question": "What must be true about the ratio of the inner arms (p/q) and outer arms (P/Q) for the exact balance equation to hold true?",
+            "options": [
+                  "They must be exactly inverse (p/q = Q/P).",
+                  "They must be completely unequal.",
+                  "They must be kept exactly equal (p/q = P/Q).",
+                  "The inner arms must be ten times the outer arms."
+            ],
+            "correctIndex": 2
       },
       {
-        "question": "Why do we use an AC source for measuring inductance or capacitance instead of DC?",
-        "answer": "DC cannot measure reactance. Inductors act as short circuits and capacitors act as open circuits to steady DC. AC provides a time-varying signal (jωL and 1/jωC) allowing us to measure their AC impedances."
+            "id": "kdb_q3",
+            "question": "If the heavy copper yoke connecting the standard and unknown resistor breaks, what happens?",
+            "options": [
+                  "The measurement becomes twice as accurate.",
+                  "The current stops flowing through the main circuit and the bridge cannot be balanced.",
+                  "The galvanometer deflection reverses direction.",
+                  "The bridge automatically acts like a Wheatstone bridge."
+            ],
+            "correctIndex": 1
+      },
+      {
+            "id": "kdb_q4",
+            "question": "What type of detector is most suitable for finding the null point in this highly precise DC bridge?",
+            "options": [
+                  "A cathode ray oscilloscope (CRO).",
+                  "A high-frequency vibration galvanometer.",
+                  "A highly sensitive DC DArsonval galvanometer.",
+                  "A digital multimeter set to AC voltage."
+            ],
+            "correctIndex": 2
+      },
+      {
+            "id": "kdb_q5",
+            "question": "Why is a heavy current usually passed through the standard and unknown resistors?",
+            "options": [
+                  "To ensure the resistors reach their maximum operating temperature.",
+                  "To produce a measurable voltage drop across the very low resistances.",
+                  "To burn off any oxidation on the contact terminals.",
+                  "To generate a strong magnetic field for the galvanometer."
+            ],
+            "correctIndex": 1
       }
-    ]
+]
   },
   {
     "id": "capacitance-comparison-bridge",
@@ -426,18 +512,61 @@ export const EXPERIMENTS = [
     ],
     "viva": [
       {
-        "question": "Why is the Capacitance Comparison Bridge specifically suited for its typical measurements over simpler methods?",
-        "answer": "This setup is designed to eliminate common sources of error (like lead resistance for low values, or stray capacitance for high frequencies) that simpler methods like the Wheatstone bridge or direct multimeter readings suffer from."
+            "id": "ccb_q1",
+            "question": "What is the main purpose of the Capacitance Comparison Bridge?",
+            "options": [
+                  "To measure the self-inductance of a coil.",
+                  "To determine the exact frequency of an AC source.",
+                  "To determine an unknown capacitance by comparing it with a known standard capacitor.",
+                  "To measure the DC resistance of an insulator."
+            ],
+            "correctIndex": 2
       },
       {
-        "question": "What would happen to the balance condition if the source voltage was doubled?",
-        "answer": "The balance condition would remain completely unaffected. Bridge balance depends only on the ratio of the impedances in the arms, not on the excitation voltage. However, the sensitivity of the galvanometer deflection when slightly unbalanced would increase."
+            "id": "ccb_q2",
+            "question": "What happens if the dielectric of the unknown capacitor is very lossy (has high equivalent series resistance)?",
+            "options": [
+                  "A perfect null cannot be achieved unless a variable resistive arm is added to balance the real power loss.",
+                  "The bridge balances much faster than with a perfect capacitor.",
+                  "The standard capacitor will overheat and get damaged.",
+                  "The excitation frequency automatically drops to zero."
+            ],
+            "correctIndex": 0
       },
       {
-        "question": "Why do we use an AC source for measuring inductance or capacitance instead of DC?",
-        "answer": "DC cannot measure reactance. Inductors act as short circuits and capacitors act as open circuits to steady DC. AC provides a time-varying signal (jωL and 1/jωC) allowing us to measure their AC impedances."
+            "id": "ccb_q3",
+            "question": "Which detector is commonly used for an audio-frequency AC capacitance bridge?",
+            "options": [
+                  "A standard moving-coil DC galvanometer.",
+                  "A compass needle.",
+                  "Headphones or an AC tuned detector.",
+                  "An ammeter."
+            ],
+            "correctIndex": 2
+      },
+      {
+            "id": "ccb_q4",
+            "question": "In an ideal lossless capacitance comparison bridge, the balance condition depends on:",
+            "options": [
+                  "The absolute voltage of the AC supply.",
+                  "The ratio of the adjacent resistive arms.",
+                  "The phase angle of the detector.",
+                  "The ambient temperature of the room."
+            ],
+            "correctIndex": 1
+      },
+      {
+            "id": "ccb_q5",
+            "question": "How are stray electrostatic capacitances between bridge arms and ground mitigated in high-precision AC bridges?",
+            "options": [
+                  "By submerging the bridge in distilled water.",
+                  "By using a Wagner earth connection and electrostatic shielding.",
+                  "By increasing the supply voltage to overpower the stray signals.",
+                  "By replacing all capacitors with inductors."
+            ],
+            "correctIndex": 1
       }
-    ]
+]
   },
   {
     "id": "maxwell-inductance-bridge",
@@ -572,18 +701,61 @@ export const EXPERIMENTS = [
     ],
     "viva": [
       {
-        "question": "Why is the Maxwell’s Inductance Bridge specifically suited for its typical measurements over simpler methods?",
-        "answer": "This setup is designed to eliminate common sources of error (like lead resistance for low values, or stray capacitance for high frequencies) that simpler methods like the Wheatstone bridge or direct multimeter readings suffer from."
+            "id": "mib_q1",
+            "question": "What does Maxwells Inductance Bridge primarily compare the unknown inductance against?",
+            "options": [
+                  "A standard variable capacitor.",
+                  "A standard variable inductor.",
+                  "A highly stable DC voltage source.",
+                  "A precision frequency oscillator."
+            ],
+            "correctIndex": 1
       },
       {
-        "question": "What would happen to the balance condition if the source voltage was doubled?",
-        "answer": "The balance condition would remain completely unaffected. Bridge balance depends only on the ratio of the impedances in the arms, not on the excitation voltage. However, the sensitivity of the galvanometer deflection when slightly unbalanced would increase."
+            "id": "mib_q2",
+            "question": "Why is the Maxwell Inductance Bridge rarely used for highly precise laboratory measurements compared to the Maxwell-Wien bridge?",
+            "options": [
+                  "It requires a DC supply which is hard to stabilize.",
+                  "Standard variable inductors are bulky, expensive, and prone to external magnetic field errors.",
+                  "It can only measure inductances above 100 Henrys.",
+                  "It requires a perfectly lossless standard inductor, which does not exist."
+            ],
+            "correctIndex": 1
       },
       {
-        "question": "Why do we use an AC source for measuring inductance or capacitance instead of DC?",
-        "answer": "DC cannot measure reactance. Inductors act as short circuits and capacitors act as open circuits to steady DC. AC provides a time-varying signal (jωL and 1/jωC) allowing us to measure their AC impedances."
+            "id": "mib_q3",
+            "question": "To achieve balance in a Maxwell Inductance Bridge, which components are typically adjusted?",
+            "options": [
+                  "A variable capacitor and a fixed resistor.",
+                  "The AC source frequency and amplitude.",
+                  "A variable standard inductor and a variable resistor in series with it.",
+                  "Two variable capacitors."
+            ],
+            "correctIndex": 2
+      },
+      {
+            "id": "mib_q4",
+            "question": "What is the effect of mutual inductance between the standard reference coil and the unknown coil?",
+            "options": [
+                  "It speeds up the balancing process.",
+                  "It causes significant measurement errors; hence coils must be magnetically shielded or placed far apart.",
+                  "It cancels out the resistive losses in both coils.",
+                  "It doubles the sensitivity of the detector."
+            ],
+            "correctIndex": 1
+      },
+      {
+            "id": "mib_q5",
+            "question": "If the unknown inductor has a very high internal resistance, what happens to the balance?",
+            "options": [
+                  "The bridge becomes a Wheatstone bridge.",
+                  "The standard variable resistor must be adjusted to a high value to achieve real balance.",
+                  "The inductance measurement becomes perfectly accurate.",
+                  "The AC supply will short circuit."
+            ],
+            "correctIndex": 1
       }
-    ]
+]
   },
   {
     "id": "maxwell-lc-bridge",
@@ -716,18 +888,61 @@ export const EXPERIMENTS = [
     ],
     "viva": [
       {
-        "question": "Why is the Maxwell’s Inductance-Capacitance Bridge specifically suited for its typical measurements over simpler methods?",
-        "answer": "This setup is designed to eliminate common sources of error (like lead resistance for low values, or stray capacitance for high frequencies) that simpler methods like the Wheatstone bridge or direct multimeter readings suffer from."
+            "id": "mlcb_q1",
+            "question": "Maxwells Inductance-Capacitance (Maxwell-Wien) Bridge is best suited for measuring coils with which range of Q (Quality) factor?",
+            "options": [
+                  "High Q coils (Q > 10)",
+                  "Medium Q coils (1 < Q < 10)",
+                  "Low Q coils (Q < 1)",
+                  "It measures pure inductance irrespective of Q factor."
+            ],
+            "correctIndex": 1
       },
       {
-        "question": "What would happen to the balance condition if the source voltage was doubled?",
-        "answer": "The balance condition would remain completely unaffected. Bridge balance depends only on the ratio of the impedances in the arms, not on the excitation voltage. However, the sensitivity of the galvanometer deflection when slightly unbalanced would increase."
+            "id": "mlcb_q2",
+            "question": "Which component is used as the standard reference to measure the unknown inductance in a Maxwell-Wien Bridge?",
+            "options": [
+                  "A standard variable inductor.",
+                  "A standard variable capacitor.",
+                  "A standard high-wattage resistor.",
+                  "A standard step-down transformer."
+            ],
+            "correctIndex": 1
       },
       {
-        "question": "Why do we use an AC source for measuring inductance or capacitance instead of DC?",
-        "answer": "DC cannot measure reactance. Inductors act as short circuits and capacitors act as open circuits to steady DC. AC provides a time-varying signal (jωL and 1/jωC) allowing us to measure their AC impedances."
+            "id": "mlcb_q3",
+            "question": "What practical difficulty arises if a Maxwells bridge is used to measure a very low-Q coil (Q < 1)?",
+            "options": [
+                  "The standard capacitor value required would be impractically small.",
+                  "The required balancing resistance becomes impractically large.",
+                  "Balancing becomes a slow, iterative process because adjusting for resistive balance disturbs the inductive balance, causing a sliding balance.",
+                  "The bridge excitation frequency must be drastically increased to achieve balance."
+            ],
+            "correctIndex": 2
+      },
+      {
+            "id": "mlcb_q4",
+            "question": "In an AC bridge like Maxwells, what two conditions must be satisfied simultaneously to achieve a true null balance?",
+            "options": [
+                  "Voltage and Current must balance independently.",
+                  "Real (resistive) and Imaginary (reactive) components must balance independently.",
+                  "Frequency and Phase must balance independently.",
+                  "Inductive and Capacitive reactances must completely cancel each other out."
+            ],
+            "correctIndex": 1
+      },
+      {
+            "id": "mlcb_q5",
+            "question": "Why are headphones, vibration galvanometers, or CROs used instead of a standard moving-coil galvanometer in Maxwells Bridge?",
+            "options": [
+                  "Because the bridge operates on an AC supply and a standard DC galvanometer cannot detect alternating current.",
+                  "Because headphones amplify the weak signals better than a galvanometer.",
+                  "Because they can measure the exact RMS voltage value across the bridge arms.",
+                  "Because AC bridges require audio-frequency tuning to establish resonance."
+            ],
+            "correctIndex": 0
       }
-    ]
+]
   },
   {
     "id": "hays-bridge",
@@ -860,18 +1075,61 @@ export const EXPERIMENTS = [
     ],
     "viva": [
       {
-        "question": "Why is the Hay’s Bridge specifically suited for its typical measurements over simpler methods?",
-        "answer": "This setup is designed to eliminate common sources of error (like lead resistance for low values, or stray capacitance for high frequencies) that simpler methods like the Wheatstone bridge or direct multimeter readings suffer from."
+            "id": "hb_q1",
+            "question": "Hays Bridge is a modification of Maxwells Bridge specifically designed to measure what?",
+            "options": [
+                  "Extremely low resistances.",
+                  "Low Q coils (Q < 1).",
+                  "High Q coils (Q > 10).",
+                  "Unknown frequencies."
+            ],
+            "correctIndex": 2
       },
       {
-        "question": "What would happen to the balance condition if the source voltage was doubled?",
-        "answer": "The balance condition would remain completely unaffected. Bridge balance depends only on the ratio of the impedances in the arms, not on the excitation voltage. However, the sensitivity of the galvanometer deflection when slightly unbalanced would increase."
+            "id": "hb_q2",
+            "question": "In Hays Bridge, how is the standard capacitor connected in the reference arm?",
+            "options": [
+                  "In parallel with a standard resistor (like Maxwells).",
+                  "In series with a standard resistor.",
+                  "Directly across the AC supply.",
+                  "In parallel with the unknown inductor."
+            ],
+            "correctIndex": 1
       },
       {
-        "question": "Why do we use an AC source for measuring inductance or capacitance instead of DC?",
-        "answer": "DC cannot measure reactance. Inductors act as short circuits and capacitors act as open circuits to steady DC. AC provides a time-varying signal (jωL and 1/jωC) allowing us to measure their AC impedances."
+            "id": "hb_q3",
+            "question": "What is a major mathematical disadvantage of Hays Bridge when calculating the exact inductance?",
+            "options": [
+                  "The balance equation for inductance contains the AC source frequency, making it frequency-dependent.",
+                  "The equation requires complex integration.",
+                  "It produces a negative inductance value.",
+                  "It requires knowing the exact phase angle of the detector."
+            ],
+            "correctIndex": 0
+      },
+      {
+            "id": "hb_q4",
+            "question": "Why is the series R-C arrangement in Hays bridge better for high-Q coils than Maxwells parallel R-C?",
+            "options": [
+                  "Because high-Q coils require a larger current to balance.",
+                  "For high-Q, Maxwells bridge requires an impractically large parallel resistance, whereas Hays requires a manageable small series resistance.",
+                  "Because series circuits do not suffer from stray capacitance.",
+                  "Because series capacitors are cheaper than parallel capacitors."
+            ],
+            "correctIndex": 1
+      },
+      {
+            "id": "hb_q5",
+            "question": "If Hays bridge is incorrectly used to measure a very low-Q coil, what problem occurs?",
+            "options": [
+                  "The calculated inductance becomes highly sensitive to frequency variations and small errors.",
+                  "The standard capacitor will explode due to high current.",
+                  "The bridge balances instantly but gives a zero reading.",
+                  "The detector will indicate a perfect null regardless of the component values."
+            ],
+            "correctIndex": 0
       }
-    ]
+]
   },
   {
     "id": "anderson-bridge",
@@ -1004,18 +1262,61 @@ export const EXPERIMENTS = [
     ],
     "viva": [
       {
-        "question": "Why is the Anderson Bridge specifically suited for its typical measurements over simpler methods?",
-        "answer": "This setup is designed to eliminate common sources of error (like lead resistance for low values, or stray capacitance for high frequencies) that simpler methods like the Wheatstone bridge or direct multimeter readings suffer from."
+            "id": "ab_q1",
+            "question": "Anderson Bridge is a modification of Maxwells Bridge primarily used to measure what?",
+            "options": [
+                  "Very high Q coils.",
+                  "The inductance of low Q coils precisely.",
+                  "Extremely small capacitances.",
+                  "High voltage dielectric loss."
+            ],
+            "correctIndex": 1
       },
       {
-        "question": "What would happen to the balance condition if the source voltage was doubled?",
-        "answer": "The balance condition would remain completely unaffected. Bridge balance depends only on the ratio of the impedances in the arms, not on the excitation voltage. However, the sensitivity of the galvanometer deflection when slightly unbalanced would increase."
+            "id": "ab_q2",
+            "question": "How does the topology of Andersons Bridge differ from standard four-arm bridges like Maxwells L-C bridge?",
+            "options": [
+                  "It operates on DC instead of AC.",
+                  "It uses two standard inductors instead of one.",
+                  "It is a 5-point network (effectively a 6-arm bridge) with an extra variable resistor node.",
+                  "It places the detector in series with the AC supply."
+            ],
+            "correctIndex": 2
       },
       {
-        "question": "Why do we use an AC source for measuring inductance or capacitance instead of DC?",
-        "answer": "DC cannot measure reactance. Inductors act as short circuits and capacitors act as open circuits to steady DC. AC provides a time-varying signal (jωL and 1/jωC) allowing us to measure their AC impedances."
+            "id": "ab_q3",
+            "question": "What is the main practical advantage of Andersons Bridge over Maxwells Bridge?",
+            "options": [
+                  "It balances instantly without any manual adjustment.",
+                  "It achieves balance using only fixed capacitors and variable resistors, avoiding expensive precision variable capacitors.",
+                  "It requires no detector to find the null point.",
+                  "It operates independently of the real resistive balance."
+            ],
+            "correctIndex": 1
+      },
+      {
+            "id": "ab_q4",
+            "question": "What is a significant drawback of using the Anderson Bridge?",
+            "options": [
+                  "The balance equations are extremely complex and balancing is tedious due to multiple interacting resistive adjustments.",
+                  "It can only be used at frequencies above 1 MHz.",
+                  "It requires a massive standard inductor.",
+                  "It is highly dangerous due to high voltage requirements."
+            ],
+            "correctIndex": 0
+      },
+      {
+            "id": "ab_q5",
+            "question": "In Andersons bridge, the balance condition for the unknown inductance depends on:",
+            "options": [
+                  "Only the fixed capacitor and one resistor.",
+                  "The fixed capacitor and multiple resistive arms in the network.",
+                  "The frequency of the AC source.",
+                  "The internal resistance of the detector."
+            ],
+            "correctIndex": 1
       }
-    ]
+]
   },
   {
     "id": "schering-bridge",
@@ -1149,18 +1450,61 @@ export const EXPERIMENTS = [
     ],
     "viva": [
       {
-        "question": "Why is the Schering Bridge specifically suited for its typical measurements over simpler methods?",
-        "answer": "This setup is designed to eliminate common sources of error (like lead resistance for low values, or stray capacitance for high frequencies) that simpler methods like the Wheatstone bridge or direct multimeter readings suffer from."
+            "id": "sb_q1",
+            "question": "What is the primary industrial application of the Schering Bridge?",
+            "options": [
+                  "Measuring unknown inductance of high Q coils.",
+                  "Measuring extremely low DC contact resistances.",
+                  "Measuring unknown capacitance and the dielectric loss angle (dissipation factor) of insulators.",
+                  "Measuring the exact frequency of an unknown AC source."
+            ],
+            "correctIndex": 2
       },
       {
-        "question": "What would happen to the balance condition if the source voltage was doubled?",
-        "answer": "The balance condition would remain completely unaffected. Bridge balance depends only on the ratio of the impedances in the arms, not on the excitation voltage. However, the sensitivity of the galvanometer deflection when slightly unbalanced would increase."
+            "id": "sb_q2",
+            "question": "In a high-voltage Schering Bridge, why is the standard reference capacitor typically a gas-filled or air capacitor?",
+            "options": [
+                  "It is cheaper to manufacture and maintain.",
+                  "It has virtually zero dielectric loss, serving as a perfect lossless reference.",
+                  "It can handle significantly higher steady-state DC currents.",
+                  "It automatically adjusts its capacitance based on ambient temperature."
+            ],
+            "correctIndex": 1
       },
       {
-        "question": "Why do we use an AC source for measuring inductance or capacitance instead of DC?",
-        "answer": "DC cannot measure reactance. Inductors act as short circuits and capacitors act as open circuits to steady DC. AC provides a time-varying signal (jωL and 1/jωC) allowing us to measure their AC impedances."
+            "id": "sb_q3",
+            "question": "What safety precaution is specifically utilized in the structural layout of a high-voltage Schering Bridge?",
+            "options": [
+                  "The detector and standard adjustable components are placed in the lower arms and grounded to protect the operator.",
+                  "The entire bridge circuit must be submerged in insulating transformer oil.",
+                  "It must be operated inside a Faraday cage to prevent RF interference.",
+                  "A high-voltage fuse is placed directly in series with the unknown test capacitor."
+            ],
+            "correctIndex": 0
+      },
+      {
+            "id": "sb_q4",
+            "question": "The dissipation factor (tan δ) measured by a Schering Bridge is an indicator of:",
+            "options": [
+                  "The maximum peak voltage the capacitor can withstand before breakdown.",
+                  "The quality of the dielectric material and the power lost as heat within it.",
+                  "The physical size and distance between the capacitor plates.",
+                  "The self-resonant frequency of the capacitor under test."
+            ],
+            "correctIndex": 1
+      },
+      {
+            "id": "sb_q5",
+            "question": "How does the presence of stray capacitance affect Schering Bridge measurements at higher frequencies?",
+            "options": [
+                  "It artificially improves the accuracy of the dissipation factor measurement.",
+                  "It has absolutely no effect because the bridge naturally operates on AC.",
+                  "It causes significant errors in both capacitance and loss angle, often requiring a Wagner Earth connection to mitigate.",
+                  "It only affects the inductance measurements of the connecting leads."
+            ],
+            "correctIndex": 2
       }
-    ]
+]
   },
   {
     "id": "wiens-bridge",
@@ -1293,18 +1637,61 @@ export const EXPERIMENTS = [
     ],
     "viva": [
       {
-        "question": "Why is the Wien’s Bridge specifically suited for its typical measurements over simpler methods?",
-        "answer": "This setup is designed to eliminate common sources of error (like lead resistance for low values, or stray capacitance for high frequencies) that simpler methods like the Wheatstone bridge or direct multimeter readings suffer from."
+            "id": "wb_q1",
+            "question": "What is the primary use of the Wien Bridge as a measurement device in AC circuits?",
+            "options": [
+                  "Measuring very high inductances.",
+                  "Measuring the exact frequency of the AC source.",
+                  "Measuring dielectric loss of insulators.",
+                  "Measuring low DC resistances."
+            ],
+            "correctIndex": 1
       },
       {
-        "question": "What would happen to the balance condition if the source voltage was doubled?",
-        "answer": "The balance condition would remain completely unaffected. Bridge balance depends only on the ratio of the impedances in the arms, not on the excitation voltage. However, the sensitivity of the galvanometer deflection when slightly unbalanced would increase."
+            "id": "wb_q2",
+            "question": "What is required for the Wien Bridge to achieve balance if the components in the reactive arms are exactly matched (R1=R2=R, C1=C2=C)?",
+            "options": [
+                  "The supply voltage must be exactly 10V.",
+                  "The ratio arms must be set to 2:1 (so the overall gain balances).",
+                  "The excitation frequency must exactly equal 1 / (2πRC).",
+                  "The detector must have zero internal resistance."
+            ],
+            "correctIndex": 2
       },
       {
-        "question": "Why do we use an AC source for measuring inductance or capacitance instead of DC?",
-        "answer": "DC cannot measure reactance. Inductors act as short circuits and capacitors act as open circuits to steady DC. AC provides a time-varying signal (jωL and 1/jωC) allowing us to measure their AC impedances."
+            "id": "wb_q3",
+            "question": "Apart from frequency measurement, what is a very common commercial application of the Wien Bridge network?",
+            "options": [
+                  "Used as the frequency-determining feedback network in audio-frequency oscillators (Wien-bridge oscillator).",
+                  "Used as a high-voltage step-up transformer.",
+                  "Used to measure the speed of DC motors.",
+                  "Used as a DC voltage regulator."
+            ],
+            "correctIndex": 0
+      },
+      {
+            "id": "wb_q4",
+            "question": "Why is the Wien Bridge highly sensitive to harmonics present in the AC supply voltage?",
+            "options": [
+                  "Because harmonics cause the resistors to overheat.",
+                  "Because the balance condition is strictly frequency-dependent; harmonics will not balance and will produce a residual signal at the detector.",
+                  "Because harmonics damage the capacitors dielectric.",
+                  "Because harmonics reverse the phase of the galvanometer."
+            ],
+            "correctIndex": 1
+      },
+      {
+            "id": "wb_q5",
+            "question": "What type of detector is most suitable for a Wien Bridge operating at an audio frequency of 1 kHz?",
+            "options": [
+                  "A DC moving-coil galvanometer.",
+                  "A vibration galvanometer tuned to 50 Hz.",
+                  "Headphones or a tuned audio-frequency detector.",
+                  "A digital logic probe."
+            ],
+            "correctIndex": 2
       }
-    ]
+]
   },
   {
     "id": "transformer-ratio-bridge",
@@ -1436,17 +1823,60 @@ export const EXPERIMENTS = [
     ],
     "viva": [
       {
-        "question": "Why is the Transformer Ratio Bridge specifically suited for its typical measurements over simpler methods?",
-        "answer": "This setup is designed to eliminate common sources of error (like lead resistance for low values, or stray capacitance for high frequencies) that simpler methods like the Wheatstone bridge or direct multimeter readings suffer from."
+            "id": "trb_q1",
+            "question": "What replaces the standard resistive ratio arms in a Transformer Ratio Bridge?",
+            "options": [
+                  "Two standard variable capacitors.",
+                  "A tapped precision transformer or autotransformer.",
+                  "High wattage precision resistors.",
+                  "A balanced diode bridge."
+            ],
+            "correctIndex": 1
       },
       {
-        "question": "What would happen to the balance condition if the source voltage was doubled?",
-        "answer": "The balance condition would remain completely unaffected. Bridge balance depends only on the ratio of the impedances in the arms, not on the excitation voltage. However, the sensitivity of the galvanometer deflection when slightly unbalanced would increase."
+            "id": "trb_q2",
+            "question": "What is a major advantage of using transformer ratio arms instead of resistive ratio arms?",
+            "options": [
+                  "They are much lighter and cheaper to manufacture.",
+                  "They provide highly stable and precise ratios that are largely immune to temperature changes and aging.",
+                  "They allow the bridge to operate on pure DC.",
+                  "They automatically amplify the detector signal."
+            ],
+            "correctIndex": 1
       },
       {
-        "question": "Why do we use an AC source for measuring inductance or capacitance instead of DC?",
-        "answer": "DC cannot measure reactance. Inductors act as short circuits and capacitors act as open circuits to steady DC. AC provides a time-varying signal (jωL and 1/jωC) allowing us to measure their AC impedances."
+            "id": "trb_q3",
+            "question": "How is balance typically achieved in a Transformer Ratio Bridge?",
+            "options": [
+                  "By altering the frequency of the AC supply until null is reached.",
+                  "By adjusting a slide wire resistance.",
+                  "By selecting the appropriate taps on the transformer windings to change the voltage ratio.",
+                  "By moving the detector along a magnetic core."
+            ],
+            "correctIndex": 2
+      },
+      {
+            "id": "trb_q4",
+            "question": "Why are stray capacitances from the bridge arms to ground significantly less problematic in a Transformer Ratio Bridge?",
+            "options": [
+                  "Because transformers operate at frequencies where stray capacitance does not exist.",
+                  "Because the very low impedance of the transformer windings shunts the stray capacitance to ground, minimizing error voltage.",
+                  "Because the transformer core absorbs all stray electrostatic fields.",
+                  "Because the bridge is operated entirely in a vacuum."
+            ],
+            "correctIndex": 1
+      },
+      {
+            "id": "trb_q5",
+            "question": "Which fundamental property of an ideal transformer ensures that its voltage ratio remains highly accurate?",
+            "options": [
+                  "The core temperature.",
+                  "The exact turns ratio of the windings, which is physically fixed.",
+                  "The gauge of the wire used for the primary winding.",
+                  "The frequency of the input voltage."
+            ],
+            "correctIndex": 1
       }
-    ]
+]
   }
 ];

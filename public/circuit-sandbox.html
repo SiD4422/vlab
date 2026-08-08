@@ -23,14 +23,14 @@
   input[type=number]:focus{outline:1px solid var(--accent);}
 
   .app{display:grid;grid-template-rows:52px 1fr;height:100vh;}
-  .topbar{display:flex;align-items:center;gap:10px;padding:0 16px;border-bottom:1px solid var(--border);background:var(--panel);}
+  .topbar{display:flex;align-items:center;gap:10px;padding:0 16px;border-bottom:1px solid var(--border);background:var(--panel);overflow-x:auto;}
   .brand{font-family:var(--mono);font-weight:700;font-size:13px;letter-spacing:.06em;color:var(--accent);white-space:nowrap;}
-  .topbar .sep{width:1px;height:26px;background:var(--border);margin:0 4px;}
+  .topbar .sep{width:1px;height:26px;background:var(--border);margin:0 4px;flex-shrink:0;}
   .topbar .spacer{flex:1;}
   .hint{font-family:var(--mono);font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
-  .body{display:grid;grid-template-columns:200px 1fr 260px;min-height:0;}
-  .palette{border-right:1px solid var(--border);background:var(--panel);padding:14px 10px;overflow-y:auto;}
+  .body{display:flex;min-height:0;position:relative;}
+  .palette{border-right:1px solid var(--border);background:var(--panel);padding:14px 10px;overflow-y:auto;width:200px;flex-shrink:0;}
   .palette h4{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:4px 6px 10px;}
   .pitem{display:flex;align-items:center;gap:10px;padding:9px 8px;border-radius:9px;cursor:pointer;margin-bottom:4px;border:1px solid transparent;}
   .pitem:hover{background:var(--panel);border-color:var(--border);}
@@ -38,10 +38,10 @@
   .pitem svg{width:34px;height:22px;flex-shrink:0;}
   .pitem span{font-size:12.5px;font-weight:500;}
 
-  .canvas-wrap{position:relative;overflow:auto;background:
+  .canvas-wrap{flex:1;position:relative;overflow:hidden;background:
       linear-gradient(90deg, var(--panel2) 1px, transparent 1px) 0 0/40px 40px,
       linear-gradient(var(--panel2) 1px, transparent 1px) 0 0/40px 40px, var(--bg);}
-  svg#canvas{display:block;cursor:default;}
+  svg#canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%;}
   .comp-body{cursor:grab;}
   .comp-body:active{cursor:grabbing;}
   .comp-body.selected .body-outline{stroke:var(--accent);stroke-width:2.5;stroke-dasharray:6 4;fill:rgba(13,148,136,0.05);}
@@ -62,7 +62,12 @@
   .meter-ring{fill:var(--panel2);}
   .meter-text{fill:var(--accent);font-family:var(--mono);font-weight:700;font-size:12px;text-anchor:middle;}
 
-  .inspector{border-left:1px solid var(--border);background:var(--panel);padding:16px;overflow-y:auto;}
+  .zoom-controls{position:absolute;bottom:12px;left:12px;z-index:50;display:flex;gap:6px;align-items:center;background:rgba(255,255,255,0.92);border:1px solid var(--border);border-radius:10px;padding:5px 8px;box-shadow:0 2px 10px rgba(0,0,0,0.08);}
+  .zoom-btn{font-size:14px;padding:4px 8px;border-radius:6px;min-width:28px;font-weight:700;}
+  .zoom-level{font-family:var(--mono);font-size:11px;color:var(--muted);min-width:38px;text-align:center;}
+
+  .inspector{border-left:1px solid var(--border);background:var(--panel);padding:16px;overflow-y:auto;width:260px;flex-shrink:0;display:none;}
+  .inspector.open{display:block;}
   .inspector h4{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 12px;}
   .insp-empty{color:var(--muted);font-size:13px;line-height:1.6;}
   .field{margin-bottom:12px;}
@@ -74,1067 +79,819 @@
   .insp-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
   .insp-title{font-size:15px;font-weight:700;margin-bottom:4px;}
   .insp-sub{font-size:11.5px;color:var(--muted);margin-bottom:14px;}
-  /* === OSCILLOSCOPE === */
-  #osc-toggle{
-    position:fixed; bottom:20px; right:20px; z-index:200;
-    background:var(--accent); color:#04201d; border:none;
-    border-radius:50%; width:48px; height:48px; font-size:20px;
-    box-shadow:0 4px 20px rgba(13,148,136,.45); cursor:pointer;
-    display:flex;align-items:center;justify-content:center;
-    transition:.2s;
+
+  #analysis-panel{
+    position:absolute;top:0;right:0;bottom:0;z-index:100;
+    width:320px;flex-shrink:0;background:#0f172a;border-left:1px solid #1e293b;
+    display:flex;flex-direction:column;overflow:hidden;
+    transform:translateX(100%);transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);
   }
+  #analysis-panel.open{transform:translateX(0);}
+  .analysis-topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:#1e293b;border-bottom:1px solid #334155;flex-shrink:0;}
+  .analysis-title{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#94a3b8;}
+  .analysis-close{background:transparent;border:none;color:#64748b;cursor:pointer;font-size:16px;padding:2px 6px;border-radius:4px;transition:.15s;line-height:1;}
+  .analysis-close:hover{color:#e2e8f0;background:#334155;}
+  .analysis-body{flex:1;overflow-y:auto;padding:16px;}
+  .analysis-body::-webkit-scrollbar{width:4px;}
+  .analysis-body::-webkit-scrollbar-track{background:#0f172a;}
+  .analysis-body::-webkit-scrollbar-thumb{background:#334155;border-radius:2px;}
+  .a-section{margin-bottom:20px;}
+  .a-section-title{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#475569;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #1e293b;}
+  .a-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid rgba(30,41,59,0.5);}
+  .a-row:last-child{border-bottom:none;}
+  .a-key{font-family:var(--mono);font-size:11px;color:#64748b;}
+  .a-val{font-family:var(--mono);font-size:12px;font-weight:700;color:#2dd4bf;}
+  .a-val.warn{color:#f59e0b;}
+  .a-val.ok{color:#34d399;}
+  .a-val.na{color:#475569;}
+  .a-comp-card{background:#1e293b;border-radius:8px;padding:10px 12px;margin-bottom:8px;}
+  .a-comp-name{font-family:var(--mono);font-size:11px;font-weight:700;color:#94a3b8;margin-bottom:6px;}
+  .a-comp-row{display:flex;justify-content:space-between;margin-bottom:2px;}
+  .a-comp-key{font-family:var(--mono);font-size:10px;color:#475569;}
+  .a-comp-val{font-family:var(--mono);font-size:10px;font-weight:600;color:#7dd3fc;}
+  .a-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;font-family:var(--mono);font-size:10px;font-weight:700;}
+  .a-badge.ok{background:rgba(52,211,153,0.12);color:#34d399;border:1px solid rgba(52,211,153,0.25);}
+  .a-badge.warn{background:rgba(245,158,11,0.12);color:#f59e0b;border:1px solid rgba(245,158,11,0.25);}
+  .a-mode-badge{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:999px;background:rgba(13,148,136,0.15);color:#2dd4bf;border:1px solid rgba(13,148,136,0.3);}
+
+  #osc-toggle{position:fixed;bottom:20px;right:20px;z-index:200;background:var(--accent);color:#04201d;border:none;border-radius:50%;width:48px;height:48px;font-size:20px;box-shadow:0 4px 20px rgba(13,148,136,.45);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;}
   #osc-toggle:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(13,148,136,.6);}
-  #osc-panel{
-    position:fixed; bottom:80px; right:20px; z-index:199;
-    width:520px; background:#0f172a; border:1px solid #1e3a5f;
-    border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,.5);
-    font-family:var(--mono); color:#e2e8f0;
-    display:none; flex-direction:column; overflow:hidden;
-    resize:both; min-width:360px; min-height:260px; height: 320px;
-  }
+  #osc-panel{position:fixed;bottom:80px;right:20px;z-index:199;width:520px;background:#0f172a;border:1px solid #1e3a5f;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.5);font-family:var(--mono);color:#e2e8f0;display:none;flex-direction:column;overflow:hidden;resize:both;min-width:360px;min-height:260px;height:320px;}
   #osc-panel.open{display:flex;}
-  .osc-topbar{
-    display:flex;align-items:center;gap:8px;padding:10px 14px;
-    background:#1e293b; border-bottom:1px solid #334155;
-    cursor:move; user-select:none;
-  }
+  .osc-topbar{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#1e293b;border-bottom:1px solid #334155;cursor:move;user-select:none;}
   .osc-title{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#94a3b8;flex:1;}
-  .osc-btn{
-    font-family:var(--mono);font-size:10px;font-weight:600;
-    padding:4px 9px;border-radius:6px;border:1px solid #334155;
-    background:#0f172a;color:#94a3b8;cursor:pointer;transition:.15s;
-  }
+  .osc-btn{font-family:var(--mono);font-size:10px;font-weight:600;padding:4px 9px;border-radius:6px;border:1px solid #334155;background:#0f172a;color:#94a3b8;cursor:pointer;transition:.15s;}
   .osc-btn:hover{border-color:#0d9488;color:#2dd4bf;}
   .osc-btn.active{background:#0d9488;color:#04201d;border-color:#0d9488;}
   #osc-canvas{display:block;width:100%;background:#050d1a;flex:1;cursor:crosshair;}
-  .osc-footer{
-    display:flex;align-items:center;gap:8px;padding:8px 12px;
-    background:#1e293b;border-top:1px solid #334155;flex-wrap:wrap;
-  }
-  .osc-channel{
-    display:flex;align-items:center;gap:5px;
-    padding:4px 9px;border-radius:20px;font-size:10.5px;
-    border:1px solid; cursor:pointer; transition:.15s;
-  }
+  .osc-footer{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#1e293b;border-top:1px solid #334155;flex-wrap:wrap;}
+  .osc-channel{display:flex;align-items:center;gap:5px;padding:4px 9px;border-radius:20px;font-size:10.5px;border:1px solid;cursor:pointer;transition:.15s;}
   .osc-channel .dot{width:8px;height:8px;border-radius:50%;}
   .osc-channel.muted{opacity:.4;text-decoration:line-through;}
-  .osc-no-probe{
-    flex:1;text-align:center;font-size:11px;color:#475569;padding:6px;
-  }
+  .osc-no-probe{flex:1;text-align:center;font-size:11px;color:#475569;padding:6px;}
   .osc-readout{font-size:10px;color:#64748b;margin-left:auto;}
 </style>
 </head>
 <body>
 <div class="app">
   <div class="topbar">
-    <div class="brand">⚡ CIRCUIT SANDBOX</div>
+    <div class="brand">&#9889; CIRCUIT SANDBOX</div>
     <div class="sep"></div>
-    <button id="btnRun" class="primary">⏸ Pause</button>
-    <button id="btnClear">🗑 Clear</button>
-    <button id="btnFullscreen">⛶ Fullscreen</button>
+    <button id="btnRun" class="primary">&#9208; Pause</button>
+    <button id="btnClear">&#128465; Clear</button>
+    <button id="btnFullscreen">&#9014; Fullscreen</button>
     <div class="sep"></div>
-    <button id="btnRecordLab" style="color: #20c997; border-color: #20c997;">✅ Record</button>
-    <button id="btnCaptureLab" style="background: #1f7a72; color: #fff; border-color: #1f7a72;">📸 Capture</button>
-
-    <button id="btnSave">💾 Save</button>
-    <button id="btnLoad">📂 Load</button>
+    <button id="btnRecordLab" style="color:#20c997;border-color:#20c997;">&#10003; Record</button>
+    <button id="btnCaptureLab" style="background:#1f7a72;color:#fff;border-color:#1f7a72;">&#128248; Capture</button>
+    <div class="sep"></div>
+    <button id="btnAnalysis" title="Toggle Math Analysis Panel">&#8801; Analysis</button>
     <div class="spacer"></div>
-    <div class="hint" id="hint">Click a component from the left panel to select it, then click on the grid to place it.</div>
+    <div class="hint" id="hint">Click a component to select it, then click the grid to place it.</div>
+    <button id="btnSettings" title="Toggle Inspector" style="background:transparent;border:none;color:#64748b;font-size:18px;cursor:pointer;margin-left:8px;padding:4px;transition:0.2s;">&#9881;</button>
   </div>
   <div class="body">
     <div class="palette" id="palette"></div>
-    <div class="canvas-wrap">
-      <svg id="canvas" width="1600" height="1100"></svg>
+    <div class="canvas-wrap" id="canvasWrap">
+      <svg id="canvas"><g id="viewport-g"></g></svg>
+      <div class="zoom-controls">
+        <button class="zoom-btn" id="btnZoomIn" title="Zoom In (Ctrl+Scroll)">+</button>
+        <span class="zoom-level" id="zoomLabel">100%</span>
+        <button class="zoom-btn" id="btnZoomOut" title="Zoom Out">&#8722;</button>
+        <button class="zoom-btn" id="btnZoomReset" title="Reset View" style="font-size:11px;padding:4px 8px;">&#8966; Reset</button>
+      </div>
     </div>
     <div class="inspector" id="inspector"></div>
+    <div id="analysis-panel">
+      <div class="analysis-topbar">
+        <span class="analysis-title">&#9889; Live Analysis</span>
+        <span class="a-mode-badge" id="analysis-mode-badge">DC</span>
+        <button class="analysis-close" id="analysis-close-btn" title="Close">&#215;</button>
+      </div>
+      <div class="analysis-body" id="analysis-body">
+        <div style="color:#475569;font-family:var(--mono);font-size:11px;text-align:center;padding:40px 16px;line-height:1.8;">Build a complete circuit<br>to see live analysis.</div>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- Oscilloscope Toggle Button -->
-<button id="osc-toggle" title="Open Oscilloscope">📈</button>
-
-<!-- Oscilloscope Panel -->
+<button id="osc-toggle" title="Open Oscilloscope">&#128200;</button>
 <div id="osc-panel">
   <div class="osc-topbar" id="osc-drag-handle">
-    <span class="osc-title">⚡ Oscilloscope</span>
-    <select id="osc-probe-sel" style="font-family:var(--mono);font-size:11px;background:#0f172a;color:#94a3b8;border:1px solid #334155;border-radius:6px;padding:3px 6px;">
-      <option value="">— Probe a component —</option>
-    </select>
+    <span class="osc-title">&#9889; Scope</span>
+    <select id="osc-probe-sel" style="font-family:var(--mono);font-size:11px;background:#0f172a;color:#94a3b8;border:1px solid #334155;border-radius:4px;padding:2px 4px;"><option value="">&#8212; Probe &#8212;</option></select>
     <button class="osc-btn" id="osc-add-ch">+ Add</button>
-    <button class="osc-btn" id="osc-clear-ch">Clear All</button>
-    <button class="osc-btn" id="osc-freeze">❄ Freeze</button>
-    <button class="osc-btn" id="osc-close">✕</button>
+    <select id="osc-timebase" title="Time Window" style="font-family:var(--mono);font-size:11px;background:#0f172a;color:#94a3b8;border:1px solid #334155;border-radius:4px;padding:2px 4px;">
+      <option value="1">1s</option>
+      <option value="2">2s</option>
+      <option value="4" selected>4s</option>
+      <option value="10">10s</option>
+    </select>
+    <select id="osc-yscale" title="Vertical Scale" style="font-family:var(--mono);font-size:11px;background:#0f172a;color:#94a3b8;border:1px solid #334155;border-radius:4px;padding:2px 4px;">
+      <option value="auto" selected>Auto Y</option>
+      <option value="5">Fixed 5</option>
+      <option value="10">Fixed 10</option>
+      <option value="50">Fixed 50</option>
+    </select>
+    <button class="osc-btn" id="osc-clear-ch" title="Clear All">&#128465;</button>
+    <button class="osc-btn" id="osc-freeze" title="Freeze">&#10052;</button>
+    <button class="osc-btn" id="osc-capture" title="Capture" style="color:#2dd4bf;border-color:#0d9488;">&#128248;</button>
+    <button class="osc-btn" id="osc-maximize" title="Maximize">&#9744;</button>
+    <button class="osc-btn" id="osc-close" title="Close">&#215;</button>
   </div>
   <canvas id="osc-canvas" height="200"></canvas>
-  <div class="osc-footer" id="osc-footer">
-    <span class="osc-no-probe">Add a component probe above to start plotting ↑</span>
-  </div>
+  <div class="osc-footer" id="osc-footer"><span class="osc-no-probe">Add a component probe above to start plotting &#8593;</span></div>
 </div>
 
 <script>
-const GMIN = 1e-9;
-class DSU{
-  constructor(){ this.parent = new Map(); }
-  find(x){ if(!this.parent.has(x)) this.parent.set(x,x);
-    let root=x; while(this.parent.get(root)!==root) root=this.parent.get(root);
-    let cur=x; while(this.parent.get(cur)!==root){ const nx=this.parent.get(cur); this.parent.set(cur,root); cur=nx; }
-    return root; }
-  union(a,b){ const ra=this.find(a), rb=this.find(b); if(ra!==rb) this.parent.set(ra,rb); }
-}
-const REF = (compId,t)=> compId+'#'+t;
-const GND = '__GND__';
+const GMIN=1e-9;
+class DSU{constructor(){this.parent=new Map();}find(x){if(!this.parent.has(x))this.parent.set(x,x);let root=x;while(this.parent.get(root)!==root)root=this.parent.get(root);let cur=x;while(this.parent.get(cur)!==root){const nx=this.parent.get(cur);this.parent.set(cur,root);cur=nx;}return root;}union(a,b){const ra=this.find(a),rb=this.find(b);if(ra!==rb)this.parent.set(ra,rb);}}
+const REF=(compId,t)=>compId+'#'+t;
+const GND='__GND__';
 
-function buildDSU(components, wires){
-  const dsu = new DSU(); dsu.find(GND);
-  wires.forEach(w=> dsu.union(REF(w.a.compId,w.a.t), REF(w.b.compId,w.b.t)));
+function buildDSU(components,wires){const dsu=new DSU();dsu.find(GND);wires.forEach(w=>dsu.union(REF(w.a.compId,w.a.t),REF(w.b.compId,w.b.t)));components.forEach(c=>{if(c.type==='switch'&&c.on)dsu.union(REF(c.id,0),REF(c.id,1));if(c.type==='ground')dsu.union(REF(c.id,0),GND);});return dsu;}
+
+function solveCircuit(components,wires,dt,t,history){
+  history=history||{};
+  const dsu=buildDSU(components,wires);
+  const root=(compId,tIdx)=>dsu.find(REF(compId,tIdx));
+  const nodeSet=new Set();
+  components.forEach(c=>{if(c.type==='ground')return;for(let i=0;i<2;i++)nodeSet.add(root(c.id,i));});
+  const gndRoot=dsu.find(GND);nodeSet.add(gndRoot);
+  const nodeList=[...nodeSet].filter(n=>n!==gndRoot);
+  const nIndex=new Map(nodeList.map((n,i)=>[n,i]));
+  const N=nodeList.length;
+  const vSources=components.filter(c=>c.type==='battery'||c.type==='acsource');
+  const M=vSources.length,size=N+M;
+  const A=Array.from({length:size},()=>new Array(size).fill(0));
+  const z=new Array(size).fill(0);
+  const vidx=(r)=>r===gndRoot?-1:nIndex.get(r);
+  for(let i=0;i<N;i++)A[i][i]+=GMIN;
+  function stampG(nA,nB,G){const a=vidx(nA),b=vidx(nB);if(a>=0)A[a][a]+=G;if(b>=0)A[b][b]+=G;if(a>=0&&b>=0){A[a][b]-=G;A[b][a]-=G;}}
+  function stampI(nA,nB,I){const a=vidx(nA),b=vidx(nB);if(a>=0)z[a]+=I;if(b>=0)z[b]-=I;}
   components.forEach(c=>{
-    if(c.type==='switch' && c.on) dsu.union(REF(c.id,0), REF(c.id,1));
-    if(c.type==='ground') dsu.union(REF(c.id,0), GND);
-  });
-  return dsu;
-}
-
-function solveCircuit(components, wires, dt, t, history){
-  history = history || {};
-  const dsu = buildDSU(components, wires);
-  const root = (compId,tIdx)=> dsu.find(REF(compId,tIdx));
-  const nodeSet = new Set();
-  components.forEach(c=>{ if(c.type==='ground') return; for(let i=0;i<2;i++) nodeSet.add(root(c.id,i)); });
-  const gndRoot = dsu.find(GND); nodeSet.add(gndRoot);
-  const nodeList = [...nodeSet].filter(n=>n!==gndRoot);
-  const nIndex = new Map(nodeList.map((n,i)=>[n,i]));
-  const N = nodeList.length;
-  const vSources = components.filter(c=> c.type==='battery' || c.type==='acsource');
-  const M = vSources.length, size = N+M;
-  const A = Array.from({length:size},()=>new Array(size).fill(0));
-  const z = new Array(size).fill(0);
-  const vidx = (r)=> r===gndRoot ? -1 : nIndex.get(r);
-  for(let i=0;i<N;i++) A[i][i]+=GMIN;
-  function stampG(nA,nB,G){ const a=vidx(nA), b=vidx(nB);
-    if(a>=0) A[a][a]+=G; if(b>=0) A[b][b]+=G;
-    if(a>=0&&b>=0){ A[a][b]-=G; A[b][a]-=G; } }
-  function stampI(nA,nB,I){ const a=vidx(nA), b=vidx(nB); if(a>=0) z[a]+=I; if(b>=0) z[b]-=I; }
-
-  components.forEach(c=>{
-    if(c.type==='ground' || c.type==='switch' || c.type==='junction') return;
-    const n1=root(c.id,0), n2=root(c.id,1);
+    if(c.type==='ground'||c.type==='switch'||c.type==='junction')return;
+    const n1=root(c.id,0),n2=root(c.id,1);
     switch(c.type){
-      case 'resistor': case 'bulb': stampG(n1,n2, 1/Math.max(c.value,1e-6)); break;
-      case 'voltmeter': stampG(n1,n2, 1/10e6); break;
-      case 'ammeter': stampG(n1,n2, 1/0.001); break;
-      case 'galvanometer': stampG(n1,n2, 1/(c.value||100)); break;
-      case 'capacitor': { const G=Math.max(c.value,1e-12)/dt; const vPrev=history[c.id]||0; stampG(n1,n2,G); stampI(n1,n2,G*vPrev); break; }
-      case 'inductor': { const G=dt/Math.max(c.value,1e-9); const iPrev=history[c.id]||0; stampG(n1,n2,G); stampI(n2,n1,iPrev); break; }
-      default: break;
+      case 'resistor':case 'bulb':stampG(n1,n2,1/Math.max(c.value,1e-6));break;
+      case 'voltmeter':stampG(n1,n2,1/10e6);break;
+      case 'ammeter':stampG(n1,n2,1/0.001);break;
+      case 'galvanometer':stampG(n1,n2,1/(c.value||100));break;
+      case 'capacitor':{const G=Math.max(c.value,1e-12)/dt;const vPrev=history[c.id]||0;stampG(n1,n2,G);stampI(n1,n2,G*vPrev);break;}
+      case 'inductor':{const G=dt/Math.max(c.value,1e-9);const iPrev=history[c.id]||0;stampG(n1,n2,G);stampI(n2,n1,iPrev);break;}
+      default:break;
     }
   });
   vSources.forEach((c,k)=>{
-    const n1=root(c.id,0), n2=root(c.id,1), row=N+k;
-    const a=vidx(n1), b=vidx(n2);
-    if(a>=0){ A[a][row]+=1; A[row][a]+=1; }
-    if(b>=0){ A[b][row]-=1; A[row][b]-=1; }
-    z[row] = (c.type==='acsource') ? c.value*Math.sin(2*Math.PI*(c.freq||2)*t) : c.value;
+    const n1=root(c.id,0),n2=root(c.id,1),row=N+k;
+    const a=vidx(n1),b=vidx(n2);
+    if(a>=0){A[a][row]+=1;A[row][a]+=1;}if(b>=0){A[b][row]-=1;A[row][b]-=1;}
+    z[row]=(c.type==='acsource')?c.value*Math.sin(2*Math.PI*(c.freq||2)*t):c.value;
   });
-  const x = gaussSolve(A,z);
-  if(!x) return null;
-  const V = (r)=> r===gndRoot?0:x[nIndex.get(r)];
-  const readings = {}, newHistory = {};
+  const x=gaussSolve(A,z);if(!x)return null;
+  const V=(r)=>r===gndRoot?0:x[nIndex.get(r)];
+  const readings={},newHistory={};
   components.forEach(c=>{
-    if(c.type==='ground' || c.type==='junction'){ readings[c.id]={}; return; }
-    if(c.type==='switch'){ readings[c.id]={on:c.on}; return; }
-    const n1=root(c.id,0), n2=root(c.id,1); const Vd=V(n1)-V(n2);
+    if(c.type==='ground'||c.type==='junction'){readings[c.id]={};return;}
+    if(c.type==='switch'){readings[c.id]={on:c.on};return;}
+    const n1=root(c.id,0),n2=root(c.id,1);const Vd=V(n1)-V(n2);
     switch(c.type){
-      case 'resistor': case 'bulb': { const Rv=Math.max(c.value,1e-6); const I=Vd/Rv; readings[c.id]={V:Vd,I,P:Vd*I}; break; }
-      case 'voltmeter': readings[c.id]={V:Vd}; break;
-      case 'ammeter': readings[c.id]={I:Vd/0.001}; break;
-      case 'galvanometer': readings[c.id]={I:Vd/(c.value||100), V:Vd}; break;
-      case 'capacitor': { const G=Math.max(c.value,1e-12)/dt; const vPrev=history[c.id]||0; readings[c.id]={V:Vd,I:G*Vd-G*vPrev}; newHistory[c.id]=Vd; break; }
-      case 'inductor': { const G=dt/Math.max(c.value,1e-9); const iPrev=history[c.id]||0; const I=G*Vd+iPrev; readings[c.id]={V:Vd,I}; newHistory[c.id]=I; break; }
-      case 'battery': case 'acsource': { const k=vSources.indexOf(c); readings[c.id]={V:Vd, I:x[N+k]}; break; }
-      default: break;
+      case 'resistor':case 'bulb':{const Rv=Math.max(c.value,1e-6);const I=Vd/Rv;readings[c.id]={V:Vd,I,P:Vd*I};break;}
+      case 'voltmeter':readings[c.id]={V:Vd};break;
+      case 'ammeter':readings[c.id]={I:Vd/0.001};break;
+      case 'galvanometer':readings[c.id]={I:Vd/(c.value||100),V:Vd};break;
+      case 'capacitor':{const G=Math.max(c.value,1e-12)/dt;const vPrev=history[c.id]||0;readings[c.id]={V:Vd,I:G*Vd-G*vPrev};newHistory[c.id]=Vd;break;}
+      case 'inductor':{const G=dt/Math.max(c.value,1e-9);const iPrev=history[c.id]||0;const I=G*Vd+iPrev;readings[c.id]={V:Vd,I};newHistory[c.id]=I;break;}
+      case 'battery':case 'acsource':{const k=vSources.indexOf(c);readings[c.id]={V:Vd,I:x[N+k]};break;}
+      default:break;
     }
   });
-  return {readings, history:newHistory};
+  return{readings,history:newHistory};
 }
 
 function gaussSolve(Ain,zin){
-  const n=zin.length; const A=Ain.map(r=>r.slice()), z=zin.slice();
-  for(let col=0; col<n; col++){
-    let piv=col;
-    for(let r=col+1;r<n;r++) if(Math.abs(A[r][col])>Math.abs(A[piv][col])) piv=r;
-    if(Math.abs(A[piv][col])<1e-14) continue;
-    if(piv!==col){ [A[col],A[piv]]=[A[piv],A[col]]; [z[col],z[piv]]=[z[piv],z[col]]; }
+  const n=zin.length;const A=Ain.map(r=>r.slice()),z=zin.slice();
+  for(let col=0;col<n;col++){
+    let piv=col;for(let r=col+1;r<n;r++)if(Math.abs(A[r][col])>Math.abs(A[piv][col]))piv=r;
+    if(Math.abs(A[piv][col])<1e-14)continue;
+    if(piv!==col){[A[col],A[piv]]=[A[piv],A[col]];[z[col],z[piv]]=[z[piv],z[col]];}
     const pv=A[col][col];
-    for(let r=0;r<n;r++){ if(r===col) continue; const f=A[r][col]/pv; if(f===0) continue;
-      for(let cc=col; cc<n; cc++) A[r][cc]-=f*A[col][cc]; z[r]-=f*z[col]; }
+    for(let r=0;r<n;r++){if(r===col)continue;const f=A[r][col]/pv;if(f===0)continue;for(let cc=col;cc<n;cc++)A[r][cc]-=f*A[col][cc];z[r]-=f*z[col];}
   }
   const x=new Array(n).fill(0);
-  for(let i=0;i<n;i++) x[i]=Math.abs(A[i][i])<1e-14?0:z[i]/A[i][i];
+  for(let i=0;i<n;i++)x[i]=Math.abs(A[i][i])<1e-14?0:z[i]/A[i][i];
   return x;
 }
 
-const GRID = 40;
-const COMP_TYPES = {
-  resistor:     {label:'Resistor',      unit:'Ω',  def:100,  terms:2},
-  bulb:         {label:'Bulb',          unit:'Ω',  def:20,   terms:2},
-  capacitor:    {label:'Capacitor',     unit:'µF', def:100,  terms:2},
-  inductor:     {label:'Inductor',      unit:'mH', def:100,  terms:2},
-  switch:       {label:'Switch',        unit:'',   def:null, terms:2},
-  voltmeter:    {label:'Voltmeter',     unit:'',   def:null, terms:2},
-  ammeter:      {label:'Ammeter',       unit:'',   def:null, terms:2},
-  galvanometer: {label:'Galvanometer',  unit:'Ω',  def:100,  terms:2},
-  battery:      {label:'Battery (DC)',  unit:'V',  def:9,    terms:2},
-  acsource:     {label:'AC Source',     unit:'V',  def:10,   terms:2, extra:{key:'freq',label:'Frequency',unit:'Hz',def:2}},
-  ground:       {label:'Ground',        unit:'',   def:null, terms:1},
-  junction:     {label:'Junction Node', unit:'',   def:null, terms:1},
+const GRID=40;
+const COMP_TYPES={
+  resistor:{label:'Resistor',unit:'&#937;',def:100,terms:2},
+  bulb:{label:'Bulb',unit:'&#937;',def:20,terms:2},
+  capacitor:{label:'Capacitor',unit:'&#181;F',def:100,terms:2},
+  inductor:{label:'Inductor',unit:'mH',def:100,terms:2},
+  switch:{label:'Switch',unit:'',def:null,terms:2},
+  voltmeter:{label:'Voltmeter',unit:'',def:null,terms:2},
+  ammeter:{label:'Ammeter',unit:'',def:null,terms:2},
+  galvanometer:{label:'Galvanometer',unit:'&#937;',def:100,terms:2},
+  battery:{label:'Battery (DC)',unit:'V',def:9,terms:2},
+  acsource:{label:'AC Source',unit:'V',def:10,terms:2,extra:{key:'freq',label:'Frequency',unit:'Hz',def:2}},
+  ground:{label:'Ground',unit:'',def:null,terms:1},
+  junction:{label:'Junction Node',unit:'',def:null,terms:1},
 };
+// Plain unit strings for JS logic
+const UNITS={resistor:'Ohm',bulb:'Ohm',capacitor:'uF',inductor:'mH',battery:'V',acsource:'V',galvanometer:'Ohm'};
 
-function localTerminals(type){
-  if(type==='ground') return [{dx:0,dy:-28}];
-  if(type==='junction') return [{dx:0,dy:0}];
-  return [{dx:-40,dy:0},{dx:40,dy:0}];
-}
-function rotatePt(dx,dy,deg){
-  const rad = deg*Math.PI/180;
-  return { x: dx*Math.cos(rad)-dy*Math.sin(rad), y: dx*Math.sin(rad)+dy*Math.cos(rad) };
-}
-function absTerminal(c, idx){
-  const lt = localTerminals(c.type)[idx];
-  const r = rotatePt(lt.dx, lt.dy, c.rotation||0);
-  return { x: c.x+r.x, y: c.y+r.y };
-}
+function localTerminals(type){if(type==='ground')return[{dx:0,dy:-28}];if(type==='junction')return[{dx:0,dy:0}];return[{dx:-40,dy:0},{dx:40,dy:0}];}
+function rotatePt(dx,dy,deg){const rad=deg*Math.PI/180;return{x:dx*Math.cos(rad)-dy*Math.sin(rad),y:dx*Math.sin(rad)+dy*Math.cos(rad)};}
+function absTerminal(c,idx){const lt=localTerminals(c.type)[idx];const r=rotatePt(lt.dx,lt.dy,c.rotation||0);return{x:c.x+r.x,y:c.y+r.y};}
 
 function iconInner(c){
   switch(c.type){
-    case 'resistor':
-      return `<path class="lead" d="M-40,0 L-22,0"/><path class="lead" d="M22,0 L40,0"/>
-              <path class="icon-line" d="M-22,0 L-14,0 L-10,-9 L-2,9 L6,-9 L14,9 L18,0 L22,0"/>`;
-    case 'bulb': {
-      const p = Math.min(1, (c._P||0)/2);
-      return `<path class="lead" d="M-40,0 L-16,0"/><path class="lead" d="M16,0 L40,0"/>
-              <circle cx="0" cy="0" r="16" fill="rgba(245,165,36,${0.12+0.7*p})" stroke="#f5a524" stroke-width="2"/>
-              <path class="icon-line" stroke="#f5a524" d="M-9,-9 L9,9 M9,-9 L-9,9"/>`;
-    }
-    case 'capacitor':
-      return `<path class="lead" d="M-40,0 L-6,0"/><path class="lead" d="M6,0 L40,0"/>
-              <path class="icon-line" d="M-6,-14 L-6,14 M6,-14 L6,14"/>`;
-    case 'inductor':
-      return `<path class="lead" d="M-40,0 L-24,0"/><path class="lead" d="M24,0 L40,0"/>
-              <path class="icon-line" d="M-24,0 Q-16,-16 -8,0 Q0,-16 8,0 Q16,-16 24,0"/>`;
-    case 'switch': {
-      const closed = !!c.on;
-      return `<path class="lead" d="M-40,0 L-14,0"/><path class="lead" d="M14,0 L40,0"/>
-              <circle cx="-14" cy="0" r="3.5" fill="var(--muted)"/><circle cx="14" cy="0" r="3.5" fill="var(--muted)"/>
-              <path class="icon-line" stroke="${closed?'#2dd4c8':'#f5556e'}" d="M-14,0 L${closed?14:5},${closed?0:-16}"/>`;
-    }
-    case 'voltmeter':
-      return `<path class="lead" d="M-40,0 L-18,0"/><path class="lead" d="M18,0 L40,0"/>
-              <circle cx="0" cy="0" r="18" fill="var(--panel2)" stroke="var(--muted)" stroke-width="2"/>
-              <text x="0" y="5" text-anchor="middle" font-family="IBM Plex Mono" font-weight="700" font-size="14" fill="var(--text)">V</text>`;
-    case 'ammeter':
-      return `<path class="lead" d="M-40,0 L-18,0"/><path class="lead" d="M18,0 L40,0"/>
-              <circle cx="0" cy="0" r="18" fill="var(--panel2)" stroke="var(--muted)" stroke-width="2"/>
-              <text x="0" y="5" text-anchor="middle" font-family="IBM Plex Mono" font-weight="700" font-size="14" fill="var(--text)">A</text>`;
-    case 'galvanometer':
-      return `<path class="lead" d="M-40,0 L-18,0"/><path class="lead" d="M18,0 L40,0"/>
-              <circle cx="0" cy="0" r="18" fill="var(--panel2)" stroke="var(--muted)" stroke-width="2"/>
-              <text x="0" y="13" text-anchor="middle" font-family="IBM Plex Mono" font-weight="700" font-size="9" fill="var(--text)">G</text>
-              <g data-needle="1"><line x1="0" y1="0" x2="0" y2="-13" stroke="#2dd4c8" stroke-width="2" stroke-linecap="round"/></g>`;
-    case 'battery':
-      return `<path class="lead" d="M-40,0 L-10,0"/><path class="lead" d="M10,0 L40,0"/>
-              <path class="icon-line" d="M-10,-16 L-10,16"/><path class="icon-line" stroke-width="4" d="M-2,-9 L-2,9"/>
-              <path class="icon-line" d="M2,-16 L2,16"/><path class="icon-line" stroke-width="4" d="M10,-9 L10,9"/>
-              <text x="-22" y="-14" font-family="IBM Plex Mono" font-size="13" fill="#2dd4c8">+</text>`;
-    case 'acsource':
-      return `<path class="lead" d="M-40,0 L-18,0"/><path class="lead" d="M18,0 L40,0"/>
-              <circle cx="0" cy="0" r="18" fill="var(--panel2)" stroke="var(--muted)" stroke-width="2"/>
-              <path class="icon-line" d="M-9,2 Q-5,-9 0,2 Q5,13 9,2"/>`;
-    case 'junction':
-      return `<circle cx="0" cy="0" r="8" fill="var(--muted)"/>`;
-    case 'ground':
-      return `<path class="lead" d="M0,-28 L0,-8"/>
-              <path class="icon-line" d="M-14,-8 L14,-8"/>
-              <path class="icon-line" d="M-8,-2 L8,-2"/>
-              <path class="icon-line" d="M-3,4 L3,4"/>`;
-    default: return '';
+    case 'resistor':return`<path class="lead" d="M-40,0 L-22,0"/><path class="lead" d="M22,0 L40,0"/><path class="icon-line" d="M-22,0 L-14,0 L-10,-9 L-2,9 L6,-9 L14,9 L18,0 L22,0"/>`;
+    case 'bulb':{const p=Math.min(1,(c._P||0)/2);return`<path class="lead" d="M-40,0 L-16,0"/><path class="lead" d="M16,0 L40,0"/><circle cx="0" cy="0" r="16" fill="rgba(245,165,36,${0.12+0.7*p})" stroke="#f5a524" stroke-width="2"/><path class="icon-line" stroke="#f5a524" d="M-9,-9 L9,9 M9,-9 L-9,9"/>`;}
+    case 'capacitor':return`<path class="lead" d="M-40,0 L-6,0"/><path class="lead" d="M6,0 L40,0"/><path class="icon-line" d="M-6,-14 L-6,14 M6,-14 L6,14"/>`;
+    case 'inductor':return`<path class="lead" d="M-40,0 L-24,0"/><path class="lead" d="M24,0 L40,0"/><path class="icon-line" d="M-24,0 Q-16,-16 -8,0 Q0,-16 8,0 Q16,-16 24,0"/>`;
+    case 'switch':{const cl=!!c.on;return`<path class="lead" d="M-40,0 L-14,0"/><path class="lead" d="M14,0 L40,0"/><circle cx="-14" cy="0" r="3.5" fill="var(--muted)"/><circle cx="14" cy="0" r="3.5" fill="var(--muted)"/><path class="icon-line" stroke="${cl?'#2dd4c8':'#f5556e'}" d="M-14,0 L${cl?14:5},${cl?0:-16}"/>`;}
+    case 'voltmeter':return`<path class="lead" d="M-40,0 L-18,0"/><path class="lead" d="M18,0 L40,0"/><circle cx="0" cy="0" r="18" fill="var(--panel2)" stroke="var(--muted)" stroke-width="2"/><text x="0" y="5" text-anchor="middle" font-family="IBM Plex Mono" font-weight="700" font-size="14" fill="var(--text)">V</text>`;
+    case 'ammeter':return`<path class="lead" d="M-40,0 L-18,0"/><path class="lead" d="M18,0 L40,0"/><circle cx="0" cy="0" r="18" fill="var(--panel2)" stroke="var(--muted)" stroke-width="2"/><text x="0" y="5" text-anchor="middle" font-family="IBM Plex Mono" font-weight="700" font-size="14" fill="var(--text)">A</text>`;
+    case 'galvanometer':return`<path class="lead" d="M-40,0 L-18,0"/><path class="lead" d="M18,0 L40,0"/><circle cx="0" cy="0" r="18" fill="var(--panel2)" stroke="var(--muted)" stroke-width="2"/><text x="0" y="13" text-anchor="middle" font-family="IBM Plex Mono" font-weight="700" font-size="9" fill="var(--text)">G</text><g data-needle="1"><line x1="0" y1="0" x2="0" y2="-13" stroke="#2dd4c8" stroke-width="2" stroke-linecap="round"/></g>`;
+    case 'battery':return`<path class="lead" d="M-40,0 L-10,0"/><path class="lead" d="M10,0 L40,0"/><path class="icon-line" d="M-10,-16 L-10,16"/><path class="icon-line" stroke-width="4" d="M-2,-9 L-2,9"/><path class="icon-line" d="M2,-16 L2,16"/><path class="icon-line" stroke-width="4" d="M10,-9 L10,9"/><text x="-22" y="-14" font-family="IBM Plex Mono" font-size="13" fill="#2dd4c8">+</text>`;
+    case 'acsource':return`<path class="lead" d="M-40,0 L-18,0"/><path class="lead" d="M18,0 L40,0"/><circle cx="0" cy="0" r="18" fill="var(--panel2)" stroke="var(--muted)" stroke-width="2"/><path class="icon-line" d="M-9,2 Q-5,-9 0,2 Q5,13 9,2"/>`;
+    case 'junction':return`<circle cx="0" cy="0" r="8" fill="var(--muted)"/>`;
+    case 'ground':return`<path class="lead" d="M0,-28 L0,-8"/><path class="icon-line" d="M-14,-8 L14,-8"/><path class="icon-line" d="M-8,-2 L8,-2"/><path class="icon-line" d="M-3,4 L3,4"/>`;
+    default:return'';
   }
 }
-function paletteIcon(type){
-  return `<svg viewBox="-42 -22 84 44">${iconInner({type})}</svg>`;
+function paletteIcon(t){return`<svg viewBox="-42 -22 84 44">${iconInner({type:t})}</svg>`;}
+
+let components=[],wires=[],simHistory={},simTime=0,running=true,selected=null,placing=null,drag=null,drawingWire=null,uidCounter=1;
+const uid=()=>'c'+(uidCounter++);
+
+// Zoom/pan state
+let zoom=1,panX=0,panY=0;
+function updateViewport(){
+  const vp=document.getElementById('viewport-g');
+  if(vp)vp.setAttribute('transform',`translate(${panX},${panY}) scale(${zoom})`);
+  document.getElementById('zoomLabel').textContent=Math.round(zoom*100)+'%';
 }
 
-let components = [];
-let wires = [];
-let simHistory = {};
-let simTime = 0;
-let running = true;
-let selected = null;
-let placing = null;
-let drag = null;
-let drawingWire = null;
-let uidCounter = 1;
-const uid = ()=> 'c'+(uidCounter++);
-
-// Expose globals for the oscilloscope
 Object.defineProperty(window,'_sbComponents',{get:()=>components});
 Object.defineProperty(window,'_sbCompTypes',{get:()=>COMP_TYPES});
 Object.defineProperty(window,'_sbSimTime',{get:()=>simTime});
 
-function addComponent(type, x, y){
-  const def = COMP_TYPES[type];
-  const c = { id: uid(), type, x, y, rotation:0, value: def.def };
-  if(type==='switch') c.on = true;
-  if(def.extra) c[def.extra.key] = def.extra.def;
-  components.push(c);
-  return c;
-}
-function removeComponent(id){
-  components = components.filter(c=>c.id!==id);
-  wires = wires.filter(w=> w.a.compId!==id && w.b.compId!==id);
-  delete simHistory[id];
-}
-function addWire(a,b){
-  if(a.compId===b.compId && a.t===b.t) return;
-  wires.push({id:'w'+uid(), a, b});
-}
+function addComponent(type,x,y){const def=COMP_TYPES[type];const c={id:uid(),type,x,y,rotation:0,value:def.def};if(type==='switch')c.on=true;if(def.extra)c[def.extra.key]=def.extra.def;components.push(c);return c;}
+function removeComponent(id){components=components.filter(c=>c.id!==id);wires=wires.filter(w=>w.a.compId!==id&&w.b.compId!==id);delete simHistory[id];}
+function addWire(a,b){if(a.compId===b.compId&&a.t===b.t)return;wires.push({id:'w'+uid(),a,b});}
 
-const svg = document.getElementById('canvas');
+const svg=document.getElementById('canvas');
 
-function wirePath(w){
-  const ca = components.find(c=>c.id===w.a.compId), cb = components.find(c=>c.id===w.b.compId);
-  if(!ca||!cb) return '';
-  const p1 = absTerminal(ca,w.a.t), p2 = absTerminal(cb,w.b.t);
-  return `M${p1.x},${p1.y} L${p2.x},${p2.y}`;
-}
+function wirePath(w){const ca=components.find(c=>c.id===w.a.compId),cb=components.find(c=>c.id===w.b.compId);if(!ca||!cb)return'';const p1=absTerminal(ca,w.a.t),p2=absTerminal(cb,w.b.t);return`M${p1.x},${p1.y} L${p2.x},${p2.y}`;}
 
 function render(){
-  let html = '';
+  let html='';
   wires.forEach(w=>{
-    html += `<path class="wire-hitbox" data-role="wire" data-w="${w.id}" d="${wirePath(w)}" stroke="transparent" stroke-width="20" fill="none" style="cursor:pointer; pointer-events:all;"/>`;
-    html += `<path class="wire ${selected&&selected.kind==='wire'&&selected.id===w.id?'selected':''}" data-role="wire" data-id="${w.id}" d="${wirePath(w)}" style="pointer-events:none;"/>`;
+    html+=`<path class="wire-hitbox" data-role="wire" data-w="${w.id}" d="${wirePath(w)}" stroke="transparent" stroke-width="20" fill="none" style="cursor:pointer;pointer-events:all;"/>`;
+    html+=`<path class="wire ${selected&&selected.kind==='wire'&&selected.id===w.id?'selected':''}" data-role="wire" data-id="${w.id}" d="${wirePath(w)}" style="pointer-events:none;"/>`;
   });
   components.forEach(c=>{
-    const def = COMP_TYPES[c.type];
-    const terms = localTerminals(c.type);
-    let termHtml = terms.map((lt,idx)=>{
-      return `<circle class="terminal" data-role="terminal" data-comp="${c.id}" data-t="${idx}" cx="${lt.dx}" cy="${lt.dy}" r="6"/>`;
-    }).join('');
-    const isSel = selected && selected.kind==='comp' && selected.id===c.id;
-    const valLabel = (def.def!==null) ? `${fmtVal(c.value)}${def.unit}` : '';
-    html += `<g class="comp-body ${isSel?'selected':''}" data-role="body" data-comp="${c.id}"
-                transform="translate(${c.x},${c.y}) rotate(${c.rotation||0})">
-        <rect class="body-outline" x="-46" y="-24" width="92" height="48" rx="10" fill="transparent" stroke="transparent" pointer-events="all"/>
-        ${iconInner(c)}
-        ${termHtml}
-      </g>
+    const def=COMP_TYPES[c.type];
+    const terms=localTerminals(c.type);
+    let termHtml=terms.map((lt,idx)=>`<circle class="terminal" data-role="terminal" data-comp="${c.id}" data-t="${idx}" cx="${lt.dx}" cy="${lt.dy}" r="6"/>`).join('');
+    const isSel=selected&&selected.kind==='comp'&&selected.id===c.id;
+    const valLabel=(def.def!==null)?`${fmtVal(c.value)}`:'';
+    html+=`<g class="comp-body ${isSel?'selected':''}" data-role="body" data-comp="${c.id}" transform="translate(${c.x},${c.y}) rotate(${c.rotation||0})">
+      <rect class="body-outline" x="-46" y="-24" width="92" height="48" rx="10" fill="transparent" stroke="transparent" pointer-events="all"/>
+      ${iconInner(c)}${termHtml}</g>
       <text class="label-name" x="${c.x}" y="${c.y-48}">${def.label}</text>
       ${valLabel?`<text class="label-val" x="${c.x}" y="${c.y+48}">${valLabel}</text>`:''}
       <text class="label-read" data-role="reading" data-comp="${c.id}" x="${c.x}" y="${c.y+62}"></text>
-      ${isSel ? `
-        <g class="ctx-btn" data-role="ctx-rotate" data-comp="${c.id}" transform="translate(${c.x-30},${c.y-40})">
-          <circle cx="0" cy="0" r="14" stroke="var(--border)" stroke-width="1.5"/>
-          <text x="0" y="4" font-size="14" fill="var(--text)" text-anchor="middle">↻</text>
-        </g>
-        <g class="ctx-btn" data-role="ctx-delete" data-comp="${c.id}" transform="translate(${c.x+30},${c.y-40})">
-          <circle cx="0" cy="0" r="14" stroke="var(--danger)" stroke-width="1.5"/>
-          <text x="0" y="4.5" font-size="13" fill="var(--danger)" text-anchor="middle">🗑</text>
-        </g>
-      ` : ''}
-    `;
+      ${isSel?`
+      <g class="ctx-btn" data-role="ctx-rotate" data-comp="${c.id}" transform="translate(${c.x-30},${c.y-40})">
+        <circle cx="0" cy="0" r="14" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="0" y="4" font-size="14" fill="var(--text)" text-anchor="middle">&#8635;</text>
+      </g>
+      <g class="ctx-btn" data-role="ctx-delete" data-comp="${c.id}" transform="translate(${c.x+30},${c.y-40})">
+        <circle cx="0" cy="0" r="14" stroke="var(--danger)" stroke-width="1.5"/>
+        <text x="0" y="4.5" font-size="13" fill="var(--danger)" text-anchor="middle">&#128465;</text>
+      </g>`:''}`;
   });
-  svg.innerHTML = html;
-}
-function fmtVal(v){
-  if(v===null||v===undefined) return '';
-  if(Math.abs(v)>=1000) return (v/1000).toFixed(v%1000===0?0:1)+'k';
-  return (v%1===0)? String(v) : v.toFixed(2);
+  document.getElementById('viewport-g').innerHTML=html;
+  updateViewport();
 }
 
+function fmtVal(v){if(v===null||v===undefined)return'';if(Math.abs(v)>=1000)return(v/1000).toFixed(v%1000===0?0:1)+'k';return(v%1===0)?String(v):v.toFixed(2);}
+
 function renderPalette(){
-  const groups = [
-    ['Sources', ['battery','acsource','ground']],
-    ['Passive', ['resistor','bulb','capacitor','inductor','switch','junction']],
-    ['Meters', ['voltmeter','ammeter','galvanometer']],
-  ];
+  const groups=[['Sources',['battery','acsource','ground']],['Passive',['resistor','bulb','capacitor','inductor','switch','junction']],['Meters',['voltmeter','ammeter','galvanometer']]];
   let html='';
-  groups.forEach(([title, types])=>{
-    html += `<h4>${title}</h4>`;
-    types.forEach(t=>{
-      html += `<div class="pitem" data-type="${t}" id="pitem-${t}">${paletteIcon(t)}<span>${COMP_TYPES[t].label}</span></div>`;
-    });
-  });
-  document.getElementById('palette').innerHTML = html;
-  document.querySelectorAll('.pitem').forEach(el=>{
-    el.addEventListener('click', ()=>{
-      placing = (placing===el.dataset.type) ? null : el.dataset.type;
-      document.querySelectorAll('.pitem').forEach(p=>p.classList.toggle('armed', p.dataset.type===placing));
-      document.getElementById('hint').textContent = placing
-        ? `Click anywhere on the grid to place a ${COMP_TYPES[placing].label}.`
-        : 'Click a component from the left panel to select it, then click on the grid to place it.';
-    });
-  });
+  groups.forEach(([title,types])=>{html+=`<h4>${title}</h4>`;types.forEach(t=>{html+=`<div class="pitem" data-type="${t}" id="pitem-${t}">${paletteIcon(t)}<span>${COMP_TYPES[t].label}</span></div>`;});});
+  document.getElementById('palette').innerHTML=html;
+  document.querySelectorAll('.pitem').forEach(el=>{el.addEventListener('click',()=>{placing=(placing===el.dataset.type)?null:el.dataset.type;document.querySelectorAll('.pitem').forEach(p=>p.classList.toggle('armed',p.dataset.type===placing));document.getElementById('hint').textContent=placing?`Click the grid to place a ${COMP_TYPES[placing].label}.`:'Click a component to select it, then click the grid to place it.';});});
 }
 
 function renderInspector(){
-  const el = document.getElementById('inspector');
-  if(!selected){
-    el.innerHTML = `<h4>Inspector</h4><div class="insp-empty">Select a component or wire to see its properties and live readings here.<br><br>
-      <b>Tips</b><br>• Click a palette item, then click the grid to place it.<br>• Drag from a terminal dot to wire two parts.<br>• Click a part, press <b>R</b> to rotate, <b>Delete</b> to remove.<br>• Click a switch to flip it on/off.</div>`;
-    return;
-  }
-  if(selected.kind==='wire'){
-    el.innerHTML = `<h4>Inspector</h4><div class="insp-title">Wire</div><div class="insp-sub">Connects two terminals.</div>
-      <div class="insp-actions"><button id="btnDelWire">🗑 Delete Wire</button></div>`;
-    document.getElementById('btnDelWire').onclick=()=>{ wires = wires.filter(w=>w.id!==selected.id); selected=null; render(); renderInspector(); };
-    return;
-  }
-  const c = components.find(x=>x.id===selected.id);
-  if(!c){ selected=null; renderInspector(); return; }
-  const def = COMP_TYPES[c.type];
-  let fields = '';
-  if(def.def!==null && c.type!=='switch'){
-    fields += `<div class="field"><label>${def.label} value (${def.unit})</label><input type="number" id="fVal" value="${c.value}" step="any"></div>`;
-  }
-  if(def.extra){
-    fields += `<div class="field"><label>${def.extra.label} (${def.extra.unit})</label><input type="number" id="fExtra" value="${c[def.extra.key]}" step="any"></div>`;
-  }
-  let switchBtn = '';
-  if(c.type==='switch'){
-    switchBtn = `<button id="btnToggleSw" style="width:100%;margin-bottom:10px;">${c.on?'🟢 ON — click to open':'🔴 OFF — click to close'}</button>`;
-  }
-  const readoutDefs = {
-    resistor:['V','I','P'], bulb:['V','I','P'], capacitor:['V','I'], inductor:['V','I'],
-    voltmeter:['V'], ammeter:['I'], galvanometer:['I','V'], battery:['V','I'], acsource:['V','I'], ground:[], switch:[]
-  };
-  const rk = readoutDefs[c.type]||[];
-  const readoutHtml = rk.map(k=>`<div class="readout"><div class="k">${k==='V'?'Voltage (V)':k==='I'?'Current (A)':'Power (W)'}</div><div class="v" id="ro-${k}">--</div></div>`).join('');
-
-  el.innerHTML = `<h4>Inspector</h4>
-    <div class="insp-title">${def.label}</div>
-    <div class="insp-sub">id: ${c.id}</div>
-    ${switchBtn}
-    ${fields}
-    ${rk.length?`<div class="readout-grid">${readoutHtml}</div>`:''}
-    <div class="insp-actions">
-      <button id="btnRotate">↻ Rotate</button>
-      <button id="btnDelete">🗑 Delete</button>
-    </div>`;
-
-  const fVal = document.getElementById('fVal');
-  if(fVal) fVal.oninput = ()=>{ c.value = parseFloat(fVal.value)||0; render(); };
-  const fExtra = document.getElementById('fExtra');
-  if(fExtra) fExtra.oninput = ()=>{ c[def.extra.key] = parseFloat(fExtra.value)||0; };
-  const btnSw = document.getElementById('btnToggleSw');
-  if(btnSw) btnSw.onclick = ()=>{ c.on=!c.on; render(); renderInspector(); };
-  document.getElementById('btnRotate').onclick = ()=>{ c.rotation = ((c.rotation||0)+45)%360; render(); };
-  document.getElementById('btnDelete').onclick = ()=>{ removeComponent(c.id); selected=null; render(); renderInspector(); };
+  const el=document.getElementById('inspector');
+  if(!selected){el.innerHTML=`<h4>Inspector</h4><div class="insp-empty">Select a component or wire.</div>`;return;}
+  if(selected.kind==='wire'){el.innerHTML=`<h4>Inspector</h4><div class="insp-title">Wire</div><div class="insp-sub">Connects two terminals.</div><div class="insp-actions"><button id="btnDelWire">&#128465; Delete Wire</button></div>`;document.getElementById('btnDelWire').onclick=()=>{wires=wires.filter(w=>w.id!==selected.id);selected=null;render();renderInspector();};return;}
+  const c=components.find(x=>x.id===selected.id);if(!c){selected=null;renderInspector();return;}
+  const def=COMP_TYPES[c.type];
+  let fields='';
+  if(def.def!==null&&c.type!=='switch')fields+=`<div class="field"><label>${def.label} value</label><input type="number" id="fVal" value="${c.value}" step="any"></div>`;
+  if(def.extra)fields+=`<div class="field"><label>${def.extra.label} (${def.extra.unit})</label><input type="number" id="fExtra" value="${c[def.extra.key]}" step="any"></div>`;
+  let switchBtn=c.type==='switch'?`<button id="btnToggleSw" style="width:100%;margin-bottom:10px;">${c.on?'ON &#8212; click to open':'OFF &#8212; click to close'}</button>`:'';
+  const readoutDefs={resistor:['V','I','P'],bulb:['V','I','P'],capacitor:['V','I'],inductor:['V','I'],voltmeter:['V'],ammeter:['I'],galvanometer:['I','V'],battery:['V','I'],acsource:['V','I'],ground:[],switch:[]};
+  const rk=readoutDefs[c.type]||[];
+  const readoutHtml=rk.map(k=>`<div class="readout"><div class="k">${k==='V'?'Voltage (V)':k==='I'?'Current (A)':'Power (W)'}</div><div class="v" id="ro-${k}">--</div></div>`).join('');
+  el.innerHTML=`<h4>Inspector</h4><div class="insp-title">${def.label}</div><div class="insp-sub">id: ${c.id}</div>${switchBtn}${fields}${rk.length?`<div class="readout-grid">${readoutHtml}</div>`:''}<div class="insp-actions"><button id="btnRotate">&#8635; Rotate</button><button id="btnDelete">&#128465; Delete</button></div>`;
+  const fVal=document.getElementById('fVal');if(fVal)fVal.oninput=()=>{c.value=parseFloat(fVal.value)||0;render();};
+  const fExtra=document.getElementById('fExtra');if(fExtra)fExtra.oninput=()=>{c[def.extra.key]=parseFloat(fExtra.value)||0;};
+  const btnSw=document.getElementById('btnToggleSw');if(btnSw)btnSw.onclick=()=>{c.on=!c.on;render();renderInspector();};
+  document.getElementById('btnRotate').onclick=()=>{c.rotation=((c.rotation||0)+45)%360;render();};
+  document.getElementById('btnDelete').onclick=()=>{removeComponent(c.id);selected=null;render();renderInspector();};
 }
 
-function svgPoint(evt){
-  const rect = svg.getBoundingClientRect();
-  return { x: evt.clientX-rect.left, y: evt.clientY-rect.top };
-}
-function snap(v){ return Math.round(v/GRID)*GRID; }
+// svgPoint accounting for zoom/pan
+function svgPoint(evt){const rect=svg.getBoundingClientRect();return{x:(evt.clientX-rect.left-panX)/zoom,y:(evt.clientY-rect.top-panY)/zoom};}
+function snap(v){return Math.round(v/GRID)*GRID;}
 
-svg.addEventListener('pointerdown', (e)=>{
-  const pt = svgPoint(e);
-  const target = e.target;
-  
+svg.addEventListener('pointerdown',(e)=>{
+  const pt=svgPoint(e);const target=e.target;
   if(drawingWire){
-    if(target.dataset && target.dataset.role==='terminal'){
-      addWire(drawingWire.from, {compId:target.dataset.comp, t:parseInt(target.dataset.t)});
-    } else if(target.dataset && target.dataset.role==='wire'){
-      const wId = target.dataset.w;
-      const targetWire = wires.find(w=>w.id===wId);
-      if(targetWire){
-        const dropPt = svgPoint(e);
-        const jId = uid();
-        components.push({id:jId, type:'junction', x:snap(dropPt.x), y:snap(dropPt.y), rotation:0});
-        wires = wires.filter(w=>w.id!==wId);
-        addWire(targetWire.a, {compId:jId, t:0});
-        addWire({compId:jId, t:0}, targetWire.b);
-        addWire(drawingWire.from, {compId:jId, t:0});
-      }
-    } else if (target.id === 'canvas' || target.tagName.toLowerCase() === 'svg') {
-      const ca = components.find(c=>c.id===drawingWire.from.compId);
-      if(ca){
-        const dropPt = svgPoint(e);
-        const jId = uid();
-        components.push({id:jId, type:'junction', x:snap(dropPt.x), y:snap(dropPt.y), rotation:0});
-        addWire(drawingWire.from, {compId:jId, t:0});
-        drawingWire = { from: {compId: jId, t:0}, cur: dropPt };
-        render(); renderInspector();
-        return; // Continue routing from new junction
-      }
-    }
-    drawingWire = null; 
-    removeWireDraft(); render(); renderInspector(); 
-    return;
+    if(target.dataset&&target.dataset.role==='terminal'){addWire(drawingWire.from,{compId:target.dataset.comp,t:parseInt(target.dataset.t)});}
+    else if(target.dataset&&target.dataset.role==='wire'){const wId=target.dataset.w;const tw=wires.find(w=>w.id===wId);if(tw){const dp=svgPoint(e);const jId=uid();components.push({id:jId,type:'junction',x:snap(dp.x),y:snap(dp.y),rotation:0});wires=wires.filter(w=>w.id!==wId);addWire(tw.a,{compId:jId,t:0});addWire({compId:jId,t:0},tw.b);addWire(drawingWire.from,{compId:jId,t:0});}}
+    else if(target.id==='canvas'||target.tagName.toLowerCase()==='svg'||target.id==='viewport-g'){const ca=components.find(c=>c.id===drawingWire.from.compId);if(ca){const dp=svgPoint(e);const jId=uid();components.push({id:jId,type:'junction',x:snap(dp.x),y:snap(dp.y),rotation:0});addWire(drawingWire.from,{compId:jId,t:0});drawingWire={from:{compId:jId,t:0},cur:dp};render();renderInspector();return;}}
+    drawingWire=null;removeWireDraft();render();renderInspector();return;
   }
+  const ctxBtn=target.closest?target.closest('.ctx-btn'):null;
+  if(ctxBtn){const role=ctxBtn.dataset.role,compId=ctxBtn.dataset.comp;if(role==='ctx-rotate'){const c=components.find(x=>x.id===compId);if(c){c.rotation=((c.rotation||0)+45)%360;render();}}else if(role==='ctx-delete'){removeComponent(compId);selected=null;render();renderInspector();}return;}
+  if(placing){addComponent(placing,snap(pt.x),snap(pt.y));placing=null;document.querySelectorAll('.pitem').forEach(p=>p.classList.remove('armed'));document.getElementById('hint').textContent='Click a component to select it, then click the grid to place it.';render();return;}
+  if(target.dataset&&target.dataset.role==='terminal'){drawingWire={from:{compId:target.dataset.comp,t:parseInt(target.dataset.t)},cur:pt};return;}
+  const compBody=target.closest?target.closest('.comp-body'):null;
+  if(compBody){const compId=compBody.dataset.comp;const c=components.find(x=>x.id===compId);if(c.type==='switch'){drag={mode:'move-or-toggle',compId,startPt:pt,origin:{x:c.x,y:c.y},moved:false};}else{drag={mode:'move',compId,origin:{x:c.x,y:c.y},startPt:pt};}selected={kind:'comp',id:compId};render();renderInspector();return;}
+  if(target.dataset&&target.dataset.role==='wire'){selected={kind:'wire',id:(target.dataset.w||target.dataset.id)};render();renderInspector();return;}
+  selected=null;render();renderInspector();
+});
+svg.addEventListener('pointermove',(e)=>{
+  const pt=svgPoint(e);
+  if(drawingWire){drawingWire.cur=pt;drawWireDraft();}
+  if(!drag)return;
+  if(drag.mode==='move'||drag.mode==='move-or-toggle'){const dx=pt.x-drag.startPt.x,dy=pt.y-drag.startPt.y;if(Math.abs(dx)>4||Math.abs(dy)>4)drag.moved=true;const c=components.find(x=>x.id===drag.compId);c.x=snap(drag.origin.x+dx);c.y=snap(drag.origin.y+dy);render();}
+});
+svg.addEventListener('pointerup',(e)=>{if(!drag)return;if(drag.mode==='move-or-toggle'&&!drag.moved){const c=components.find(x=>x.id===drag.compId);if(c)c.on=!c.on;render();renderInspector();}drag=null;});
 
-  const ctxBtn = target.closest ? target.closest('.ctx-btn') : null;
-  if(ctxBtn){
-    const role = ctxBtn.dataset.role;
-    const compId = ctxBtn.dataset.comp;
-    if(role==='ctx-rotate'){
-      const c = components.find(x=>x.id===compId);
-      if(c){ c.rotation = ((c.rotation||0)+45)%360; render(); }
-    } else if(role==='ctx-delete'){
-      removeComponent(compId); selected=null; render(); renderInspector();
-    }
-    return;
-  }
-  if(placing){
-    addComponent(placing, snap(pt.x), snap(pt.y));
-    placing = null;
-    document.querySelectorAll('.pitem').forEach(p=>p.classList.remove('armed'));
-    document.getElementById('hint').textContent = 'Click a component from the left panel to select it, then click on the grid to place it.';
-    render(); return;
-  }
-  if(target.dataset && target.dataset.role==='terminal'){
-    drawingWire = { from:{compId:target.dataset.comp, t:parseInt(target.dataset.t)}, cur:pt }; return;
-  }
-  const compBody = target.closest ? target.closest('.comp-body') : null;
-  if(compBody){
-    const compId = compBody.dataset.comp;
-    const c = components.find(x=>x.id===compId);
-    if(c.type==='switch'){
-      drag = { mode:'move-or-toggle', compId, startPt:pt, origin:{x:c.x,y:c.y}, moved:false };
-    } else {
-      drag = { mode:'move', compId, origin:{x:c.x,y:c.y}, startPt:pt };
-    }
-    selected = {kind:'comp', id:compId};
-    render(); renderInspector(); return;
-  }
-  if(target.dataset && target.dataset.role==='wire'){
-    selected = {kind:'wire', id:(target.dataset.w || target.dataset.id)};
-    render(); renderInspector(); return;
-  }
-  selected = null; render(); renderInspector();
+function drawWireDraft(){removeWireDraft();if(!drawingWire)return;const ca=components.find(c=>c.id===drawingWire.from.compId);if(!ca)return;const p1=absTerminal(ca,drawingWire.from.t);const p2=drawingWire.cur;const vp=document.getElementById('viewport-g');const d=document.createElementNS('http://www.w3.org/2000/svg','path');d.setAttribute('class','wire-draft');d.setAttribute('id','wireDraft');d.setAttribute('d',`M${p1.x},${p1.y} L${p2.x},${p2.y}`);vp.appendChild(d);}
+function removeWireDraft(){const d=document.getElementById('wireDraft');if(d)d.remove();}
+
+window.addEventListener('keydown',(e)=>{
+  if(e.key==='Escape'){if(drag){removeWireDraft();drag=null;}placing=null;document.querySelectorAll('.pitem').forEach(p=>p.classList.remove('armed'));}
+  if(!selected||selected.kind!=='comp')return;
+  const c=components.find(x=>x.id===selected.id);if(!c)return;
+  if(e.key==='r'||e.key==='R'){c.rotation=((c.rotation||0)+45)%360;render();}
+  if(e.key==='Delete'||e.key==='Backspace'){removeComponent(c.id);selected=null;render();renderInspector();}
 });
 
-svg.addEventListener('pointermove', (e)=>{
-  const pt = svgPoint(e);
-  if(drawingWire){
-    drawingWire.cur = pt; drawWireDraft();
+// Zoom / Pan
+const canvasWrap=document.getElementById('canvasWrap');
+canvasWrap.addEventListener('wheel',(e)=>{
+  e.preventDefault();
+  const rect=canvasWrap.getBoundingClientRect();
+  const rawX=e.clientX-rect.left,rawY=e.clientY-rect.top;
+  if(e.ctrlKey||e.metaKey){
+    // Cursor-centered zoom with translate-compensation
+    const oldZoom=zoom;
+    zoom=Math.max(0.2,Math.min(3,zoom*(e.deltaY<0?1.15:1/1.15)));
+    panX=rawX-(rawX-panX)*(zoom/oldZoom);
+    panY=rawY-(rawY-panY)*(zoom/oldZoom);
+  } else {
+    panX-=e.deltaX;
+    panY-=e.deltaY;
   }
-  if(!drag) return;
-  if(drag.mode==='move' || drag.mode==='move-or-toggle'){
-    const dx = pt.x-drag.startPt.x, dy = pt.y-drag.startPt.y;
-    if(Math.abs(dx)>4||Math.abs(dy)>4) drag.moved = true;
-    const c = components.find(x=>x.id===drag.compId);
-    c.x = snap(drag.origin.x+dx); c.y = snap(drag.origin.y+dy);
-    render();
-  }
-});
+  updateViewport();
+},{passive:false});
 
-svg.addEventListener('pointerup', (e)=>{
-  if(!drag) return;
-  const target = e.target;
-  
-  if(drag.mode==='move-or-toggle' && !drag.moved){
-    const c = components.find(x=>x.id===drag.compId);
-    if(c) { c.on = !c.on; }
-    render(); renderInspector();
-  }
-  drag = null;
-});
-svg.addEventListener('pointerleave', ()=>{ if(drawingWire){ /* don't cancel on leave, just hide draft? */ } });
+let mmDrag=null;
+canvasWrap.addEventListener('pointerdown',(e)=>{if(e.button===1){e.preventDefault();mmDrag={startX:e.clientX,startY:e.clientY,startPanX:panX,startPanY:panY};canvasWrap.setPointerCapture(e.pointerId);}});
+canvasWrap.addEventListener('pointermove',(e)=>{if(!mmDrag)return;panX=mmDrag.startPanX+(e.clientX-mmDrag.startX);panY=mmDrag.startPanY+(e.clientY-mmDrag.startY);updateViewport();});
+canvasWrap.addEventListener('pointerup',(e)=>{if(e.button===1)mmDrag=null;});
 
-function drawWireDraft(){
-  removeWireDraft();
-  if(!drawingWire) return;
-  const ca = components.find(c=>c.id===drawingWire.from.compId);
-  if(!ca) return;
-  const p1 = absTerminal(ca, drawingWire.from.t);
-  const p2 = drawingWire.cur;
-  svg.insertAdjacentHTML('beforeend', `<path class="wire-draft" id="wireDraft" d="M${p1.x},${p1.y} L${p2.x},${p2.y}"/>`);
-}
-function removeWireDraft(){ const d=document.getElementById('wireDraft'); if(d) d.remove(); }
+function zoomAround(factor){const rect=canvasWrap.getBoundingClientRect();const cx=rect.width/2,cy=rect.height/2;const oldZoom=zoom;zoom=Math.max(0.2,Math.min(3,zoom*factor));panX=cx-(cx-panX)*(zoom/oldZoom);panY=cy-(cy-panY)*(zoom/oldZoom);updateViewport();}
+document.getElementById('btnZoomIn').onclick=()=>zoomAround(1.25);
+document.getElementById('btnZoomOut').onclick=()=>zoomAround(1/1.25);
+// Reset BOTH zoom and pan
+document.getElementById('btnZoomReset').onclick=()=>{zoom=1;panX=0;panY=0;updateViewport();};
 
-window.addEventListener('keydown', (e)=>{
-  if(e.key==='Escape'){ if(drag){ removeWireDraft(); drag=null; } placing=null; document.querySelectorAll('.pitem').forEach(p=>p.classList.remove('armed')); }
-  if(!selected || selected.kind!=='comp') return;
-  const c = components.find(x=>x.id===selected.id);
-  if(!c) return;
-  if(e.key==='r'||e.key==='R'){ c.rotation=((c.rotation||0)+45)%360; render(); }
-  if(e.key==='Delete'||e.key==='Backspace'){ removeComponent(c.id); selected=null; render(); renderInspector(); }
-});
-
-const PHYS_DT = 0.002;
-let lastFrame = performance.now();
-
-function solverComponents(){
-  return components.map(c=>{
-    const o = Object.assign({}, c);
-    if(c.type==='capacitor') o.value = c.value*1e-6;
-    if(c.type==='inductor') o.value = c.value*1e-3;
-    return o;
-  });
-}
+// Simulation
+const PHYS_DT=0.002;let lastFrame=performance.now();
+function solverComponents(){return components.map(c=>{const o=Object.assign({},c);if(c.type==='capacitor')o.value=c.value*1e-6;if(c.type==='inductor')o.value=c.value*1e-3;return o;});}
 
 function tick(now){
   requestAnimationFrame(tick);
-  const elapsed = Math.min(0.1, (now-lastFrame)/1000);
-  lastFrame = now;
-  if(!running) return;
-  const steps = Math.min(25, Math.max(1, Math.round(elapsed/PHYS_DT)));
-  let res = null;
-  const comps = solverComponents();
-  for(let i=0;i<steps;i++){
-    res = solveCircuit(comps, wires, PHYS_DT, simTime, simHistory);
-    if(!res) break;
-    simHistory = res.history;
-    simTime += PHYS_DT;
-  }
-  if(res){ 
-    applyReadings(res.readings); 
-    window._lastReadings = res.readings;
-    if(window._oscUpdate) window._oscUpdate(res.readings, simTime); 
-  }
+  const elapsed=Math.min(0.1,(now-lastFrame)/1000);lastFrame=now;
+  if(!running)return;
+  const steps=Math.min(25,Math.max(1,Math.round(elapsed/PHYS_DT)));
+  let res=null;const comps=solverComponents();
+  for(let i=0;i<steps;i++){res=solveCircuit(comps,wires,PHYS_DT,simTime,simHistory);if(!res)break;simHistory=res.history;simTime+=PHYS_DT;}
+  if(res){applyReadings(res.readings);window._lastReadings=res.readings;if(window._oscUpdate)window._oscUpdate(res.readings,simTime);checkAnalysisTrigger(res.readings);}
 }
 
 function applyReadings(readings){
   components.forEach(c=>{
-    const r = readings[c.id]; if(!r) return;
-    const txt = svg.querySelector(`[data-role="reading"][data-comp="${c.id}"]`);
+    const r=readings[c.id];if(!r)return;
+    const txt=document.querySelector(`[data-role="reading"][data-comp="${c.id}"]`);
     if(txt){
-      if(c.type==='resistor') txt.textContent = `${fmtSI(r.I,'A')}`;
-      else if(c.type==='bulb'){ txt.textContent = `${fmtSI(r.I,'A')} · ${r.P.toFixed(2)}W`; c._P=r.P; }
-      else if(c.type==='capacitor'||c.type==='inductor') txt.textContent = `${r.V.toFixed(2)}V · ${fmtSI(r.I,'A')}`;
-      else if(c.type==='voltmeter') txt.textContent = `${r.V.toFixed(3)} V`;
-      else if(c.type==='ammeter') txt.textContent = `${fmtSI(r.I,'A')}`;
-      else if(c.type==='galvanometer') txt.textContent = `${fmtSI(r.I,'A')}`;
-      else if(c.type==='battery'||c.type==='acsource') txt.textContent = `${fmtSI(r.I,'A')}`;
+      if(c.type==='resistor')txt.textContent=`${fmtSI(r.I,'A')}`;
+      else if(c.type==='bulb'){txt.textContent=`${fmtSI(r.I,'A')} ${r.P.toFixed(2)}W`;c._P=r.P;}
+      else if(c.type==='capacitor'||c.type==='inductor')txt.textContent=`${r.V.toFixed(2)}V ${fmtSI(r.I,'A')}`;
+      else if(c.type==='voltmeter')txt.textContent=`${r.V.toFixed(3)} V`;
+      else if(c.type==='ammeter')txt.textContent=`${fmtSI(r.I,'A')}`;
+      else if(c.type==='galvanometer')txt.textContent=`${fmtSI(r.I,'A')}`;
+      else if(c.type==='battery'||c.type==='acsource')txt.textContent=`${fmtSI(r.I,'A')}`;
     }
-    if(c.type==='bulb'){
-      const glow = svg.querySelector(`[data-comp="${c.id}"] circle`);
-      if(glow){ const p=Math.min(1,(r.P||0)/2); glow.setAttribute('fill', `rgba(245,165,36,${0.12+0.7*p})`); }
-    }
-    if(c.type==='galvanometer'){
-      const needle = svg.querySelector(`[data-comp="${c.id}"] [data-needle] line`);
-      if(needle){
-        const deg = Math.max(-75, Math.min(75, (r.I||0)*3000));
-        needle.setAttribute('transform', `rotate(${deg})`);
-      }
-    }
-    if(selected && selected.kind==='comp' && selected.id===c.id){
-      ['V','I','P'].forEach(k=>{
-        const el = document.getElementById('ro-'+k);
-        if(el && r[k]!==undefined) el.textContent = (k==='P'? r[k].toFixed(3) : fmtSI(r[k], k==='V'?'V':'A'));
-      });
-    }
+    if(c.type==='bulb'){const glow=document.querySelector(`[data-comp="${c.id}"] circle`);if(glow){const p=Math.min(1,(r.P||0)/2);glow.setAttribute('fill',`rgba(245,165,36,${0.12+0.7*p})`);}}
+    if(c.type==='galvanometer'){const needle=document.querySelector(`[data-comp="${c.id}"] [data-needle] line`);if(needle){const deg=Math.max(-75,Math.min(75,(r.I||0)*3000));needle.setAttribute('transform',`rotate(${deg})`);}}
+    if(selected&&selected.kind==='comp'&&selected.id===c.id){['V','I','P'].forEach(k=>{const el=document.getElementById('ro-'+k);if(el&&r[k]!==undefined)el.textContent=(k==='P'?r[k].toFixed(3):fmtSI(r[k],k==='V'?'V':'A'));});}
   });
 }
 
-function fmtSI(v, unit){
-  const a = Math.abs(v);
-  if(a>=1) return v.toFixed(3)+' '+unit;
-  if(a>=1e-3) return (v*1e3).toFixed(2)+' m'+unit;
-  if(a>=1e-6) return (v*1e6).toFixed(2)+' µ'+unit;
-  return v.toExponential(2)+' '+unit;
-}
+function fmtSI(v,unit){const a=Math.abs(v);if(a>=1)return v.toFixed(3)+' '+unit;if(a>=1e-3)return(v*1e3).toFixed(2)+' m'+unit;if(a>=1e-6)return(v*1e6).toFixed(2)+' u'+unit;return v.toExponential(2)+' '+unit;}
 
-document.getElementById('btnRun').onclick = (e)=>{
-  running = !running;
-  e.target.textContent = running ? '⏸ Pause' : '▶ Run';
-};
-document.getElementById('btnClear').onclick = ()=>{
-  if(!confirm('Clear the whole canvas?')) return;
-  components=[]; wires=[]; simHistory={}; simTime=0; selected=null;
-  render(); renderInspector();
-};
-
-document.getElementById('btnFullscreen').onclick = () => {
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen().catch(()=>{});
-  } else {
-    document.exitFullscreen();
-  }
-};
-document.addEventListener('fullscreenchange', () => {
-  document.getElementById('btnFullscreen').textContent = document.fullscreenElement ? '🗗 Exit Fullscreen' : '⛶ Fullscreen';
-});
-
-document.getElementById('btnSave').onclick = ()=>{
-  try {
-    const data = JSON.stringify({ components, wires });
-    localStorage.setItem('vlab_circuit_save', data);
-    document.getElementById('hint').textContent = '✅ Circuit saved to browser storage.';
-    setTimeout(()=>{ document.getElementById('hint').textContent = 'Click a component from the left panel to select it, then click on the grid to place it.'; }, 2000);
-  } catch(e){ alert('Save failed.'); }
-};
-document.getElementById('btnLoad').onclick = ()=>{
-  try {
-    const raw = localStorage.getItem('vlab_circuit_save');
-    if(!raw){ alert('No saved circuit found.'); return; }
-    const data = JSON.parse(raw);
-    components = data.components||[]; wires = data.wires||[]; simHistory={}; simTime=0; selected=null;
-    render(); renderInspector();
-    document.getElementById('hint').textContent = '✅ Circuit loaded.';
-    setTimeout(()=>{ document.getElementById('hint').textContent = 'Click a component from the left panel to select it, then click on the grid to place it.'; }, 2000);
-  } catch(e){ alert('Load failed or no saved data.'); }
-};
-
-function loadExample(comps, ws){
-  components = comps; wires = ws; simHistory={}; simTime=0; selected=null;
-  render(); renderInspector();
-}
-
+document.getElementById('btnRun').onclick=(e)=>{running=!running;e.target.textContent=running?'&#9208; Pause':'&#9654; Run';};
+document.getElementById('btnClear').onclick=()=>{if(!confirm('Clear the whole canvas?'))return;components=[];wires=[];simHistory={};simTime=0;selected=null;analysisDismissed=false;analysisAutoOpenedOnce=false;closeAnalysisPanel();render();renderInspector();};
+document.getElementById('btnFullscreen').onclick=()=>{if(!document.fullscreenElement){document.documentElement.requestFullscreen().catch(()=>{});}else{document.exitFullscreen();}};
+document.addEventListener('fullscreenchange',()=>{document.getElementById('btnFullscreen').innerHTML=document.fullscreenElement?'&#9014; Exit Fullscreen':'&#9014; Fullscreen';});
+document.getElementById('btnSettings').onclick=()=>{document.getElementById('inspector').classList.toggle('open');};
 
 /* ============================
-   OSCILLOSCOPE ENGINE
+   ANALYSIS PANEL
    ============================ */
-(function(){
-  const COLORS = ['#2dd4bf','#f59e0b','#f43f5e','#818cf8','#34d399','#fb923c','#e879f9','#38bdf8'];
-  const MAX_SAMPLES = 800;
-  const TIME_WINDOW = 4; // seconds to show
+let analysisDismissed=false,analysisAutoOpenedOnce=false,analysisDebounceTimer=null,analysisPanelOpen=false;
 
-  let channels = [];
-  window._oscChannels = channels;
-  let frozen = false;
-  let oscOpen = false;
-  let animId = null;
+function isCircuitSolved(readings){
+  if(!readings)return false;
+  return components.some(c=>(c.type==='battery'||c.type==='acsource')&&readings[c.id]&&typeof readings[c.id].I==='number'&&!isNaN(readings[c.id].I)&&!isNaN(readings[c.id].V)&&Math.abs(readings[c.id].I)>1e-10);
+}
 
-  const panel     = document.getElementById('osc-panel');
-  const canvas    = document.getElementById('osc-canvas');
-  const ctx       = canvas.getContext('2d');
-  const footer    = document.getElementById('osc-footer');
-  const probeSel  = document.getElementById('osc-probe-sel');
-  const btnToggle = document.getElementById('osc-toggle');
-  const btnAdd    = document.getElementById('osc-add-ch');
-  const btnClear  = document.getElementById('osc-clear-ch');
-  const btnFreeze = document.getElementById('osc-freeze');
-  const btnClose  = document.getElementById('osc-close');
+function checkAnalysisTrigger(readings){
+  const solved=isCircuitSolved(readings);
+  if(solved&&!analysisDismissed&&!analysisAutoOpenedOnce){
+    clearTimeout(analysisDebounceTimer);
+    analysisDebounceTimer=setTimeout(()=>{if(isCircuitSolved(window._lastReadings)){openAnalysisPanel();analysisAutoOpenedOnce=true;}},400);
+  } else if(!solved){clearTimeout(analysisDebounceTimer);}
+  if(analysisPanelOpen&&solved)renderAnalysisContent(readings);
+}
 
-  // ── draggable panel ──────────────────────────────────────────────
-  (function makeDraggable(){
-    const handle = document.getElementById('osc-drag-handle');
-    let ox=0,oy=0,px=0,py=0;
-    handle.addEventListener('mousedown', e=>{
-      if(e.target.tagName==='SELECT'||e.target.tagName==='BUTTON') return;
-      px=e.clientX; py=e.clientY;
-      const r=panel.getBoundingClientRect();
-      ox=r.left; oy=r.top;
-      panel.style.right='auto';
-      panel.style.left=ox+'px'; panel.style.top=oy+'px'; panel.style.bottom='auto';
-      const mm=ev=>{ panel.style.left=(ox+ev.clientX-px)+'px'; panel.style.top=(oy+ev.clientY-py)+'px'; };
-      const mu=()=>{ document.removeEventListener('mousemove',mm); document.removeEventListener('mouseup',mu); };
-      document.addEventListener('mousemove',mm);
-      document.addEventListener('mouseup',mu);
+function openAnalysisPanel(){document.getElementById('analysis-panel').classList.add('open');analysisPanelOpen=true;if(window._lastReadings)renderAnalysisContent(window._lastReadings);}
+function closeAnalysisPanel(){document.getElementById('analysis-panel').classList.remove('open');analysisPanelOpen=false;}
+document.getElementById('analysis-close-btn').addEventListener('click',()=>{analysisDismissed=true;closeAnalysisPanel();});
+document.getElementById('btnAnalysis').addEventListener('click',()=>{if(analysisPanelOpen){analysisDismissed=true;closeAnalysisPanel();}else{analysisDismissed=false;openAnalysisPanel();}});
+
+function fmtSIplain(v,unit){const a=Math.abs(v);if(a===0)return'0 '+unit;if(a>=1)return v.toFixed(4)+' '+unit;if(a>=1e-3)return(v*1e3).toFixed(3)+' m'+unit;if(a>=1e-6)return(v*1e6).toFixed(3)+' u'+unit;return v.toExponential(3)+' '+unit;}
+
+function renderAnalysisContent(readings){
+  const body=document.getElementById('analysis-body');
+  if(!readings){body.innerHTML='<div style="color:#475569;font-family:var(--mono);font-size:11px;text-align:center;padding:40px 16px;">Waiting for solver...</div>';return;}
+  const sources=components.filter(c=>c.type==='battery'||c.type==='acsource');
+  const hasAC=sources.some(c=>c.type==='acsource');
+  const isMultiSource=sources.length>1;
+  const modeBadge=document.getElementById('analysis-mode-badge');
+  modeBadge.textContent=hasAC?'AC':(isMultiSource?'MULTI':'DC');
+
+  let html='';
+  const passiveComps=components.filter(c=>!['ground','junction','switch'].includes(c.type));
+  html+=`<div class="a-section"><div class="a-section-title">Circuit Summary</div>
+    <div class="a-row"><span class="a-key">Components</span><span class="a-val">${passiveComps.length}</span></div>
+    <div class="a-row"><span class="a-key">Wires</span><span class="a-val">${wires.length}</span></div>
+    <div class="a-row"><span class="a-key">Sources</span><span class="a-val">${sources.length}</span></div>
+    <div class="a-row"><span class="a-key">Sim Time</span><span class="a-val">${simTime.toFixed(2)}s</span></div>
+  </div>`;
+
+  if(sources.length>0){
+    html+=`<div class="a-section"><div class="a-section-title">Power Source</div>`;
+    sources.forEach(src=>{
+      const r=readings[src.id]||{};
+      html+=`<div class="a-row"><span class="a-key">${src.type==='battery'?'Battery':'AC Source'} EMF</span><span class="a-val">${src.value}V${src.type==='acsource'?' pk':''}</span></div>`;
+      if(src.type==='acsource')html+=`<div class="a-row"><span class="a-key">Frequency</span><span class="a-val">${src.freq||2} Hz</span></div>`;
+      if(r.I!==undefined&&!isNaN(r.I))html+=`<div class="a-row"><span class="a-key">Source Current</span><span class="a-val">${fmtSIplain(r.I,'A')}</span></div>`;
     });
-  })();
+    html+=`</div>`;
 
-  // ── toggle open/close ─────────────────────────────────────────────
-  btnToggle.addEventListener('click', ()=>{
-    oscOpen = !oscOpen;
-    panel.classList.toggle('open', oscOpen);
-    btnToggle.textContent = oscOpen ? '✕' : '📈';
-    if(oscOpen){ resizeCanvas(); startDraw(); }
-    else stopDraw();
-  });
-  btnClose.addEventListener('click', ()=>{
-    oscOpen=false; panel.classList.remove('open');
-    btnToggle.textContent='📈'; stopDraw();
-  });
-
-  // ── freeze toggle ─────────────────────────────────────────────────
-  btnFreeze.addEventListener('click', ()=>{
-    frozen=!frozen;
-    btnFreeze.classList.toggle('active', frozen);
-    btnFreeze.textContent = frozen ? '▶ Resume' : '❄ Freeze';
-  });
-
-  // ── populate probe selector ───────────────────────────────────────
-  function refreshProbeList(){
-    const prev = probeSel.value;
-    probeSel.innerHTML = '<option value="">— Probe a component —</option>';
-    (window._sbComponents||[]).forEach(c=>{
-      if(['ground','junction','switch'].includes(c.type)) return;
-      const def = (window._sbCompTypes||{})[c.type];
-      const label = def ? def.label : c.type;
-      const el = document.createElement('option');
-      el.value = c.id;
-      el.textContent = `${label} (${c.id})`;
-      probeSel.appendChild(el);
-    });
-    if(prev) probeSel.value=prev;
+    if(!hasAC&&!isMultiSource&&sources.length===1){
+      const src=sources[0];const r=readings[src.id]||{};
+      if(r.I&&Math.abs(r.I)>1e-10){
+        const Req=Math.abs(r.V/r.I);
+        const totalP=components.filter(c=>['resistor','bulb','capacitor','inductor'].includes(c.type)).reduce((s,c)=>s+(readings[c.id]?.P||0),0);
+        const sourceP=Math.abs((r.V||0)*(r.I||0));
+        html+=`<div class="a-section"><div class="a-section-title">DC Analysis</div>
+          <div class="a-row"><span class="a-key">Equiv. Resistance</span><span class="a-val">${fmtSIplain(Req,'Ohm')}</span></div>
+          <div class="a-row"><span class="a-key">Power Supplied</span><span class="a-val">${fmtSIplain(sourceP,'W')}</span></div>
+          <div class="a-row"><span class="a-key">Power Dissipated</span><span class="a-val">${fmtSIplain(totalP,'W')}</span></div>
+        </div>
+        <div class="a-section"><div class="a-section-title">Mathematical Walkthrough</div>
+          <div style="font-family:var(--mono);font-size:10.5px;color:#cbd5e1;line-height:1.6;background:rgba(30,41,59,0.5);padding:10px;border-radius:6px;border:1px solid #334155;">
+            <div style="color:#94a3b8;margin-bottom:4px;font-weight:600;">Ohm's Law:</div>
+            <div style="margin-left:8px;margin-bottom:12px;border-left:2px solid #0d9488;padding-left:8px;">
+               R<sub>eq</sub> = V / I<br>
+               R<sub>eq</sub> = ${Math.abs(r.V).toFixed(2)} V / ${Math.abs(r.I).toFixed(4)} A<br>
+               <span style="color:#2dd4bf;font-weight:bold;">R<sub>eq</sub> = ${fmtSIplain(Req,'&#937;')}</span>
+            </div>
+            <div style="color:#94a3b8;margin-bottom:4px;font-weight:600;">Power Equation:</div>
+            <div style="margin-left:8px;border-left:2px solid #0d9488;padding-left:8px;">
+               P = V &times; I<br>
+               P = ${Math.abs(r.V).toFixed(2)} V &times; ${Math.abs(r.I).toFixed(4)} A<br>
+               <span style="color:#2dd4bf;font-weight:bold;">P = ${fmtSIplain(sourceP,'W')}</span>
+            </div>
+          </div>
+        </div>`;
+      }
+    } else if(hasAC){
+      html+=`<div class="a-section"><div class="a-section-title">AC Mode</div>
+        <div class="a-row"><span class="a-key">Req / Zeq</span><span class="a-val na">DC-only formula</span></div>
+        <div style="font-family:var(--mono);font-size:9.5px;color:#475569;margin-top:6px;line-height:1.6;">Instantaneous values shown per-component. Complex impedance requires phasor analysis.</div>
+      </div>`;
+    }
   }
 
-  // ── add channel ───────────────────────────────────────────────────
-  btnAdd.addEventListener('click', ()=>{
-    const id = probeSel.value;
-    if(!id) return;
-    const c = (window._sbComponents||[]).find(x=>x.id===id);
-    if(!c) return;
-    const def = (window._sbCompTypes||{})[c.type];
-    const label = def ? def.label : c.type;
-    // auto pick metric (V or I or P)
-    const metrics = getMetrics(c.type);
-    metrics.forEach((metric,mi)=>{
-      if(channels.find(ch=>ch.compId===id && ch.metric===metric)) return;
-      const color = COLORS[(channels.length) % COLORS.length];
-      channels.push({ compId:id, label:`${label} ${metric}`, metric, color, data:[], muted:false });
+  const readableComps=components.filter(c=>!['ground','junction','switch'].includes(c.type)&&readings[c.id]&&Object.keys(readings[c.id]).length>0);
+  if(readableComps.length>0){
+    html+=`<div class="a-section"><div class="a-section-title">Component Readings</div>`;
+    readableComps.forEach(c=>{
+      const r=readings[c.id];const def=COMP_TYPES[c.type];
+      const valStr=def.def!==null?` ${fmtVal(c.value)}`:'';
+      html+=`<div class="a-comp-card"><div class="a-comp-name">${def.label}${valStr} <span style="color:#334155">(${c.id})</span></div>`;
+      if(r.V!==undefined&&!isNaN(r.V))html+=`<div class="a-comp-row"><span class="a-comp-key">Voltage</span><span class="a-comp-val">${r.V.toFixed(4)} V</span></div>`;
+      if(r.I!==undefined&&!isNaN(r.I))html+=`<div class="a-comp-row"><span class="a-comp-key">Current</span><span class="a-comp-val">${fmtSIplain(r.I,'A')}</span></div>`;
+      if(r.P!==undefined&&!isNaN(r.P))html+=`<div class="a-comp-row"><span class="a-comp-key">Power</span><span class="a-comp-val">${r.P.toFixed(4)} W</span></div>`;
+      html+=`</div>`;
+    });
+    html+=`</div>`;
+  }
+
+  // KVL/KCL with epsilon=1e-6
+  const KVL_EPS=1e-6;
+  let kvlOk=null,kclOk=null;
+  const sourceVsum=sources.reduce((s,c)=>s+Math.abs(readings[c.id]?.V||0),0);
+  const dropVsum=components.filter(c=>!['battery','acsource','ground','junction','switch'].includes(c.type)).reduce((s,c)=>s+Math.abs(readings[c.id]?.V||0),0);
+  if(sourceVsum>KVL_EPS){const kvlErr=Math.abs(sourceVsum-dropVsum)/sourceVsum;kvlOk=kvlErr<0.01;}
+
+  const junctionComps=components.filter(c=>c.type==='junction');
+  if(junctionComps.length>0){kclOk=true;junctionComps.forEach(jc=>{const connWires=wires.filter(w=>w.a.compId===jc.id||w.b.compId===jc.id);if(connWires.length<2)kclOk=false;});}
+
+  html+=`<div class="a-section"><div class="a-section-title">Kirchhoff Verification</div>`;
+  if(kvlOk!==null)html+=`<div class="a-row"><span class="a-key">KVL (Loop)</span><span class="a-badge ${kvlOk?'ok':'warn'}">${kvlOk?'&#10003; PASS':'&#9888; CHECK'}</span></div>`;
+  else html+=`<div class="a-row"><span class="a-key">KVL</span><span class="a-val na">&#8212;</span></div>`;
+  if(kclOk!==null)html+=`<div class="a-row"><span class="a-key">KCL (Nodes)</span><span class="a-badge ${kclOk?'ok':'warn'}">${kclOk?'&#10003; PASS':'&#9888; CHECK'}</span></div>`;
+  else html+=`<div class="a-row"><span class="a-key">KCL</span><span class="a-val na">&#8212;</span></div>`;
+  html+=`<div style="font-family:var(--mono);font-size:9px;color:#334155;margin-top:8px;line-height:1.6;">&epsilon; = 1e-6 · MNA solver with GMIN regularization</div></div>`;
+
+  body.innerHTML=html;
+}
+
+/* ============================
+   OSCILLOSCOPE
+   ============================ */
+(function(){
+  const COLORS=['#2dd4bf','#f59e0b','#f43f5e','#818cf8','#34d399','#fb923c','#e879f9','#38bdf8'];
+  let MAX_SAMPLES=2000,TIME_WINDOW=4;
+  let channels=[],frozen=false,oscOpen=false,animId=null,probeInterval=null;
+  window._oscChannels=channels;
+
+  const panel=document.getElementById('osc-panel');
+  const canvas=document.getElementById('osc-canvas');
+  const ctx=canvas.getContext('2d');
+  const footer=document.getElementById('osc-footer');
+  const probeSel=document.getElementById('osc-probe-sel');
+  const btnToggle=document.getElementById('osc-toggle');
+  const btnAdd=document.getElementById('osc-add-ch');
+  const btnClear=document.getElementById('osc-clear-ch');
+  const btnFreeze=document.getElementById('osc-freeze');
+  const btnClose=document.getElementById('osc-close');
+  const btnMaximize=document.getElementById('osc-maximize');
+  const selTimebase=document.getElementById('osc-timebase');
+  const selYScale=document.getElementById('osc-yscale');
+
+  let isMaximized = false;
+  let preMax = { t: '', l: '', w: '', h: '', r: '', b: '' };
+  btnMaximize.addEventListener('click', () => {
+    isMaximized = !isMaximized;
+    if (isMaximized) {
+      preMax = { t: panel.style.top, l: panel.style.left, w: panel.style.width, h: panel.style.height, r: panel.style.right, b: panel.style.bottom };
+      panel.style.top = '10px'; panel.style.left = '10px'; panel.style.right = '10px'; panel.style.bottom = '80px';
+      panel.style.width = 'auto'; panel.style.height = 'auto'; panel.style.resize = 'none';
+    } else {
+      panel.style.top = preMax.t; panel.style.left = preMax.l; panel.style.right = preMax.r; panel.style.bottom = preMax.b;
+      panel.style.width = preMax.w; panel.style.height = preMax.h; panel.style.resize = 'both';
+    }
+  });
+
+  // Draggable
+  (function(){const handle=document.getElementById('osc-drag-handle');let ox=0,oy=0,px=0,py=0;handle.addEventListener('mousedown',e=>{if(isMaximized)return;if(e.target.tagName==='SELECT'||e.target.tagName==='BUTTON'||e.target.tagName==='OPTION')return;px=e.clientX;py=e.clientY;const r=panel.getBoundingClientRect();ox=r.left;oy=r.top;panel.style.right='auto';panel.style.left=ox+'px';panel.style.top=oy+'px';panel.style.bottom='auto';const mm=ev=>{panel.style.left=(ox+ev.clientX-px)+'px';panel.style.top=(oy+ev.clientY-py)+'px';};const mu=()=>{document.removeEventListener('mousemove',mm);document.removeEventListener('mouseup',mu);};document.addEventListener('mousemove',mm);document.addEventListener('mouseup',mu);});})();
+
+  function startProbeRefresh(){
+    if(probeInterval)clearInterval(probeInterval); // prevent duplicate intervals
+    refreshProbeList(); // immediate populate on open
+    probeInterval=setInterval(refreshProbeList,500);
+  }
+  function stopProbeRefresh(){if(probeInterval){clearInterval(probeInterval);probeInterval=null;}} // no leak
+
+  btnToggle.addEventListener('click',()=>{
+    oscOpen=!oscOpen;panel.classList.toggle('open',oscOpen);btnToggle.innerHTML=oscOpen?'&#215;':'&#128200;';
+    if(oscOpen){resizeCanvas();startDraw();startProbeRefresh();}
+    else{stopDraw();stopProbeRefresh();}
+  });
+  btnClose.addEventListener('click',()=>{oscOpen=false;panel.classList.remove('open');btnToggle.innerHTML='&#128200;';stopDraw();stopProbeRefresh();});
+  btnFreeze.addEventListener('click',()=>{frozen=!frozen;btnFreeze.classList.toggle('active',frozen);btnFreeze.innerHTML=frozen?'&#9654; Resume':'&#10052; Freeze';});
+  selTimebase.addEventListener('change',()=>{TIME_WINDOW=parseFloat(selTimebase.value);});
+
+  function refreshProbeList(){
+    const currentIds = Array.from(probeSel.options).map(o=>o.value).filter(v=>v);
+    const newComps = (window._sbComponents||[]).filter(c=>!['ground','junction','switch'].includes(c.type));
+    const newIds = newComps.map(c=>c.id);
+    if(currentIds.join(',') === newIds.join(',')) return; // Avoid recreating DOM if unchanged
+    
+    const prev=probeSel.value;
+    probeSel.innerHTML='<option value="">&#8212; Probe &#8212;</option>';
+    newComps.forEach(c=>{const def=(window._sbCompTypes||{})[c.type];const label=def?def.label:c.type;const el=document.createElement('option');el.value=c.id;el.textContent=`${label} (${c.id})`;probeSel.appendChild(el);});
+    if(prev)probeSel.value=prev;
+  }
+
+  btnAdd.addEventListener('click',()=>{
+    const id=probeSel.value;if(!id)return;
+    const c=(window._sbComponents||[]).find(x=>x.id===id);if(!c)return;
+    const def=(window._sbCompTypes||{})[c.type];const label=def?def.label:c.type;
+    getMetrics(c.type).forEach(metric=>{
+      if(channels.find(ch=>ch.compId===id&&ch.metric===metric))return;
+      const color=COLORS[channels.length%COLORS.length];
+      // Fixed label: "Label (id)" separate from metric — rendered as "label · metric"
+      channels.push({compId:id,label:`${label} (${id})`,metric,color,data:[],muted:false});
     });
     renderFooter();
   });
 
   function getMetrics(type){
-    if(['voltmeter','battery','acsource','capacitor','inductor','galvanometer'].includes(type)) return ['V','I'];
-    if(type==='ammeter') return ['I'];
-    if(type==='resistor'||type==='bulb') return ['V','I'];
-    return ['V'];
+    if(['voltmeter','battery','acsource','capacitor','inductor','galvanometer'].includes(type))return['V','I'];
+    if(type==='ammeter')return['I'];
+    if(type==='resistor'||type==='bulb')return['V','I'];
+    return['V'];
   }
 
-  // ── clear all channels ────────────────────────────────────────────
-  btnClear.addEventListener('click', ()=>{ channels=[]; renderFooter(); });
+  btnClear.addEventListener('click',()=>{channels=[];renderFooter();});
 
-  // ── render channel chips in footer ───────────────────────────────
   function renderFooter(){
-    if(channels.length===0){
-      footer.innerHTML='<span class="osc-no-probe">Add a component probe above to start plotting ↑</span>';
-      return;
-    }
+    if(channels.length===0){footer.innerHTML='<span class="osc-no-probe">Add a component probe above to start plotting &#8593;</span>';return;}
     footer.innerHTML='';
     channels.forEach((ch,i)=>{
-      const el = document.createElement('div');
-      el.className='osc-channel'+(ch.muted?' muted':'');
-      el.style.borderColor=ch.color;
-      el.style.color=ch.color;
-      el.innerHTML=`<span class="dot" style="background:${ch.color}"></span>${ch.label}.${ch.metric}`;
-      el.title='Click to mute/unmute';
-      el.addEventListener('click', ()=>{ ch.muted=!ch.muted; renderFooter(); });
-      const rm=document.createElement('span');
-      rm.textContent='✕'; rm.style.marginLeft='4px'; rm.style.cursor='pointer'; rm.style.opacity='.6';
-      rm.addEventListener('click', e=>{ e.stopPropagation(); channels.splice(i,1); renderFooter(); });
-      el.appendChild(rm);
-      footer.appendChild(el);
+      const el=document.createElement('div');el.className='osc-channel'+(ch.muted?' muted':'');el.style.borderColor=ch.color;el.style.color=ch.color;
+      // "Label (id) · Metric" — no double-append of metric
+      el.innerHTML=`<span class="dot" style="background:${ch.color}"></span>${ch.label} &middot; ${ch.metric}`;
+      el.title='Click to mute/unmute';el.addEventListener('click',()=>{ch.muted=!ch.muted;renderFooter();});
+      const rm=document.createElement('span');rm.textContent='&#215;';rm.style.marginLeft='4px';rm.style.cursor='pointer';rm.style.opacity='.6';rm.addEventListener('click',e=>{e.stopPropagation();channels.splice(i,1);renderFooter();});el.appendChild(rm);footer.appendChild(el);
     });
-    const ro=document.createElement('span');
-    ro.className='osc-readout'; ro.id='osc-readout';
-    footer.appendChild(ro);
+    const ro=document.createElement('span');ro.className='osc-readout';ro.id='osc-readout';footer.appendChild(ro);
   }
 
-  // Expose draw function so we can force a redraw during snapshot if canvas was 0x0
-  window._oscDraw = draw;
+  window._oscDraw=draw;
+  window._oscGetSnapshot = function() {
+    const W = canvas.width, H = canvas.height;
+    let restore = false;
+    if(W === 0 || H === 0) {
+      canvas.width = 460; canvas.height = 200;
+      draw();
+      restore = true;
+    }
+    const off = document.createElement('canvas');
+    const hdr = 36;
+    off.width = canvas.width;
+    off.height = canvas.height + hdr;
+    const ctx2 = off.getContext('2d');
+    ctx2.fillStyle = '#050d1a';
+    ctx2.fillRect(0, 0, off.width, hdr);
+    ctx2.font = '11px monospace';
+    ctx2.fillStyle = '#94a3b8';
+    ctx2.textAlign = 'left';
+    ctx2.textBaseline = 'middle';
+    const tb = selTimebase.options[selTimebase.selectedIndex].text;
+    const ys = selYScale.options[selYScale.selectedIndex].text;
+    ctx2.fillText(`Timebase: ${tb}  |  Y-Scale: ${ys}`, 12, hdr / 2);
+    let cx = off.width - 12;
+    ctx2.textAlign = 'right';
+    if(channels.length === 0) {
+      ctx2.fillText('No Probes', cx, hdr / 2);
+    } else {
+      [...channels].reverse().forEach(ch => {
+        if(ch.muted) return;
+        const text = ch.label;
+        ctx2.fillStyle = ch.color;
+        ctx2.fillText(text, cx, hdr / 2);
+        cx -= ctx2.measureText(text).width;
+        ctx2.fillStyle = '#475569';
+        ctx2.fillText(' \u25A0 ', cx, hdr / 2);
+        cx -= ctx2.measureText(' \u25A0 ').width;
+      });
+    }
+    ctx2.drawImage(canvas, 0, hdr);
+    const dataUrl = off.toDataURL('image/png');
+    if (restore) { canvas.width = W; canvas.height = H; }
+    return dataUrl;
+  };
 
-  // ── canvas resize ─────────────────────────────────────────────────
-  function resizeCanvas(){
-    canvas.width = panel.clientWidth;
-    canvas.height = Math.max(160, panel.clientHeight - 90);
-  }
+  function resizeCanvas(){canvas.width=panel.clientWidth;canvas.height=Math.max(160,panel.clientHeight-90);}
   new ResizeObserver(resizeCanvas).observe(panel);
-
-  // ── draw loop ─────────────────────────────────────────────────────
-  function startDraw(){ if(animId) return; loop(); }
-  function stopDraw(){ if(animId){ cancelAnimationFrame(animId); animId=null; } }
-  function loop(){ animId=requestAnimationFrame(loop); draw(); }
+  function startDraw(){if(animId)return;loop();}
+  function stopDraw(){if(animId){cancelAnimationFrame(animId);animId=null;}}
+  function loop(){animId=requestAnimationFrame(loop);draw();}
 
   function draw(){
-    const W=canvas.width, H=canvas.height;
-    if(W === 0 || H === 0) return;
+    const W=canvas.width,H=canvas.height;if(W===0||H===0)return;
     ctx.clearRect(0,0,W,H);
-
-    // background gradient
-    const bg=ctx.createLinearGradient(0,0,0,H);
-    bg.addColorStop(0,'#050d1a'); bg.addColorStop(1,'#0a1628');
-    ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
-
-    // grid lines
-    ctx.strokeStyle='rgba(148,163,184,0.07)'; ctx.lineWidth=1;
-    const cols=10, rows=8;
-    for(let i=0;i<=cols;i++){ ctx.beginPath(); ctx.moveTo(i*W/cols,0); ctx.lineTo(i*W/cols,H); ctx.stroke(); }
-    for(let i=0;i<=rows;i++){ ctx.beginPath(); ctx.moveTo(0,i*H/rows); ctx.lineTo(W,i*H/rows); ctx.stroke(); }
-    // center axes
-    ctx.strokeStyle='rgba(148,163,184,0.18)'; ctx.lineWidth=1;
-    ctx.beginPath(); ctx.moveTo(0,H/2); ctx.lineTo(W,H/2); ctx.stroke();
-
-    if(channels.length===0){
-      ctx.fillStyle='#334155'; ctx.font='13px IBM Plex Mono';
-      ctx.textAlign='center'; ctx.fillText('No channels. Add a probe ↗', W/2, H/2);
-      return;
-    }
-
-    // auto-scale: find global max across all visible channels
+    const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#050d1a');bg.addColorStop(1,'#0a1628');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle='rgba(148,163,184,0.07)';ctx.lineWidth=1;
+    const cols=10,rows=8;
+    for(let i=0;i<=cols;i++){ctx.beginPath();ctx.moveTo(i*W/cols,0);ctx.lineTo(i*W/cols,H);ctx.stroke();}
+    for(let i=0;i<=rows;i++){ctx.beginPath();ctx.moveTo(0,i*H/rows);ctx.lineTo(W,i*H/rows);ctx.stroke();}
+    ctx.strokeStyle='rgba(148,163,184,0.18)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,H/2);ctx.lineTo(W,H/2);ctx.stroke();
+    if(channels.length===0){ctx.fillStyle='#334155';ctx.font='13px IBM Plex Mono';ctx.textAlign='center';ctx.fillText('No channels. Add a probe',W/2,H/2);return;}
     let maxVal=1e-9;
+    let anyClipped=false;
+    if (selYScale.value !== 'auto') {
+      maxVal = parseFloat(selYScale.value);
+    } else {
+      channels.forEach(ch=>{if(ch.muted||ch.data.length<2)return;ch.data.forEach(p=>{if(Math.abs(p.v)>maxVal)maxVal=Math.abs(p.v);});});
+    }
+    const scale=(H/2-16)/maxVal;
+    const now=window._sbSimTime||0;const tStart=Math.max(0,now-TIME_WINDOW);
     channels.forEach(ch=>{
-      if(ch.muted||ch.data.length<2) return;
-      ch.data.forEach(p=>{ if(Math.abs(p.v)>maxVal) maxVal=Math.abs(p.v); });
-    });
-    const scale = (H/2-16) / maxVal;
-
-    // time axis: last TIME_WINDOW seconds
-    const now = window._sbSimTime||0;
-    const tStart = Math.max(0, now - TIME_WINDOW);
-
-    // draw each channel
-    channels.forEach(ch=>{
-      if(ch.muted || ch.data.length<2) return;
-      ctx.save();
-      ctx.strokeStyle=ch.color;
-      ctx.lineWidth=2;
-      ctx.shadowColor=ch.color;
-      ctx.shadowBlur=4;
-      ctx.lineJoin='round';
-      ctx.beginPath();
-      let first=true;
-      ch.data.forEach(p=>{
-        if(p.t<tStart) return;
-        const x = ((p.t-tStart)/TIME_WINDOW)*W;
-        const y = H/2 - p.v*scale;
-        if(first){ ctx.moveTo(x,y); first=false; } else ctx.lineTo(x,y);
-      });
-      ctx.stroke();
-
-      // latest value label at right edge
-      if(ch.data.length){
-        const last=ch.data[ch.data.length-1];
-        const y=Math.max(14,Math.min(H-6, H/2-last.v*scale));
-        ctx.shadowBlur=0;
-        ctx.fillStyle=ch.color;
-        ctx.font='bold 10px IBM Plex Mono';
-        ctx.textAlign='right';
-        ctx.fillText(`${ch.label}.${ch.metric}: ${fmtOsc(last.v,ch.metric)}`, W-6, y);
-      }
+      if(ch.muted||ch.data.length<2)return;
+      ctx.save();ctx.strokeStyle=ch.color;ctx.lineWidth=2;ctx.shadowColor=ch.color;ctx.shadowBlur=4;ctx.lineJoin='round';ctx.beginPath();
+      let first=true;ch.data.forEach(p=>{
+        if(p.t<tStart)return;
+        const x=((p.t-tStart)/TIME_WINDOW)*W;
+        let clampedV = p.v;
+        if (selYScale.value !== 'auto') {
+          if (p.v > maxVal) { clampedV = maxVal; anyClipped = true; }
+          else if (p.v < -maxVal) { clampedV = -maxVal; anyClipped = true; }
+        }
+        const y=H/2-clampedV*scale;
+        if(first){ctx.moveTo(x,y);first=false;}else ctx.lineTo(x,y);
+      });ctx.stroke();
+      if(ch.data.length){const last=ch.data[ch.data.length-1];const y=Math.max(14,Math.min(H-6,H/2-(Math.min(maxVal,Math.max(-maxVal,last.v)))*scale));ctx.shadowBlur=0;ctx.fillStyle=ch.color;ctx.font='bold 10px IBM Plex Mono';ctx.textAlign='right';ctx.fillText(`${ch.label} ${ch.metric}: ${fmtOsc(last.v,ch.metric)}`,W-6,y);}
       ctx.restore();
     });
-
-    // time axis labels
-    ctx.fillStyle='#475569'; ctx.font='9.5px IBM Plex Mono'; ctx.textAlign='center'; ctx.shadowBlur=0;
-    for(let i=0;i<=4;i++){
-      const t2 = tStart + (i/4)*TIME_WINDOW;
-      ctx.fillText(t2.toFixed(2)+'s', (i/4)*W, H-3);
-    }
-    // y=0 label
-    ctx.textAlign='left'; ctx.fillText('0', 3, H/2-3);
-
-    // max scale label
-    ctx.fillText(`+${fmtOsc(maxVal,'V')}`, 3, 14);
-    ctx.fillText(`-${fmtOsc(maxVal,'V')}`, 3, H-14);
-
-    // frozen indicator
-    if(frozen){
-      ctx.fillStyle='rgba(250,204,21,0.9)'; ctx.font='bold 11px IBM Plex Mono';
-      ctx.textAlign='center';
-      ctx.fillText('❄ FROZEN', W/2, 16);
-    }
+    ctx.fillStyle='#475569';ctx.font='9.5px IBM Plex Mono';ctx.textAlign='center';ctx.shadowBlur=0;
+    for(let i=0;i<=4;i++){const t2=tStart+(i/4)*TIME_WINDOW;ctx.fillText(t2.toFixed(2)+'s',(i/4)*W,H-3);}
+    ctx.textAlign='left';ctx.fillText('0',3,H/2-3);ctx.fillText('+'+fmtOsc(maxVal, selYScale.value === 'auto' ? 'V' : 'Fixed'),3,14);ctx.fillText('-'+fmtOsc(maxVal, selYScale.value === 'auto' ? 'V' : 'Fixed'),3,H-14);
+    if(anyClipped){ctx.fillStyle='#f87171';ctx.font='bold 10px IBM Plex Mono';ctx.textAlign='center';ctx.fillText('\u26A0 DATA CLIPPED \u2014 Increase Y-Scale',W/2,30);}
+    if(frozen){ctx.fillStyle='rgba(250,204,21,0.9)';ctx.font='bold 11px IBM Plex Mono';ctx.textAlign='center';ctx.fillText('FROZEN',W/2,16);}
   }
 
-  function fmtOsc(v, metric){
-    const unit = metric==='I'?'A': metric==='P'?'W':'V';
-    const a=Math.abs(v);
-    if(a>=1) return v.toFixed(3)+unit;
-    if(a>=1e-3) return (v*1e3).toFixed(2)+'m'+unit;
-    if(a>=1e-6) return (v*1e6).toFixed(2)+'µ'+unit;
-    return v.toExponential(2)+unit;
-  }
+  function fmtOsc(v,metric){if(metric==='Fixed')return v.toString();const unit=metric==='I'?'A':metric==='P'?'W':'V';const a=Math.abs(v);if(a>=1)return v.toFixed(3)+unit;if(a>=1e-3)return(v*1e3).toFixed(2)+'m'+unit;if(a>=1e-6)return(v*1e6).toFixed(2)+'u'+unit;return v.toExponential(2)+unit;}
 
-  // ── hook into simulation tick ─────────────────────────────────────
-  // We expose a global update hook the tick() calls
-  window._oscUpdate = function(readings, t){
-    if(frozen) return;
-    refreshProbeList();
-    channels.forEach(ch=>{
-      const r=readings[ch.compId]; if(!r) return;
-      let val=0;
-      if(ch.metric==='V') val=r.V||0;
-      else if(ch.metric==='I') val=r.I||0;
-      else if(ch.metric==='P') val=r.P||0;
-      ch.data.push({t, v:val});
-      // trim old samples beyond 2x window
-      const cutoff=t-TIME_WINDOW*2;
-      while(ch.data.length && ch.data[0].t<cutoff) ch.data.shift();
-      if(ch.data.length>MAX_SAMPLES) ch.data.shift();
-    });
+  window._oscUpdate=function(readings,t){
+    if(frozen)return;
+    channels.forEach(ch=>{const r=readings[ch.compId];if(!r)return;let val=0;if(ch.metric==='V')val=r.V||0;else if(ch.metric==='I')val=r.I||0;else if(ch.metric==='P')val=r.P||0;ch.data.push({t,v:val});const cutoff=t-10;while(ch.data.length&&ch.data[0].t<cutoff)ch.data.shift();if(ch.data.length>MAX_SAMPLES)ch.data.shift();});
   };
 
   renderFooter();
 })();
 
-renderPalette();
-render();
-renderInspector();
+renderPalette();render();renderInspector();
 
-// ── Inter-frame Communication for Lab Report ───────────────────────
-function doCaptureSnapshot() {
-  try {
-    // 1. Capture SVG
-    const svgEl = document.getElementById('canvas');
-    let svgStr = new XMLSerializer().serializeToString(svgEl);
-    if (!svgStr.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
-      svgStr = svgStr.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+// Lab Report Inter-frame Communication
+function doCaptureSnapshot(){
+  try{
+    const svgEl=document.getElementById('canvas');let svgStr=new XMLSerializer().serializeToString(svgEl);
+    if(!svgStr.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/))svgStr=svgStr.replace(/^<svg/,'<svg xmlns="http://www.w3.org/2000/svg"');
+    const gEl = document.getElementById('viewport-g');
+    if(gEl && gEl.childNodes.length > 0) {
+      const bbox = gEl.getBBox();
+      const p = 60; // padding
+      const vb = `${bbox.x - p} ${bbox.y - p} ${bbox.width + p * 2} ${bbox.height + p * 2}`;
+      svgStr = svgStr.replace(/^<svg/, `<svg viewBox="${vb}" width="100%" height="100%"`);
     }
-    
-    // Inject styles for SVG rendering
-    const styles = `
-      <style>
-        .wire { stroke: #94a3b8; stroke-width: 3px; fill: none; }
-        .lead { stroke: #94a3b8; stroke-width: 2.5px; fill: none; }
-        .icon-line { stroke: #0f172a; stroke-width: 2.2px; fill: none; stroke-linecap: round; }
-        .terminal { fill: #94a3b8; stroke: #fff; stroke-width: 1.5px; }
-        .label-name { fill: #94a3b8; font-family: monospace; font-size: 10.5px; text-anchor: middle; }
-        .label-val { fill: #0f172a; font-family: monospace; font-size: 10.5px; text-anchor: middle; font-weight: 600; }
-        .label-read { fill: #0d9488; font-family: monospace; font-size: 11px; text-anchor: middle; font-weight: 700; }
-      </style>
-    `;
-    svgStr = svgStr.replace('>', '>' + styles);
-    
-    const svgDataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
-    
-    // 2. Capture Oscilloscope (Always capture to maintain the 2-column layout in the Lab Report)
-    const oscCanvas = document.getElementById('osc-canvas');
-    let graphDataUrl = null;
-    if (oscCanvas) {
-      // If the panel is closed, its width is 0. We temporarily force a size to capture the "No channels" state.
-      const originalWidth = oscCanvas.width;
-      const originalHeight = oscCanvas.height;
-      if (originalWidth === 0 || originalHeight === 0) {
-        oscCanvas.width = 420;
-        oscCanvas.height = 190;
-        // Trigger a synchronous draw to fill the temporary canvas
-        if (typeof window._oscDraw === 'function') window._oscDraw();
-      }
-      graphDataUrl = oscCanvas.toDataURL('image/png');
-      
-      // Restore original dimensions if we altered them
-      if (originalWidth === 0 || originalHeight === 0) {
-        oscCanvas.width = originalWidth;
-        oscCanvas.height = originalHeight;
-      }
+    const styles=`<style>.wire{stroke:#94a3b8;stroke-width:3px;fill:none;}.lead{stroke:#94a3b8;stroke-width:2.5px;fill:none;}.icon-line{stroke:#0f172a;stroke-width:2.2px;fill:none;stroke-linecap:round;}.terminal{fill:#94a3b8;stroke:#fff;stroke-width:1.5px;}.label-name{fill:#94a3b8;font-family:monospace;font-size:10.5px;text-anchor:middle;}.label-val{fill:#0f172a;font-family:monospace;font-size:10.5px;text-anchor:middle;font-weight:600;}.label-read{fill:#0d9488;font-family:monospace;font-size:11px;text-anchor:middle;font-weight:700;}</style>`;
+    svgStr=svgStr.replace('>','>'+styles);
+    const svgDataUrl='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svgStr);
+    let graphDataUrl=null;
+    if(typeof window._oscGetSnapshot === 'function') {
+      graphDataUrl = window._oscGetSnapshot();
+    } else {
+      const oscCanvas=document.getElementById('osc-canvas');
+      if(oscCanvas){const ow=oscCanvas.width,oh=oscCanvas.height;if(ow===0||oh===0){oscCanvas.width=420;oscCanvas.height=190;if(typeof window._oscDraw==='function')window._oscDraw();}graphDataUrl=oscCanvas.toDataURL('image/png');if(ow===0||oh===0){oscCanvas.width=ow;oscCanvas.height=oh;}}
     }
-    
-    // 3. Send back to parent
     window.parent.postMessage({
       type: 'SNAPSHOT_RESULT',
       svgDataUrl,
-      graphDataUrl
+      graphDataUrl,
+      analysisData: { readings: window._lastReadings, components: window._sbComponents }
     }, '*');
-  } catch (err) {
-    console.error("Snapshot failed:", err);
-  }
+  }catch(err){console.error('Snapshot failed:',err);}
 }
-
-function doRecordReading() {
-  if (window._lastReadings) {
-    window.parent.postMessage({
-      type: 'READING_RESULT',
-      readings: window._lastReadings
-    }, '*');
-  }
-}
-
-// Listen for messages from parent
-window.addEventListener('message', (e) => {
-  if (e.data && e.data.type === 'CAPTURE_SNAPSHOT') {
-    doCaptureSnapshot();
-  } else if (e.data && e.data.type === 'RECORD_READING') {
-    doRecordReading();
-  }
+function doRecordReading(){if(window._lastReadings)window.parent.postMessage({type:'READING_RESULT',readings:window._lastReadings},'*');}
+window.addEventListener('message',(e)=>{
+  if(e.data&&e.data.type==='CAPTURE_SNAPSHOT')doCaptureSnapshot();
+  else if(e.data&&e.data.type==='RECORD_READING')doRecordReading();
 });
-
-// Bind internal buttons to trigger the exact same logic directly
-document.getElementById('btnCaptureLab').onclick = doCaptureSnapshot;
-document.getElementById('btnRecordLab').onclick = doRecordReading;
+document.getElementById('btnCaptureLab').onclick=doCaptureSnapshot;
+document.getElementById('btnRecordLab').onclick=doRecordReading;
+document.getElementById('osc-capture').onclick=doCaptureSnapshot;
 
 requestAnimationFrame(tick);
 </script>

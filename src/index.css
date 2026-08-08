@@ -105,16 +105,13 @@ code {
   background: var(--code-bg);
 }
 
-/* Scroll Reveal Animations */
-.reveal {
-  opacity: 0;
-  transform: translateY(40px);
-  transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.reveal.active {
-  opacity: 1;
-  transform: translateY(0);
+.reveal {
+  animation: fadeUp 0.8s cubic-bezier(0.5, 0, 0, 1) forwards;
 }
 
 :root {
@@ -154,23 +151,26 @@ code {
   @media print {
     body {
       background: #fff !important;
-      color: #000 !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
     
     .no-print { display: none !important; }
+    
+    .app-sidebar { display: none !important; }
+    
+    /* In print, content should take full width without the 280px sidebar offset */
+    div {
+        margin-left: 0 !important;
+    }
     
     .print-report-container {
       display: block !important;
       width: 100% !important;
       padding: 0 !important;
       margin: 0 !important;
-      color: #000 !important;
       background: #fff !important;
-    }
-
-    .print-report-container * {
-      color: #000 !important;
-      background: transparent !important;
+      border: none !important;
     }
 
     .print-report-container img {
@@ -178,11 +178,22 @@ code {
       height: auto !important;
     }
 
-    .recharts-wrapper, table, tr, .print-section, .snapshot-card {
+    .report-accordion, table, tr, .snapshot-card {
       page-break-inside: avoid;
     }
     
-    .print-section {
-      margin-bottom: 30px;
+    .print-force-open { 
+      display: block !important; 
+      border-top: 1px solid var(--border) !important; 
+    }
+    
+    .print-only { 
+      display: flex !important; 
+    }
+    
+    /* Ensure inputs display their values like normal text */
+    input[type="text"] {
+      border: none !important;
+      padding: 0 !important;
     }
   }

@@ -182,3 +182,13 @@
     border-right-color: var(--border);
   }
 }
+
+.sidebar-item:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  transform: translateX(4px) !important;
+}
+.sidebar-item:hover .sidebar-icon {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
+}
+
