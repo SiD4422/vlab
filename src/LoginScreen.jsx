@@ -138,16 +138,19 @@ export default function LoginScreen({ onLogin }) {
         <div className="login-container">
           <div className="login-heading">{isSignUp ? "Create Account" : "Sign In"}</div>
           
-          <div style={{ display: 'flex', gap: 10, marginBottom: 20, justifyContent: 'center' }}>
+          <div style={{ position: 'relative', display: 'flex', background: 'rgba(148, 163, 184, 0.1)', padding: 4, borderRadius: 999, marginBottom: 24, boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)' }}>
+            <div style={{ 
+              position: 'absolute', top: 4, bottom: 4, left: role === 'student' ? 4 : '50%', width: 'calc(50% - 4px)', 
+              background: '#fff', borderRadius: 999, transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', 
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.05)'
+            }} />
             <button 
               type="button"
               onClick={() => setRole('student')}
               style={{ 
-                flex: 1, padding: '8px', borderRadius: 8, cursor: 'pointer', border: '1px solid',
-                background: role === 'student' ? 'var(--teal)' : 'var(--canvas)',
-                borderColor: role === 'student' ? 'var(--teal)' : 'var(--border)',
-                color: role === 'student' ? '#fff' : 'var(--muted)',
-                fontWeight: 600, transition: 'all 0.2s'
+                flex: 1, padding: '10px 0', borderRadius: 999, cursor: 'pointer', border: 'none', background: 'transparent',
+                color: role === 'student' ? '#0f766e' : '#64748b',
+                fontWeight: 700, fontSize: 14, transition: 'all 0.3s', position: 'relative', zIndex: 1
               }}>
               I am a Student
             </button>
@@ -155,11 +158,9 @@ export default function LoginScreen({ onLogin }) {
               type="button"
               onClick={() => setRole('teacher')}
               style={{ 
-                flex: 1, padding: '8px', borderRadius: 8, cursor: 'pointer', border: '1px solid',
-                background: role === 'teacher' ? 'var(--copper)' : 'var(--canvas)',
-                borderColor: role === 'teacher' ? 'var(--copper)' : 'var(--border)',
-                color: role === 'teacher' ? '#fff' : 'var(--muted)',
-                fontWeight: 600, transition: 'all 0.2s'
+                flex: 1, padding: '10px 0', borderRadius: 999, cursor: 'pointer', border: 'none', background: 'transparent',
+                color: role === 'teacher' ? '#0f766e' : '#64748b',
+                fontWeight: 700, fontSize: 14, transition: 'all 0.3s', position: 'relative', zIndex: 1
               }}>
               I am a Teacher
             </button>
@@ -223,14 +224,14 @@ export default function LoginScreen({ onLogin }) {
               </button>
             </div>
           </div>
-          <div style={{ marginTop: 25, textAlign: 'center', fontSize: 13 }}>
-            <span style={{ color: 'var(--muted)' }}>
+          <div style={{ marginTop: 25, textAlign: 'center', fontSize: 14 }}>
+            <span style={{ color: '#64748b', fontWeight: 500 }}>
               {isSignUp ? "Already have an account?" : "Don't have an account?"}
             </span>
             <button 
               type="button"
               onClick={() => { setIsSignUp(!isSignUp); setError(''); }} 
-              style={{ background: 'none', border: 'none', color: 'var(--teal)', fontWeight: 600, marginLeft: 6, cursor: 'pointer' }}>
+              style={{ background: 'none', border: 'none', color: '#0d9488', fontWeight: 700, marginLeft: 8, cursor: 'pointer', fontSize: 14 }}>
               {isSignUp ? "Sign In" : "Sign Up"}
             </button>
           </div>
