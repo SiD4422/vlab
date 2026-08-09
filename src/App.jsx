@@ -356,39 +356,108 @@ function Home({ user, enrolledClass, setEnrolledClass, onOpen, unlocked, collaps
       {/* Experiments Grid */}
       <div id="experiments-grid" className="reveal" style={{ padding: "20px 40px 80px", maxWidth: 1200, margin: "0 auto" }}>
         
-        {/* LMS Class Join UI - Relocated to Student Dashboard Banner */}
-        <div className="premium-panel" style={{ width: '100%', marginBottom: 40, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 20, padding: '24px 32px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <div style={{ width: 48, height: 48, borderRadius: 24, background: 'var(--teal-soft)', color: 'var(--teal)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <GraduationCap size={24} />
+        {/* LMS Class Join UI - Premium Redesign */}
+        <div 
+          style={{ 
+            width: '100%', 
+            marginBottom: 40, 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'space-between', 
+            flexWrap: 'wrap', 
+            gap: 20, 
+            padding: '28px 36px',
+            background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+            borderRadius: 24,
+            border: '1px solid rgba(13, 148, 136, 0.1)',
+            boxShadow: '0 12px 32px rgba(0, 0, 0, 0.04), inset 0 2px 0 rgba(255,255,255,0.8)',
+            position: 'relative',
+            overflow: 'hidden'
+          }}
+        >
+          {/* Decorative background element */}
+          <div style={{ position: 'absolute', top: -100, right: -50, width: 300, height: 300, background: 'radial-gradient(circle, rgba(13,148,136,0.06) 0%, rgba(255,255,255,0) 70%)', borderRadius: '50%', zIndex: 0 }} />
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: 20, position: 'relative', zIndex: 1 }}>
+            <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'linear-gradient(135deg, #14b8a6, #0f766e)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 16px rgba(13, 148, 136, 0.25)' }}>
+              <GraduationCap size={28} />
             </div>
             <div>
-              <div className="panel-title" style={{ fontSize: 18 }}>Student Portal</div>
-              <div className="panel-subtitle">
-                {enrolledClass ? `You are currently enrolled in ${enrolledClass.className}.` : "Join a class to submit your lab records."}
+              <div style={{ fontSize: 20, fontWeight: 800, color: '#1e293b', letterSpacing: '-0.02em' }}>Student Portal</div>
+              <div style={{ fontSize: 14, color: '#64748b', marginTop: 4, fontWeight: 500 }}>
+                {enrolledClass ? `You are currently enrolled in ${enrolledClass.className}.` : "Enter your class code below to join and submit lab records."}
               </div>
             </div>
           </div>
           
-          {enrolledClass ? (
-            <div className="status-badge graded" style={{ padding: '8px 16px', fontSize: 14 }}>
-              <CheckCircle2 size={16} /> Enrolled
-            </div>
-          ) : (
-            <form onSubmit={joinClass} className="create-bar" style={{ margin: 0, width: 'auto' }}>
-              <input 
-                type="text" 
-                placeholder="INVITE CODE (VLAB-XYZ)"
-                value={inviteCode}
-                onChange={e => setInviteCode(e.target.value.toUpperCase())}
-                className="create-input"
-                style={{ width: 240, textTransform: 'uppercase' }}
-              />
-              <button type="submit" disabled={joining} className="create-btn">
-                {joining ? <Loader2 className="spin" size={16} /> : <Link2 size={16} />} Join Class
-              </button>
-            </form>
-          )}
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            {enrolledClass ? (
+              <div style={{ 
+                display: 'inline-flex', 
+                alignItems: 'center', 
+                gap: 8, 
+                padding: '10px 20px', 
+                background: '#ecfdf5', 
+                color: '#059669', 
+                borderRadius: 999, 
+                fontWeight: 700, 
+                fontSize: 15,
+                border: '1px solid #a7f3d0',
+                boxShadow: '0 4px 12px rgba(5, 150, 105, 0.1)'
+              }}>
+                <CheckCircle2 size={18} /> Enrolled
+              </div>
+            ) : (
+              <form onSubmit={joinClass} style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#fff', padding: 6, borderRadius: 16, border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
+                <div style={{ position: 'relative' }}>
+                  <input 
+                    type="text" 
+                    placeholder="Class Code (VLAB-...)"
+                    value={inviteCode}
+                    onChange={e => setInviteCode(e.target.value.toUpperCase())}
+                    style={{ 
+                      width: 260, 
+                      padding: '12px 16px 12px 42px', 
+                      borderRadius: 12, 
+                      border: '2px solid transparent', 
+                      background: '#f8fafc',
+                      fontSize: 14, 
+                      fontWeight: 600, 
+                      color: '#1e293b',
+                      textTransform: 'uppercase',
+                      outline: 'none',
+                      transition: 'all 0.2s',
+                    }}
+                    onFocus={(e) => { e.target.style.background = '#fff'; e.target.style.border = '2px solid rgba(13,148,136,0.3)'; }}
+                    onBlur={(e) => { e.target.style.background = '#f8fafc'; e.target.style.border = '2px solid transparent'; }}
+                  />
+                  <div style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}>
+                    <BookOpen size={18} />
+                  </div>
+                </div>
+                <button type="submit" disabled={joining || !inviteCode.trim()} style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 8, 
+                  background: (joining || !inviteCode.trim()) ? '#94a3b8' : 'linear-gradient(135deg, #0d9488, #0f766e)', 
+                  color: '#fff', 
+                  border: 'none', 
+                  padding: '12px 24px', 
+                  borderRadius: 12, 
+                  fontWeight: 700, 
+                  fontSize: 14, 
+                  cursor: (joining || !inviteCode.trim()) ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s',
+                  boxShadow: (joining || !inviteCode.trim()) ? 'none' : '0 4px 12px rgba(13,148,136,0.3)'
+                }}
+                onMouseOver={(e) => { if(!joining && inviteCode.trim()) e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                onMouseOut={(e) => { if(!joining && inviteCode.trim()) e.currentTarget.style.transform = 'translateY(0)'; }}
+                >
+                  {joining ? <Loader2 className="spin" size={18} /> : <Link2 size={18} />} Join Class
+                </button>
+              </form>
+            )}
+          </div>
         </div>
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 32 }}>
