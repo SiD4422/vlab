@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, updateProfile } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, googleProvider, db } from './services/firebase';
+import { useNavigate } from 'react-router-dom';
 import './LoginScreen.css';
 
-export default function LoginScreen({ onLogin }) {
+export default function LoginScreen() {
+  const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -42,28 +44,17 @@ export default function LoginScreen({ onLogin }) {
           })
         });
 
-        onLogin({
-          email: userCredential.user.email,
-          name: fullName,
-          avatar: userCredential.user.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userCredential.user.email}`,
-          uid: userCredential.user.uid,
-          role: role
-        });
+        // Navigate — AuthContext onAuthStateChanged will pick up the new user
+        navigate(role === 'teacher' ? '/teacher' : '/student');
       } else {
         // Sign In
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         
-        // Fetch role from Firestore
+        // Fetch role from Firestore to navigate to the right dashboard
         const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
         const userRole = userDoc.exists() ? userDoc.data().role : 'student';
-
-        onLogin({
-          email: userCredential.user.email,
-          name: userCredential.user.displayName || userCredential.user.email.split('@')[0],
-          avatar: userCredential.user.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userCredential.user.email}`,
-          uid: userCredential.user.uid,
-          role: userRole
-        });
+        // Navigate — AuthContext onAuthStateChanged will populate the user state
+        navigate(userRole === 'teacher' ? '/teacher' : '/student');
       }
     } catch (err) {
       console.error("Auth Error:", err);
@@ -105,13 +96,8 @@ export default function LoginScreen({ onLogin }) {
         currentRole = userDoc.data().role;
       }
 
-      onLogin({
-        email: userCredential.user.email,
-        name: userCredential.user.displayName,
-        avatar: userCredential.user.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userCredential.user.email}`,
-        uid: userCredential.user.uid,
-        role: currentRole
-      });
+      // Navigate — AuthContext onAuthStateChanged will populate the user state
+      navigate(currentRole === 'teacher' ? '/teacher' : '/student');
     } catch (err) {
       console.error("Google Auth Error:", err);
       setError(err.message.replace('Firebase: ', ''));

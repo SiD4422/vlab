@@ -11,12 +11,14 @@ import {
 import StrainGaugeSim from "./simulations/StrainGaugeSim";
 import UnifiedBridgeSim, { BridgeProcedurePanel, BRIDGES, initBridgeState, CircuitSVG } from "./simulations/UnifiedBridgeSim";
 import LoginScreen from "./LoginScreen";
-import TeacherDashboard from "./TeacherDashboard";
 import Profile from "./Profile";
 import AIChatbot from "./AIChatbot";
-import { auth, db } from "./services/firebase";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import { db } from "./services/firebase";
 import { doc, getDoc, collection, query, where, getDocs, updateDoc, arrayUnion, setDoc, writeBatch } from "firebase/firestore";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "./contexts/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
+import TeacherDashboardView from "./pages/TeacherDashboardView";
 
 /* ---------------------------------------------------------------
    DESIGN TOKENS — circuit-board palette: ink navy shell, copper
@@ -979,12 +981,69 @@ function Feedback() {
 }
 
 /* ---------------------------------------------------------------
-   APP SHELL
+   ROUTER SHELL — the real default export
+   Replaces the old conditional render (if !user / if teacher / else student)
+   with proper react-router-dom routes + ProtectedRoute guards
 --------------------------------------------------------------- */
 export default function App() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const initialView = urlParams.get('view') || "home";
-  const [view, setView] = useState(initialView);
+  const { user, role, authReady } = useAuth();
+
+  // While Firebase + Firestore role are resolving, show a full-screen spinner.
+  // This prevents ANY flash of wrong content.
+  if (!authReady) {
+    return (
+      <div style={{ display: 'flex', height: '100vh', width: '100vw', alignItems: 'center', justifyContent: 'center', background: '#0f1724', flexDirection: 'column', gap: 16 }}>
+        <Loader2 size={36} color="#0d9488" style={{ animation: 'spin 1s linear infinite' }} />
+        <div style={{ color: '#64748b', fontSize: 14, fontWeight: 500 }}>Loading V-Lab…</div>
+      </div>
+    );
+  }
+
+  return (
+    <Routes>
+      {/* Public: Login page */}
+      <Route
+        path="/"
+        element={
+          user
+            ? <Navigate to={role === 'teacher' ? '/teacher' : '/student'} replace />
+            : <LoginScreen />
+        }
+      />
+
+      {/* Protected: Student app shell */}
+      <Route
+        path="/student"
+        element={
+          <ProtectedRoute role="student">
+            <StudentApp />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Protected: Teacher dashboard */}
+      <Route
+        path="/teacher"
+        element={
+          <ProtectedRoute role="teacher">
+            <TeacherDashboardView />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Catch-all: redirect to root */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}
+
+/* ---------------------------------------------------------------
+   STUDENT APP SHELL (was: export default function App)
+   Now reads user/auth from AuthContext instead of internal state
+--------------------------------------------------------------- */
+function StudentApp() {
+  const { user, setUser, enrolledClass, setEnrolledClass, logout } = useAuth();
+  const [view, setView] = useState("home");
   const [activeId, setActiveId] = useState(null);
   const [tab, setTab] = useState("aim");
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -996,56 +1055,8 @@ export default function App() {
   const [bridgeSims, setBridgeSims] = useState({});
   const [completed, setCompleted] = useState([]);
   const [theme, setTheme] = useState(() => localStorage.getItem('vlab_theme') || 'light');
-  const [user, setUser] = useState(null);
-  const [authInitialized, setAuthInitialized] = useState(false);
-  const [enrolledClass, setEnrolledClass] = useState(null);
-
-  useEffect(() => {
-    if (!auth) {
-      // Fallback if firebase is broken (e.g. invalid keys)
-      setAuthInitialized(true);
-      return;
-    }
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      if (firebaseUser) {
-        setUser({
-          email: firebaseUser.email,
-          name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
-          avatar: firebaseUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.email}`,
-          uid: firebaseUser.uid,
-          role: 'student' // temporary default
-        });
-
-        // Fetch role and other profile data asynchronously
-        getDoc(doc(db, 'users', firebaseUser.uid)).then(userDoc => {
-          let role = 'student';
-          if (userDoc.exists()) {
-            const data = userDoc.data();
-            role = data.role || 'student';
-            setUser(prev => prev ? { 
-              ...prev, 
-              role,
-              name: data.name || prev.name,
-              avatar: data.avatar || prev.avatar
-            } : null);
-          }
-          if (role === 'student') {
-            const classQ = query(collection(db, 'classes'), where('studentUids', 'array-contains', firebaseUser.uid));
-            getDocs(classQ).then(classSnap => {
-              if (!classSnap.empty) {
-                setEnrolledClass({ id: classSnap.docs[0].id, ...classSnap.docs[0].data() });
-              }
-            }).catch(e => console.error("Error fetching class:", e));
-          }
-        }).catch(e => console.error("Error fetching user data:", e));
-
-      } else {
-        setUser(null);
-      }
-      setAuthInitialized(true);
-    });
-    return () => unsubscribe();
-  }, []);
+  // bridgeState lives here — correct scope for the student session
+  // (resets naturally when the user logs out/navigates away)
 
 
 
@@ -1098,22 +1109,6 @@ export default function App() {
     setActiveId(id);
     setTab("aim");
     setView("detail");
-  }
-
-  if (!authInitialized) {
-    return (
-      <div style={{ display: 'flex', height: '100vh', width: '100vw', alignItems: 'center', justifyContent: 'center', background: '#000' }}>
-        <Loader2 className="spin" size={32} color="var(--teal)" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <LoginScreen onLogin={setUser} />;
-  }
-
-  if (user.role === 'teacher') {
-    return <TeacherDashboard user={user} onLogout={() => signOut(auth)} onUpdate={(updatedUser) => setUser(updatedUser)} />;
   }
 
   return (
@@ -1338,11 +1333,7 @@ export default function App() {
             <button 
               onClick={() => {
                 if(window.confirm("Are you sure you want to sign out?")) {
-                  if (auth) {
-                    signOut(auth);
-                  } else {
-                    setUser(null);
-                  }
+                  logout();
                 }
               }}
               title="Sign Out"
