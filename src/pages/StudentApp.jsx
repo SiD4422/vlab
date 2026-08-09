@@ -25,6 +25,7 @@ export default function StudentApp() {
   const [bridgeSims, setBridgeSims] = useState({});
   const [completed, setCompleted] = useState([]);
   const [theme, setTheme] = useState(() => localStorage.getItem('vlab_theme') || 'light');
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   // bridgeState lives here — correct scope for the student session
   // (resets naturally when the user logs out/navigates away)
 
@@ -291,11 +292,7 @@ export default function StudentApp() {
               <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user?.email}</div>
             </div>
             <button 
-              onClick={() => {
-                if(window.confirm("Are you sure you want to sign out?")) {
-                  logout();
-                }
-              }}
+              onClick={() => setShowLogoutModal(true)}
               title="Sign Out"
               style={{ background: "rgba(255,255,255,0.1)", border: "none", color: "#fff", cursor: "pointer", width: 32, height: 32, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.2s" }}
             >
@@ -306,8 +303,22 @@ export default function StudentApp() {
         </div>
       </div>
       
+      {/* Logout Modal */}
+      {showLogoutModal && (
+        <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", background: "rgba(15, 23, 42, 0.7)", backdropFilter: "blur(8px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ background: C.card, padding: 32, borderRadius: 16, width: "90%", maxWidth: 400, boxShadow: "0 20px 40px rgba(0,0,0,0.2)", border: `1px solid ${C.border}` }}>
+            <h3 style={{ margin: "0 0 12px", fontSize: 20, fontWeight: 800, color: C.ink }}>Sign Out</h3>
+            <p style={{ margin: "0 0 24px", color: C.muted, fontSize: 15, lineHeight: 1.6 }}>Are you sure you want to sign out of your account?</p>
+            <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
+              <button onClick={() => setShowLogoutModal(false)} style={{ padding: "10px 20px", borderRadius: 8, border: `1px solid ${C.border}`, background: "transparent", color: C.ink, fontWeight: 600, cursor: "pointer" }}>Cancel</button>
+              <button onClick={() => { setShowLogoutModal(false); logout(); }} style={{ padding: "10px 20px", borderRadius: 8, border: "none", background: "#ef4444", color: "#fff", fontWeight: 700, cursor: "pointer" }}>Sign Out</button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Global AI Chatbot Widget */}
-      {view === 'detail' && active && <AIChatbot currentExperiment={active.title} />}
+      <AIChatbot currentExperiment={active?.title} />
     </div>
   );
 }
