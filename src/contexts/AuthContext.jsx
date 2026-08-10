@@ -6,10 +6,13 @@ import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firesto
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser]           = useState(null);
-  const [role, setRole]           = useState(null);
-  const [enrolledClass, setEnrolledClass] = useState(null);
-  const [authReady, setAuthReady] = useState(false);
+  // Initialize state from cache to enable instant loading (Optimistic UI)
+  const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('vlab_user')) || null);
+  const [role, setRole] = useState(() => localStorage.getItem('vlab_role') || null);
+  const [enrolledClass, setEnrolledClass] = useState(() => JSON.parse(localStorage.getItem('vlab_class')) || null);
+  
+  // If we have a cached user, we can consider auth "ready" immediately
+  const [authReady, setAuthReady] = useState(() => !!localStorage.getItem('vlab_user'));
 
   useEffect(() => {
     if (!auth) {
@@ -19,7 +22,6 @@ export function AuthProvider({ children }) {
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        // Step 1: Set a skeleton user immediately so the app knows someone is logged in
         const skeletonUser = {
           uid:    firebaseUser.uid,
           email:  firebaseUser.email,
@@ -28,7 +30,6 @@ export function AuthProvider({ children }) {
           role:   'student',
         };
 
-        // Step 2: Fetch role + profile from Firestore
         try {
           const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
           let resolvedRole = 'student';
@@ -43,16 +44,20 @@ export function AuthProvider({ children }) {
           }
 
           const fullUser = { ...skeletonUser, role: resolvedRole, name: resolvedName, avatar: resolvedAvatar };
+          
           setUser(fullUser);
           setRole(resolvedRole);
+          localStorage.setItem('vlab_user', JSON.stringify(fullUser));
+          localStorage.setItem('vlab_role', resolvedRole);
 
-          // Step 3: If student, try to fetch enrolled class
           if (resolvedRole === 'student') {
             try {
               const classQ    = query(collection(db, 'classes'), where('studentUids', 'array-contains', firebaseUser.uid));
               const classSnap = await getDocs(classQ);
               if (!classSnap.empty) {
-                setEnrolledClass({ id: classSnap.docs[0].id, ...classSnap.docs[0].data() });
+                const classData = { id: classSnap.docs[0].id, ...classSnap.docs[0].data() };
+                setEnrolledClass(classData);
+                localStorage.setItem('vlab_class', JSON.stringify(classData));
               }
             } catch (e) {
               console.error('Error fetching enrolled class:', e);
@@ -67,9 +72,11 @@ export function AuthProvider({ children }) {
         setUser(null);
         setRole(null);
         setEnrolledClass(null);
+        localStorage.removeItem('vlab_user');
+        localStorage.removeItem('vlab_role');
+        localStorage.removeItem('vlab_class');
       }
 
-      // authReady flips ONLY after both auth + role are resolved
       setAuthReady(true);
     });
 

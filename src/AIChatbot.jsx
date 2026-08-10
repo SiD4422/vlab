@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageSquare, X, Send, Settings, User, Bot, Minimize2, Maximize2, AlertTriangle } from 'lucide-react';
+import { MessageSquare, X, Send, User, Bot, Minimize2, Maximize2, AlertTriangle } from 'lucide-react';
 
 // Design tokens matching the V-Lab premium aesthetic
 const C = {
@@ -18,16 +18,14 @@ export default function AIChatbot({ currentExperiment }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   
-  const initialGreeting = "I am Professor V-Lab, your Strict Examiner. I am here to test your understanding before your actual viva. " + 
+  const initialGreeting = "Hello! I am Professor V-Lab, your electrical engineering tutor. " + 
     (currentExperiment ? `I see you are working on the ${currentExperiment} experiment. ` : "") + 
-    "Are you ready for your first question?";
+    "How can I help you with your circuits or engineering concepts today?";
 
   const [messages, setMessages] = useState([
     { role: 'assistant', content: initialGreeting }
   ]);
   const [input, setInput] = useState('');
-  const [apiKey, setApiKey] = useState(localStorage.getItem('gemini_api_key') || '');
-  const [showSettings, setShowSettings] = useState(!localStorage.getItem('gemini_api_key'));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
@@ -37,83 +35,52 @@ export default function AIChatbot({ currentExperiment }) {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages, isOpen, showSettings]);
+  }, [messages, isOpen]);
 
-  const saveApiKey = (key) => {
-    setApiKey(key);
-    localStorage.setItem('gemini_api_key', key);
-    setShowSettings(false);
-  };
-
-  const getSystemPrompt = () => {
-    return `You are "Professor V-Lab", an incredibly strict, highly knowledgeable, and slightly intimidating engineering professor conducting a Viva Voce (oral examination) for a university student.
-The student is currently in a virtual lab environment studying: ${currentExperiment || 'General Electrical & Electronics Engineering'}.
-
-Rules for your persona:
-1. DO NOT give direct answers easily. If the student asks a question, reply with a counter-question that forces them to think.
-2. Ask probing, highly technical questions related to ${currentExperiment || 'their engineering fundamentals'}.
-3. Point out flaws in their reasoning if they answer incorrectly, but guide them to the right path eventually.
-4. Keep your responses concise (2-4 sentences max per response) because this is a rapid-fire chat format.
-5. Grade their responses implicitly (e.g., "Adequate, but you missed the impact of parasitic capacitance...").
-6. Maintain a formal, academic tone. Use phrases like "Explain to me...", "What happens if...", "Are you certain?".`;
-  };
-
-  const callGemini = async (userText) => {
-    if (!apiKey) {
-      setShowSettings(true);
-      return;
-    }
-    
+  const callAI = async (userText) => {
     setLoading(true);
     setError('');
     
     try {
-      // Build conversation history for Gemini format
       const contents = messages.map(msg => ({
-        role: msg.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: msg.content }]
+        role: msg.role,
+        content: msg.content
       }));
       
-      // Append the new user message
-      contents.push({
-        role: 'user',
-        parts: [{ text: userText }]
-      });
+      contents.push({ role: 'user', content: userText });
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          systemInstruction: {
-            role: "system",
-            parts: [{ text: getSystemPrompt() }]
-          },
-          contents: contents,
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 500,
-          }
+          messages: contents,
+          currentExperiment
         })
       });
 
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error?.message || "API Error");
-      }
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.indexOf("application/json") !== -1) {
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error || "API Error");
+        }
 
-      if (data.candidates && data.candidates.length > 0) {
-        const reply = data.candidates[0].content.parts[0].text;
-        setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
+        if (data.choices && data.choices.length > 0) {
+          const reply = data.choices[0].message.content;
+          setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
+        } else {
+          throw new Error("No response generated.");
+        }
       } else {
-        throw new Error("No response generated.");
+        throw new Error("Backend not running. If testing locally, run 'npx vercel dev' instead of Vite.");
       }
       
     } catch (err) {
       console.error(err);
-      setError(err.message || 'Failed to connect to AI Examiner. Check API key.');
+      setError(err.message || 'Failed to connect to AI Examiner.');
     } finally {
       setLoading(false);
     }
@@ -127,7 +94,7 @@ Rules for your persona:
     setInput('');
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     
-    await callGemini(userMessage);
+    await callAI(userMessage);
   };
 
   if (!isOpen) {
@@ -200,16 +167,10 @@ Rules for your persona:
           </div>
           <div>
             <h3 style={{ margin: 0, color: C.text, fontSize: '16px', fontWeight: 600 }}>Professor V-Lab</h3>
-            <p style={{ margin: 0, color: C.textMuted, fontSize: '12px' }}>Strict Examiner AI</p>
+            <p style={{ margin: 0, color: C.textMuted, fontSize: '12px' }}>Engineering Tutor AI</p>
           </div>
         </div>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <button 
-            onClick={(e) => { e.stopPropagation(); setShowSettings(!showSettings); }}
-            style={{ background: 'transparent', border: 'none', color: showSettings ? C.primary : C.textMuted, cursor: 'pointer', padding: '4px' }}
-          >
-            <Settings size={18} />
-          </button>
           <button 
             onClick={(e) => { e.stopPropagation(); setIsMinimized(!isMinimized); }}
             style={{ background: 'transparent', border: 'none', color: C.textMuted, cursor: 'pointer', padding: '4px' }}
@@ -227,56 +188,7 @@ Rules for your persona:
 
       {!isMinimized && (
         <>
-          {/* Settings Panel */}
-          {showSettings ? (
-            <div style={{ flex: 1, padding: '24px', overflowY: 'auto' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: C.primary }}>
-                <AlertTriangle size={20} />
-                <h4 style={{ margin: 0 }}>API Configuration</h4>
-              </div>
-              <p style={{ color: C.textMuted, fontSize: '14px', marginBottom: '24px', lineHeight: '1.5' }}>
-                To interact with Professor V-Lab, please provide a Gemini API Key. Your key is stored securely in your browser's local storage and is never sent to our servers.
-              </p>
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', color: C.text, fontSize: '14px', marginBottom: '8px', fontWeight: 500 }}>Gemini API Key</label>
-                <input 
-                  type="password"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  placeholder="AIzaSy..."
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    background: C.bgCard,
-                    border: `1px solid ${C.bgLighter}`,
-                    borderRadius: '8px',
-                    color: C.text,
-                    outline: 'none',
-                    boxSizing: 'border-box'
-                  }}
-                />
-              </div>
-              <button 
-                onClick={() => saveApiKey(apiKey)}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  background: C.primary,
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'background 0.2s'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.background = C.primaryHover}
-                onMouseLeave={(e) => e.currentTarget.style.background = C.primary}
-              >
-                Save & Continue
-              </button>
-            </div>
-          ) : (
-            /* Chat Area */
+            {/* Chat Area */}
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
               <div style={{ flex: 1, padding: '20px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {messages.map((msg, idx) => (
@@ -414,7 +326,6 @@ Rules for your persona:
                 </button>
               </form>
             </div>
-          )}
         </>
       )}
       

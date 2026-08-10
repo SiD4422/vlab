@@ -5,6 +5,7 @@ import { useAuth } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import TeacherDashboardView from "./pages/TeacherDashboardView";
 import StudentApp from "./pages/StudentApp";
+import About from "./pages/About";
 
 /* ---------------------------------------------------------------
    DESIGN TOKENS — circuit-board palette: ink navy shell, copper
@@ -73,6 +74,9 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+
+      {/* Public: About page */}
+      <Route path="/about" element={<About />} />
 
       {/* Catch-all: redirect to root */}
       <Route path="*" element={<Navigate to="/" replace />} />

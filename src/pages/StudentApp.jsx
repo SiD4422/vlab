@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   ChevronRight, Menu, X, Globe, Lock, LogOut, User,
   Search, Check } from "lucide-react";
@@ -12,6 +13,7 @@ import AIChatbot from "../AIChatbot";
 import { C } from "../App";
 
 export default function StudentApp() {
+  const navigate = useNavigate();
   const { user, setUser, enrolledClass, setEnrolledClass, logout } = useAuth();
   const [view, setView] = useState("home");
   const [activeId, setActiveId] = useState(null);
@@ -109,6 +111,7 @@ export default function StudentApp() {
           <div style={{ display: "flex", gap: 28, fontSize: 14, color: "#c3c9d6", fontWeight: 600 }}>
             <span style={{ color: view === "home" ? "#fff" : "#c3c9d6", cursor: "pointer" }} onClick={() => setView("home")}>Home</span>
             <a href="#" onClick={(e) => { e.preventDefault(); setView("team"); }} style={{ color: view === "team" ? "#fff" : "#c3c9d6", cursor: "pointer", textDecoration: "none" }}>Developers</a>
+            <span style={{ color: "#c3c9d6", cursor: "pointer" }} onClick={() => navigate("/about")} onMouseOver={(e) => e.currentTarget.style.color = "#fff"} onMouseOut={(e) => e.currentTarget.style.color = "#c3c9d6"}>About</span>
             <button onClick={() => setUnlocked(!unlocked)} style={{ display: "none" }}>Toggle</button>
           </div>
         </div>

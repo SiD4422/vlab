@@ -221,6 +221,18 @@ export default function LoginScreen() {
               {isSignUp ? "Sign In" : "Sign Up"}
             </button>
           </div>
+          
+          <div style={{ marginTop: 20, textAlign: 'center', borderTop: '1px solid rgba(148, 163, 184, 0.1)', paddingTop: 16 }}>
+            <button 
+              type="button"
+              onClick={() => navigate('/about')}
+              style={{ background: 'none', border: 'none', color: '#64748b', fontWeight: 500, cursor: 'pointer', fontSize: 13, transition: 'color 0.2s' }}
+              onMouseOver={(e) => e.currentTarget.style.color = '#fff'}
+              onMouseOut={(e) => e.currentTarget.style.color = '#64748b'}
+            >
+              Learn more about V-Lab
+            </button>
+          </div>
       </div>
       </div>
     </div>
