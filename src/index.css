@@ -30,35 +30,7 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2a3547;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-    
-    --shell: #0a0e14;
-    --shellSoft: #141b25;
-    --canvas: #0a0e14;
-    --card: #141b25;
-    --copper: #d9823e;
-    --copperDark: #f0a369;
-    --teal: #28a89c;
-    --ink: #e2e8f0;
-    --muted: #94a3b8;
-  }
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
 
 body {
   margin: 0;
