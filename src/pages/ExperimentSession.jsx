@@ -919,12 +919,12 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, markCompleted, bridgeSi
                 You are broadcasting this experiment live to your students!
               </div>
               <button 
-                onClick={async () => {
+                onClick={() => {
                   try {
                     const sessionRef = ref(rtdb, `liveSessions/${classId}`);
-                    await update(sessionRef, { active: false });
+                    update(sessionRef, { active: false }).catch(e => console.error("Error ending broadcast:", e));
                   } catch (e) {
-                    console.error("Error ending broadcast:", e);
+                    console.error("Error ending broadcast setup:", e);
                   }
                   if (onBack) onBack();
                 }}
