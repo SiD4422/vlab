@@ -55,8 +55,8 @@ const TABS = [
 function Section({ title, children, id }) {
   return (
     <div style={{ marginBottom: 40 }} id={id}>
-      <div style={{ fontSize: 16, fontWeight: 800, color: "#1e293b", letterSpacing: 0.5, textTransform: "uppercase", marginBottom: 16, paddingBottom: 12, borderBottom: "2px solid #f1f5f9" }}>{title}</div>
-      <div style={{ fontSize: 16, color: "#334155", lineHeight: 1.8 }}>{children}</div>
+      <div style={{ fontSize: 16, fontWeight: 800, color: "var(--ink)", letterSpacing: 0.5, textTransform: "uppercase", marginBottom: 16, paddingBottom: 12, borderBottom: `2px solid var(--border)` }}>{title}</div>
+      <div style={{ fontSize: 16, color: "var(--muted)", lineHeight: 1.8 }}>{children}</div>
     </div>
   );
 }
@@ -865,8 +865,8 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, markCompleted, bridgeSi
   const bridgeIds = ["wheatstone-bridge","kelvin-bridge","kelvin-double-bridge","capacitance-comparison-bridge","maxwell-inductance-bridge","maxwell-lc-bridge","hays-bridge","anderson-bridge","schering-bridge","wiens-bridge","transformer-ratio-bridge"];
 
   return (
-    <div>
-      <div className="no-print" style={{ background: "#fff", borderBottom: `1px solid ${C.border}`, padding: "20px 60px", display: "flex", alignItems: "center", gap: 12, fontSize: 14, color: C.muted }}>
+    <div style={{ background: "var(--canvas)", minHeight: "100vh" }}>
+      <div className="no-print" style={{ background: "var(--card)", borderBottom: `1px solid ${C.border}`, padding: "20px 60px", display: "flex", alignItems: "center", gap: 12, fontSize: 14, color: C.muted }}>
         <button onClick={onBack} style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "none", color: C.teal, fontWeight: 600, cursor: "pointer", fontSize: 14, padding: 0 }}>
           <ArrowLeft size={16} /> Course Overview
         </button>
