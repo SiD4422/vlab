@@ -40,6 +40,7 @@ export default function StudentApp() {
     const sessionRef = ref(rtdb, `liveSessions/${enrolledClass.id}`);
     const unsub = onValue(sessionRef, snap => {
       const data = snap.val();
+      console.log("[StudentApp] Received liveSession update:", data);
       if (data && data.active) {
         setLiveSession(data);
       } else {
