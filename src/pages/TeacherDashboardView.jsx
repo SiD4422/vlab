@@ -23,6 +23,7 @@ export default function TeacherDashboardView() {
          exp={exp} 
          student={user}
          classId={classId}
+         teacherId={user.uid}
          isBroadcaster={true}
          onBack={() => { window.location.href = '/teacher'; }}
          bridgeSims={bridgeSims}
