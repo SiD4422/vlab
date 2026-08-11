@@ -747,17 +747,18 @@ function CircuitSandbox({ expId, bridgeState, setBridgeSims, isBroadcaster, isSp
   const [spectatorState, setSpectatorState] = useState(null);
 
   useEffect(() => {
-    console.log("[ExperimentSession] isBroadcaster:", isBroadcaster, "classId:", classId, "teacherId:", teacherId);
     if (isBroadcaster && classId && teacherId) {
       const sessionRef = ref(rtdb, `liveSessions/${classId}`);
-      console.log(`[ExperimentSession] Setting live session for class: ${classId}`);
       set(sessionRef, { active: true, expId, teacherId, state: { components: [], wires: [], readings: {} } })
-        .then(() => console.log("[ExperimentSession] Successfully set live session."))
         .catch(e => console.error("[ExperimentSession] Error setting live session:", e));
       
       onDisconnect(sessionRef).update({ active: false, teacherId })
-        .then(() => console.log("[ExperimentSession] Successfully registered onDisconnect."))
         .catch(e => console.error("[ExperimentSession] Error registering onDisconnect:", e));
+
+      return () => {
+        update(sessionRef, { active: false }).catch(e => console.error(e));
+        onDisconnect(sessionRef).cancel();
+      };
     }
   }, [isBroadcaster, classId, expId, teacherId]);
 
