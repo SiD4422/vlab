@@ -8,7 +8,7 @@ export default function TeacherDashboardView() {
   const { user, setUser, logout } = useAuth();
   
   const [bridgeSims, setBridgeSims] = useState({});
-  const [tab, setTab] = useState("aim");
+  const [tab, setTab] = useState(new URLSearchParams(window.location.search).get('broadcast') === 'true' ? "simulation" : "aim");
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const params = new URLSearchParams(window.location.search);

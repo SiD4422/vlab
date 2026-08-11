@@ -22,7 +22,7 @@ export default function StudentApp() {
 
   const [view, setView] = useState(spectatingExpId ? "detail" : "home");
   const [activeId, setActiveId] = useState(spectatingExpId || null);
-  const [tab, setTab] = useState("aim");
+  const [tab, setTab] = useState(spectatingExpId ? "simulation" : "aim");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
