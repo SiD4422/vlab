@@ -763,9 +763,15 @@ function CircuitSandbox({ expId, bridgeState, setBridgeSims, isBroadcaster, isSp
 
   useEffect(() => {
     if (isSpectator && classId) {
-      const sessionRef = ref(rtdb, `liveSessions/${classId}/state`);
+      const sessionRef = ref(rtdb, `liveSessions/${classId}`);
       const unsub = onValue(sessionRef, snap => {
-         setSpectatorState(snap.val());
+         const data = snap.val();
+         if (!data || !data.active) {
+            alert("The teacher has ended the broadcast.");
+            window.location.href = '/student';
+            return;
+         }
+         setSpectatorState(data.state);
       });
       return () => unsub();
     }
