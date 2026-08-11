@@ -109,9 +109,9 @@ export default function StudentApp() {
       <div id="app-ui">
       {/* Sticky Navbar */}
       <div className="no-print" style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-        background: (scrolled || view !== "home") ? "rgba(18, 24, 38, 0.85)" : "transparent",
-        backdropFilter: (scrolled || view !== "home") ? "blur(12px)" : "none",
-        borderBottom: (scrolled || view !== "home") ? `3px solid ${C.copper}` : "3px solid transparent",
+        background: (scrolled || view !== "home" || liveSession) ? "rgba(18, 24, 38, 0.85)" : "transparent",
+        backdropFilter: (scrolled || view !== "home" || liveSession) ? "blur(12px)" : "none",
+        borderBottom: (scrolled || view !== "home" || liveSession) ? `3px solid ${C.copper}` : "3px solid transparent",
         transition: "all 0.3s ease"
       }}>
         <div style={{ padding: "16px 40px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -156,9 +156,7 @@ export default function StudentApp() {
       )}
 
       {view === "home" ? (
-        <div style={{ paddingTop: liveSession ? 0 : 76 }}>
-          <Home onOpen={openExperiment} unlocked={unlocked} collapsedCategories={collapsedCategories} toggleCategory={toggleCategory} searchQuery={searchQuery} setSearchQuery={setSearchQuery} completed={completed} />
-        </div>
+        <Home onOpen={openExperiment} unlocked={unlocked} collapsedCategories={collapsedCategories} toggleCategory={toggleCategory} searchQuery={searchQuery} setSearchQuery={setSearchQuery} completed={completed} />
       ) : view === "detail" && active ? (
         <ExperimentSession
           exp={active}

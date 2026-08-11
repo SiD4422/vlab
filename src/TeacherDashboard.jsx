@@ -666,7 +666,7 @@ export default function TeacherDashboard({ user, onLogout, onUpdate }) {
                 </select>
                 <button 
                   disabled={!broadcastExpId}
-                  onClick={() => window.location.href = `/?broadcast=true&expId=${broadcastExpId}&classId=${managingClass.id}`}
+                  onClick={() => window.location.href = `/teacher?broadcast=true&expId=${broadcastExpId}&classId=${managingClass.id}`}
                   style={{ background: broadcastExpId ? '#10b981' : '#e2e8f0', color: broadcastExpId ? '#fff' : '#94a3b8', border: 'none', padding: '8px 16px', borderRadius: 10, fontSize: 13, fontWeight: 800, cursor: broadcastExpId ? 'pointer' : 'not-allowed', transition: 'all 0.2s', whiteSpace: 'nowrap' }}
                 >
                   🔴 Go Live
