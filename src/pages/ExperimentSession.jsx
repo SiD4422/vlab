@@ -913,9 +913,27 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, markCompleted, bridgeSi
           </div>
           
           {isBroadcaster && (
-            <div style={{ marginBottom: 24, padding: '12px 20px', background: '#e0e7ff', border: '1px solid #c7d2fe', borderRadius: 12, display: 'flex', alignItems: 'center', gap: 12, color: '#3730a3', fontWeight: 600 }}>
-              <span style={{ display: 'inline-block', width: 10, height: 10, background: '#ef4444', borderRadius: '50%', animation: 'pulse 2s infinite' }} />
-              You are broadcasting this experiment live to your students!
+            <div style={{ marginBottom: 24, padding: '12px 20px', background: '#e0e7ff', border: '1px solid #c7d2fe', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: '#3730a3', fontWeight: 600 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <span style={{ display: 'inline-block', width: 10, height: 10, background: '#ef4444', borderRadius: '50%', animation: 'pulse 2s infinite' }} />
+                You are broadcasting this experiment live to your students!
+              </div>
+              <button 
+                onClick={async () => {
+                  try {
+                    const sessionRef = ref(rtdb, `liveSessions/${classId}`);
+                    await update(sessionRef, { active: false });
+                  } catch (e) {
+                    console.error("Error ending broadcast:", e);
+                  }
+                  if (onBack) onBack();
+                }}
+                style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '6px 14px', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer', transition: 'background 0.2s', display: 'flex', alignItems: 'center', gap: 6 }}
+                onMouseEnter={e => e.target.style.background = '#dc2626'}
+                onMouseLeave={e => e.target.style.background = '#ef4444'}
+              >
+                <XCircle size={16} /> Stop Broadcast
+              </button>
             </div>
           )}
           {isSpectator && (
