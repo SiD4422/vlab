@@ -146,7 +146,7 @@ export default function StudentApp() {
               Teacher is currently broadcasting an experiment!
             </div>
             <button 
-              onClick={() => window.location.href = `/?spectate=true&classId=${enrolledClass.id}&expId=${liveSession.expId}`}
+              onClick={() => window.location.href = `/student?spectate=true&classId=${enrolledClass.id}&expId=${liveSession.expId}`}
               style={{ background: '#fff', color: '#ef4444', border: 'none', padding: '6px 16px', borderRadius: 20, fontWeight: 800, fontSize: 13, cursor: 'pointer' }}
             >
               Join Broadcast
