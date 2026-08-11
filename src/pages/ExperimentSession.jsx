@@ -743,6 +743,8 @@ function getRTDBUpdates(oldObj, newObj, path = '') {
 function CircuitSandbox({ expId, bridgeState, setBridgeSims, isBroadcaster, isSpectator, classId, teacherId }) {
   const iframeRef = useRef(null);
   const lastState = useRef({});
+  const [iframeLoaded, setIframeLoaded] = useState(false);
+  const [spectatorState, setSpectatorState] = useState(null);
 
   useEffect(() => {
     if (isBroadcaster && classId && teacherId) {
@@ -756,14 +758,17 @@ function CircuitSandbox({ expId, bridgeState, setBridgeSims, isBroadcaster, isSp
     if (isSpectator && classId) {
       const sessionRef = ref(rtdb, `liveSessions/${classId}/state`);
       const unsub = onValue(sessionRef, snap => {
-         const state = snap.val();
-         if(state && iframeRef.current) {
-            iframeRef.current.contentWindow.postMessage({ type: 'SYNC_STATE', state }, '*');
-         }
+         setSpectatorState(snap.val());
       });
       return () => unsub();
     }
   }, [isSpectator, classId]);
+
+  useEffect(() => {
+    if (iframeLoaded && spectatorState && iframeRef.current?.contentWindow) {
+      iframeRef.current.contentWindow.postMessage({ type: 'SYNC_STATE', state: spectatorState }, '*');
+    }
+  }, [iframeLoaded, spectatorState]);
 
   useEffect(() => {
     const handleMessage = (e) => {
@@ -802,7 +807,7 @@ function CircuitSandbox({ expId, bridgeState, setBridgeSims, isBroadcaster, isSp
         </div>
       </div>
       <div style={{ border: `1px solid ${C.border}`, borderRadius: 12, overflow: 'hidden', background: '#0a0e14' }}>
-        <iframe ref={iframeRef} src="/circuit-sandbox.html" style={{ width: '100%', height: '560px', border: 'none', display: 'block' }} title="Circuit Sandbox" allow="fullscreen" />
+        <iframe ref={iframeRef} onLoad={() => setIframeLoaded(true)} src="/circuit-sandbox.html" style={{ width: '100%', height: '560px', border: 'none', display: 'block' }} title="Circuit Sandbox" allow="fullscreen" />
       </div>
       <div style={{ fontSize: 13, color: C.muted, lineHeight: 1.7 }}>
         <b style={{ color: C.ink }}>How to use:</b> Click a component from the left panel → click on the grid to place it → drag from a terminal dot to another to wire them → watch the live readings update. Press <b>R</b> to rotate, <b>Delete</b> to remove.
