@@ -26,7 +26,7 @@ import {
   Link2, Target, ArrowLeft, Loader2, CheckCircle2, XCircle,
   ChevronDown, Activity, GraduationCap, Eye, FileText, Bot,
   Calculator, Trophy, AlertTriangle, HelpCircle, Building, IdCard,
-  Printer, Download, BarChart2, User, Star,
+  Printer, Download, BarChart2, User, Star, Sidebar,
 } from 'lucide-react';
 import StrainGaugeSim from '../simulations/StrainGaugeSim';
 import UnifiedBridgeSim, { BridgeProcedurePanel, BRIDGES, CircuitSVG } from '../simulations/UnifiedBridgeSim';
@@ -891,6 +891,10 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, markCompleted, bridgeSi
         </button>
         <span>/</span>
         <span style={{ color: C.ink, fontWeight: 600 }}>Module: {exp.title}</span>
+        <div style={{ flex: 1 }} />
+        <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: sidebarOpen ? C.teal : C.muted, fontWeight: 600, cursor: 'pointer', fontSize: 14, padding: 0, transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = C.teal} onMouseLeave={e => e.currentTarget.style.color = sidebarOpen ? C.teal : C.muted}>
+          <Sidebar size={18} /> {sidebarOpen ? 'Hide Menu' : 'Show Menu'}
+        </button>
       </div>
 
       <div style={{ display: "flex", gap: 40, padding: "40px 60px 80px", alignItems: "flex-start", maxWidth: 1400, margin: "0 auto" }}>
