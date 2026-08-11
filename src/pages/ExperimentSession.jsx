@@ -32,9 +32,11 @@ import StrainGaugeSim from '../simulations/StrainGaugeSim';
 import UnifiedBridgeSim, { BridgeProcedurePanel, BRIDGES, CircuitSVG } from '../simulations/UnifiedBridgeSim';
 import AIChatbot from '../AIChatbot';
 import { C } from '../App';
-import { db } from '../services/firebase';
+import { db, rtdb } from '../services/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { ref, set, update, onValue, onDisconnect } from 'firebase/database';
 import { useAuth } from '../contexts/AuthContext';
+import { useRef } from 'react';
 
 // ─── Tabs definition ────────────────────────────────────────────────────────
 const TABS = [
@@ -705,13 +707,76 @@ function LabReportTab({ exp, bridgeState, setBridgeSims }) {
   );
 }
 
+// ─── RTDB Delta Diffing ──────────────────────────────────────────────────────
+function getRTDBUpdates(oldObj, newObj, path = '') {
+  const updates = {};
+  if (Array.isArray(newObj)) {
+    if (!oldObj || oldObj.length !== newObj.length) {
+      updates[path] = newObj;
+      return updates;
+    }
+  }
+  for (let key in newObj) {
+    const p = path ? `${path}/${key}` : key;
+    const newVal = newObj[key];
+    const oldVal = oldObj ? oldObj[key] : undefined;
+    if (newVal !== null && typeof newVal === 'object') {
+      if (Array.isArray(newVal)) {
+        if (!oldVal || oldVal.length !== newVal.length) {
+          updates[p] = newVal;
+        } else {
+          Object.assign(updates, getRTDBUpdates(oldVal, newVal, p));
+        }
+      } else {
+        Object.assign(updates, getRTDBUpdates(oldVal, newVal, p));
+      }
+    } else {
+      if (oldVal !== newVal) {
+        updates[p] = newVal;
+      }
+    }
+  }
+  return updates;
+}
+
 // ─── CircuitSandbox ───────────────────────────────────────────────────────────
-function CircuitSandbox({ expId, bridgeState, setBridgeSims }) {
+function CircuitSandbox({ expId, bridgeState, setBridgeSims, isBroadcaster, isSpectator, classId, teacherId }) {
+  const iframeRef = useRef(null);
+  const lastState = useRef({});
+
+  useEffect(() => {
+    if (isBroadcaster && classId && teacherId) {
+      const sessionRef = ref(rtdb, `liveSessions/${classId}`);
+      set(sessionRef, { active: true, expId, teacherId, state: { components: [], wires: [], readings: {} } });
+      onDisconnect(sessionRef).update({ active: false });
+    }
+  }, [isBroadcaster, classId, expId, teacherId]);
+
+  useEffect(() => {
+    if (isSpectator && classId) {
+      const sessionRef = ref(rtdb, `liveSessions/${classId}/state`);
+      const unsub = onValue(sessionRef, snap => {
+         const state = snap.val();
+         if(state && iframeRef.current) {
+            iframeRef.current.contentWindow.postMessage({ type: 'SYNC_STATE', state }, '*');
+         }
+      });
+      return () => unsub();
+    }
+  }, [isSpectator, classId]);
+
   useEffect(() => {
     const handleMessage = (e) => {
       if (!e.origin || e.origin !== window.location.origin) return;
       const data = e.data;
       if (!data) return;
+      if (data.type === 'BROADCAST_STATE' && isBroadcaster && classId) {
+         const updates = getRTDBUpdates(lastState.current, data.state, `liveSessions/${classId}/state`);
+         if(Object.keys(updates).length > 0) {
+            update(ref(rtdb), updates);
+            lastState.current = JSON.parse(JSON.stringify(data.state));
+         }
+      }
       if (data.type === 'SNAPSHOT_RESULT') {
         setBridgeSims(prev => ({
           ...prev,
@@ -737,7 +802,7 @@ function CircuitSandbox({ expId, bridgeState, setBridgeSims }) {
         </div>
       </div>
       <div style={{ border: `1px solid ${C.border}`, borderRadius: 12, overflow: 'hidden', background: '#0a0e14' }}>
-        <iframe src="/circuit-sandbox.html" style={{ width: '100%', height: '560px', border: 'none', display: 'block' }} title="Circuit Sandbox" allow="fullscreen" />
+        <iframe ref={iframeRef} src="/circuit-sandbox.html" style={{ width: '100%', height: '560px', border: 'none', display: 'block' }} title="Circuit Sandbox" allow="fullscreen" />
       </div>
       <div style={{ fontSize: 13, color: C.muted, lineHeight: 1.7 }}>
         <b style={{ color: C.ink }}>How to use:</b> Click a component from the left panel → click on the grid to place it → drag from a terminal dot to another to wire them → watch the live readings update. Press <b>R</b> to rotate, <b>Delete</b> to remove.
@@ -747,7 +812,7 @@ function CircuitSandbox({ expId, bridgeState, setBridgeSims }) {
 }
 
 // ─── Detail (main experiment layout) ─────────────────────────────────────────
-function Detail({ exp, tab, setTab, onBack, sidebarOpen, markCompleted, bridgeSims, setBridgeSims }) {
+function Detail({ exp, tab, setTab, onBack, sidebarOpen, markCompleted, bridgeSims, setBridgeSims, isBroadcaster, isSpectator, classId }) {
   const { user, enrolledClass } = useAuth();
 
   // beforeunload guard — warn on browser close/refresh if bridgeState has data
@@ -846,6 +911,19 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, markCompleted, bridgeSi
               </button>
             )}
           </div>
+          
+          {isBroadcaster && (
+            <div style={{ marginBottom: 24, padding: '12px 20px', background: '#e0e7ff', border: '1px solid #c7d2fe', borderRadius: 12, display: 'flex', alignItems: 'center', gap: 12, color: '#3730a3', fontWeight: 600 }}>
+              <span style={{ display: 'inline-block', width: 10, height: 10, background: '#ef4444', borderRadius: '50%', animation: 'pulse 2s infinite' }} />
+              You are broadcasting this experiment live to your students!
+            </div>
+          )}
+          {isSpectator && (
+            <div style={{ marginBottom: 24, padding: '12px 20px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 12, display: 'flex', alignItems: 'center', gap: 12, color: '#b91c1c', fontWeight: 600 }}>
+              <span style={{ display: 'inline-block', width: 10, height: 10, background: '#ef4444', borderRadius: '50%', animation: 'pulse 2s infinite' }} />
+              Live Spectating: The teacher is controlling this simulation. Your controls are locked.
+            </div>
+          )}
 
           {tab === "aim" && (
             <div>
@@ -884,7 +962,15 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, markCompleted, bridgeSi
                   </div>
                   <div>
                     <Section title="Circuit Sandbox Workspace" id="tour-sandbox">
-                      <CircuitSandbox expId={exp.id} bridgeState={bridgeSims[exp.id]} setBridgeSims={setBridgeSims} />
+                      <CircuitSandbox 
+                         expId={exp.id} 
+                         bridgeState={bridgeSims[exp.id]} 
+                         setBridgeSims={setBridgeSims} 
+                         isBroadcaster={isBroadcaster}
+                         isSpectator={isSpectator}
+                         classId={classId}
+                         teacherId={user?.uid}
+                      />
                     </Section>
                   </div>
                 </div>
@@ -931,7 +1017,7 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, markCompleted, bridgeSi
 }
 
 // ─── ExperimentSession (the exported page component) ─────────────────────────
-export default function ExperimentSession({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCompleted, bridgeSims, setBridgeSims }) {
+export default function ExperimentSession({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCompleted, bridgeSims, setBridgeSims, isBroadcaster, isSpectator, classId }) {
   return (
     <div style={{ paddingTop: 76 }}>
       <Detail
@@ -943,6 +1029,9 @@ export default function ExperimentSession({ exp, tab, setTab, onBack, sidebarOpe
         markCompleted={markCompleted}
         bridgeSims={bridgeSims}
         setBridgeSims={setBridgeSims}
+        isBroadcaster={isBroadcaster}
+        isSpectator={isSpectator}
+        classId={classId}
       />
     </div>
   );

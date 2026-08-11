@@ -1,0 +1,18 @@
+{
+  "rules": {
+    "liveSessions": {
+      // Anyone logged in can read active live sessions
+      ".read": "auth != null",
+      
+      "$classId": {
+        // Only the teacher who starts the session can write to it
+        ".write": "auth != null && (!data.exists() ? newData.child('teacherId').val() === auth.uid : data.child('teacherId').val() === auth.uid)",
+        
+        "state": {
+           // Allow granular delta updates on the state object by the same teacher
+           ".write": "auth != null && data.parent().child('teacherId').val() === auth.uid"
+        }
+      }
+    }
+  }
+}

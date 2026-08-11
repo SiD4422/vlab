@@ -56,6 +56,7 @@ export default function TeacherDashboard({ user, onLogout, onUpdate }) {
   const [savingGrade,setSavingGrade]               = useState(false);
   const [reportTab,setReportTab]                   = useState('overview');
   const [managingClass,setManagingClass]     = useState(null);
+  const [broadcastExpId,setBroadcastExpId]   = useState('');
   const [classStudents,setClassStudents]     = useState([]);
   const [loadingStudents,setLoadingStudents] = useState(false);
   const [removingStudentId,setRemovingStudentId] = useState(null);
@@ -654,7 +655,22 @@ export default function TeacherDashboard({ user, onLogout, onUpdate }) {
                 <div style={{ fontWeight:900,fontSize:20,color:'#1e1b4b' }}>Manage Students</div>
                 <div style={{ color:'#64748b',fontSize:14,marginTop:4,fontWeight:500 }}>{managingClass.className} · Invite Code: <strong style={{ color:'#4f46e5',background:'#e0e7ff',padding:'2px 8px',borderRadius:6,fontFamily:'monospace',fontSize:15 }}>{managingClass.inviteCode}</strong></div>
               </div>
-              <div style={{ display:'flex',gap:12 }}>
+              <div style={{ display:'flex',gap:12, alignItems:'center' }}>
+                <select 
+                  value={broadcastExpId} 
+                  onChange={e=>setBroadcastExpId(e.target.value)}
+                  style={{ padding: '8px 12px', borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 13, fontWeight: 600, color: '#1e1b4b', background: '#fff', outline: 'none' }}
+                >
+                  <option value="">Select Experiment to Broadcast...</option>
+                  {EXPERIMENTS.map(e => <option key={e.id} value={e.id}>{e.title}</option>)}
+                </select>
+                <button 
+                  disabled={!broadcastExpId}
+                  onClick={() => window.location.href = `/?broadcast=true&expId=${broadcastExpId}&classId=${managingClass.id}`}
+                  style={{ background: broadcastExpId ? '#10b981' : '#e2e8f0', color: broadcastExpId ? '#fff' : '#94a3b8', border: 'none', padding: '8px 16px', borderRadius: 10, fontSize: 13, fontWeight: 800, cursor: broadcastExpId ? 'pointer' : 'not-allowed', transition: 'all 0.2s', whiteSpace: 'nowrap' }}
+                >
+                  🔴 Go Live
+                </button>
                 <button onClick={deleteClass} disabled={deletingClass} style={{ background:'#fef2f2',border:'1px solid #fecaca',color:'#dc2626',padding:'8px 16px',borderRadius:10,fontSize:13,fontWeight:800,cursor:deletingClass?'not-allowed':'pointer',display:'flex',alignItems:'center',gap:6,opacity:deletingClass?0.5:1,transition:'all 0.2s' }} onMouseEnter={e=>{if(!deletingClass){e.target.style.background='#fee2e2'}}} onMouseLeave={e=>e.target.style.background='#fef2f2'}>
                   {deletingClass?<Loader2 className="spin" size={15}/>:null} Delete Class
                 </button>

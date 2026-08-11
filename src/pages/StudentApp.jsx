@@ -11,12 +11,17 @@ import ExperimentSession from "./ExperimentSession";
 import { EXPERIMENTS } from '../data/experiments.js';
 import AIChatbot from "../AIChatbot";
 import { C } from "../App";
+import { rtdb } from "../services/firebase";
+import { ref, onValue } from "firebase/database";
 
 export default function StudentApp() {
   const navigate = useNavigate();
   const { user, setUser, enrolledClass, setEnrolledClass, logout } = useAuth();
-  const [view, setView] = useState("home");
-  const [activeId, setActiveId] = useState(null);
+  const params = new URLSearchParams(window.location.search);
+  const spectatingExpId = params.get('spectate') === 'true' ? params.get('expId') : null;
+
+  const [view, setView] = useState(spectatingExpId ? "detail" : "home");
+  const [activeId, setActiveId] = useState(spectatingExpId || null);
   const [tab, setTab] = useState("aim");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [scrolled, setScrolled] = useState(false);
@@ -28,6 +33,22 @@ export default function StudentApp() {
   const [completed, setCompleted] = useState([]);
   const [theme, setTheme] = useState(() => localStorage.getItem('vlab_theme') || 'light');
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [liveSession, setLiveSession] = useState(null);
+
+  useEffect(() => {
+    if (!enrolledClass?.id) return;
+    const sessionRef = ref(rtdb, `liveSessions/${enrolledClass.id}`);
+    const unsub = onValue(sessionRef, snap => {
+      const data = snap.val();
+      if (data && data.active) {
+        setLiveSession(data);
+      } else {
+        setLiveSession(null);
+      }
+    });
+    return () => unsub();
+  }, [enrolledClass?.id]);
+
   // bridgeState lives here — correct scope for the student session
   // (resets naturally when the user logs out/navigates away)
 
@@ -117,9 +138,27 @@ export default function StudentApp() {
         </div>
       </div>
 
-      {view === "home" ? (
-        <Home onOpen={openExperiment} unlocked={unlocked} collapsedCategories={collapsedCategories} toggleCategory={toggleCategory} searchQuery={searchQuery} setSearchQuery={setSearchQuery} completed={completed} />
+      {liveSession && view === "home" && (
+        <div style={{ paddingTop: 76 }}>
+          <div style={{ background: '#ef4444', color: '#fff', padding: '12px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontWeight: 700, fontSize: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ display: 'inline-block', width: 8, height: 8, background: '#fff', borderRadius: '50%', animation: 'pulse 2s infinite' }} />
+              Teacher is currently broadcasting an experiment!
+            </div>
+            <button 
+              onClick={() => window.location.href = `/?spectate=true&classId=${enrolledClass.id}&expId=${liveSession.expId}`}
+              style={{ background: '#fff', color: '#ef4444', border: 'none', padding: '6px 16px', borderRadius: 20, fontWeight: 800, fontSize: 13, cursor: 'pointer' }}
+            >
+              Join Broadcast
+            </button>
+          </div>
+        </div>
+      )}
 
+      {view === "home" ? (
+        <div style={{ paddingTop: liveSession ? 0 : 76 }}>
+          <Home onOpen={openExperiment} unlocked={unlocked} collapsedCategories={collapsedCategories} toggleCategory={toggleCategory} searchQuery={searchQuery} setSearchQuery={setSearchQuery} completed={completed} />
+        </div>
       ) : view === "detail" && active ? (
         <ExperimentSession
           exp={active}
@@ -131,6 +170,8 @@ export default function StudentApp() {
           markCompleted={() => markCompleted(active.id)}
           bridgeSims={bridgeSims}
           setBridgeSims={setBridgeSims}
+          isSpectator={params.get('spectate') === 'true'}
+          classId={enrolledClass?.id}
         />
       ) : view === "team" ? (
         <Team />
