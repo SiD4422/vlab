@@ -37,6 +37,8 @@ export default function Home({ onOpen, collapsedCategories, toggleCategory, sear
   const { user, enrolledClass, setEnrolledClass } = useAuth();
   const [inviteCode, setInviteCode] = useState('');
   const [joining, setJoining] = useState(false);
+  const [joinError, setJoinError] = useState(null);
+  const [joinSuccess, setJoinSuccess] = useState(null);
 
   const joinClass = async (e) => {
     e.preventDefault();
@@ -48,7 +50,7 @@ export default function Home({ onOpen, collapsedCategories, toggleCategory, sear
       const classDoc = await getDoc(classDocRef);
 
       if (!classDoc.exists()) {
-        alert("Invalid invite code.");
+        setJoinError("Invalid class code. Please double-check and try again.");
       } else {
         const batch = writeBatch(db);
         batch.update(classDocRef, { studentUids: arrayUnion(user.uid) });
@@ -60,11 +62,12 @@ export default function Home({ onOpen, collapsedCategories, toggleCategory, sear
         await batch.commit();
         setEnrolledClass({ id: classDoc.id, ...classDoc.data() });
         setInviteCode('');
-        alert("Successfully joined " + classDoc.data().className + "!");
+        setJoinError(null);
+        setJoinSuccess("Successfully joined " + classDoc.data().className + "!");
       }
     } catch (e) {
       console.error("Error joining class:", e);
-      alert("Failed to join class.");
+      setJoinError("Failed to join class. Please try again.");
     } finally {
       setJoining(false);
     }
@@ -162,7 +165,8 @@ export default function Home({ onOpen, collapsedCategories, toggleCategory, sear
                 <CheckCircle2 size={18} /> Enrolled
               </div>
             ) : (
-              <form onSubmit={joinClass} style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#fff', padding: 6, borderRadius: 16, border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
+              <>
+                <form onSubmit={joinClass} style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#fff', padding: 6, borderRadius: 16, border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
                 <div style={{ position: 'relative' }}>
                   <input
                     type="text" placeholder="Class Code (VLAB-...)" value={inviteCode}
@@ -183,6 +187,17 @@ export default function Home({ onOpen, collapsedCategories, toggleCategory, sear
                   {joining ? <Loader2 className="spin" size={18} /> : <Link2 size={18} />} Join Class
                 </button>
               </form>
+              {joinError && (
+                <div style={{ marginTop: 10, padding: '8px 14px', background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 8, color: '#991b1b', fontSize: 13, fontWeight: 600 }}>
+                  {joinError}
+                </div>
+              )}
+              {joinSuccess && (
+                <div style={{ marginTop: 10, padding: '8px 14px', background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 8, color: '#065f46', fontSize: 13, fontWeight: 600 }}>
+                  {joinSuccess}
+                </div>
+              )}
+              </>
             )}
           </div>
         </div>
