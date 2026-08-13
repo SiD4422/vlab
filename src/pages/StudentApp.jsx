@@ -141,16 +141,33 @@ export default function StudentApp() {
 
       {liveSession && view === "home" && (
         <div style={{ paddingTop: 76 }}>
-          <div style={{ background: '#ef4444', color: '#fff', padding: '12px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontWeight: 700, fontSize: 14 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ display: 'inline-block', width: 8, height: 8, background: '#fff', borderRadius: '50%', animation: 'pulse 2s infinite' }} />
-              Teacher is currently broadcasting an experiment!
+          <div style={{
+            background: 'linear-gradient(90deg, #7f1d1d 0%, #991b1b 40%, #b45309 100%)',
+            color: '#fff', padding: '0 40px',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            fontWeight: 700, fontSize: 14, height: 56,
+            boxShadow: '0 4px 20px rgba(239,68,68,0.35)',
+            animation: 'broadcastPulse 3s ease-in-out infinite'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.15)', padding: '4px 10px', borderRadius: 999, border: '1px solid rgba(255,255,255,0.25)' }}>
+                <span style={{ display: 'inline-block', width: 8, height: 8, background: '#fff', borderRadius: '50%', animation: 'pulse 1.5s infinite' }} />
+                <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.5 }}>LIVE</span>
+              </div>
+              <span>Your teacher is broadcasting a live experiment session!</span>
             </div>
             <button 
               onClick={() => window.location.href = `/student?spectate=true&classId=${enrolledClass.id}&expId=${liveSession.expId}`}
-              style={{ background: '#fff', color: '#ef4444', border: 'none', padding: '6px 16px', borderRadius: 20, fontWeight: 800, fontSize: 13, cursor: 'pointer' }}
+              style={{
+                background: '#fff', color: '#991b1b', border: 'none', padding: '8px 20px',
+                borderRadius: 999, fontWeight: 800, fontSize: 13, cursor: 'pointer',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
+                transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', gap: 8
+              }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.35)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.25)'; }}
             >
-              Join Broadcast
+              📡 Join Broadcast
             </button>
           </div>
         </div>

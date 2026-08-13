@@ -227,14 +227,32 @@ export default function Home({ onOpen, collapsedCategories, toggleCategory, sear
                     <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--ink)', margin: 0 }}>{category.title}</h3>
                     <ChevronRight size={20} color="var(--muted)" style={{ transform: isCollapsed ? "rotate(0deg)" : "rotate(90deg)", transition: "transform 0.2s ease" }} />
                   </div>
+                  {!isCollapsed && (() => {
+                    const completedCount = categoryExps.filter(e => completed?.includes(e.id)).length;
+                    const pct = categoryExps.length > 0 ? (completedCount / categoryExps.length) * 100 : 0;
+                    return completedCount > 0 ? (
+                      <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <div style={{ flex: 1, height: 4, background: 'var(--border)', borderRadius: 99, overflow: 'hidden' }}>
+                          <div style={{ width: `${pct}%`, height: '100%', background: 'linear-gradient(90deg, var(--teal), #14b8a6)', borderRadius: 99, transition: 'width 0.5s ease' }} />
+                        </div>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--teal)', whiteSpace: 'nowrap' }}>{completedCount}/{categoryExps.length} done</span>
+                      </div>
+                    ) : null;
+                  })()}
                   {!isCollapsed && (
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 24 }}>
                       {categoryExps.map(exp => {
                         const isLocked = false;
+                        const isCompleted = completed?.includes(exp.id);
                         return (
                           <button key={exp.id} onClick={() => { if (!isLocked) onOpen(exp.id); }} className="class-card"
-                            style={{ textAlign: "left", cursor: isLocked ? "not-allowed" : "pointer", display: "flex", flexDirection: "column", gap: 12, opacity: isLocked ? 0.7 : 1, border: 'none', background: 'var(--card)' }}
+                            style={{ textAlign: "left", cursor: isLocked ? "not-allowed" : "pointer", display: "flex", flexDirection: "column", gap: 12, opacity: isLocked ? 0.7 : 1, border: isCompleted ? '1.5px solid var(--teal)' : 'none', background: 'var(--card)', position: 'relative', overflow: 'hidden' }}
                           >
+                            {isCompleted && (
+                              <div style={{ position: 'absolute', top: 12, right: 12, width: 28, height: 28, borderRadius: '50%', background: 'var(--teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, boxShadow: '0 4px 12px rgba(31,122,114,0.4)' }}>
+                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7L5.5 10.5L12 3.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                              </div>
+                            )}
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", width: "100%" }}>
                               <span className={isLocked ? "status-badge pending" : "status-badge graded"} style={{ fontSize: 12 }}>{exp.tag}</span>
                               {!isLocked && <StarRating rating={RATINGS[exp.id] ?? 4} size={14} />}

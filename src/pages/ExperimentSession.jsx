@@ -38,6 +38,43 @@ import { ref, set, update, onValue, onDisconnect } from 'firebase/database';
 import { useAuth } from '../contexts/AuthContext';
 import { useRef } from 'react';
 
+// ─── Toast Notification System ───────────────────────────────────────────────
+function Toast({ toasts }) {
+  return (
+    <div style={{ position: 'fixed', top: 24, right: 24, zIndex: 9999, display: 'flex', flexDirection: 'column', gap: 12, pointerEvents: 'none' }}>
+      {toasts.map(t => (
+        <div key={t.id} style={{
+          background: t.type === 'error' ? '#1a0a0a' : t.type === 'success' ? '#0a1a0f' : '#0a1020',
+          border: `1px solid ${t.type === 'error' ? '#ef4444' : t.type === 'success' ? '#22c55e' : '#3b82f6'}`,
+          borderRadius: 14, padding: '14px 18px', minWidth: 320, maxWidth: 400,
+          boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+          display: 'flex', alignItems: 'flex-start', gap: 12,
+          animation: 'toastSlideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+          pointerEvents: 'all'
+        }}>
+          <div style={{ width: 32, height: 32, borderRadius: '50%', background: t.type === 'error' ? 'rgba(239,68,68,0.15)' : t.type === 'success' ? 'rgba(34,197,94,0.15)' : 'rgba(59,130,246,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 16 }}>
+            {t.type === 'error' ? '⛔' : t.type === 'success' ? '✅' : 'ℹ️'}
+          </div>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 14, color: '#fff', marginBottom: 4 }}>{t.title}</div>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', lineHeight: 1.5 }}>{t.message}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function useToast() {
+  const [toasts, setToasts] = useState([]);
+  const addToast = (title, message, type = 'info') => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, title, message, type }]);
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000);
+  };
+  return { toasts, addToast };
+}
+
 // ─── Tabs definition ────────────────────────────────────────────────────────
 const TABS = [
   { id: "aim",        label: "Aim",        icon: Target },
@@ -768,8 +805,11 @@ function CircuitSandbox({ expId, bridgeState, setBridgeSims, isBroadcaster, isSp
       const unsub = onValue(sessionRef, snap => {
          const data = snap.val();
          if (!data || !data.active) {
-            alert("The teacher has ended the broadcast.");
-            window.location.href = '/student';
+            // Show a brief overlay before redirecting
+            const overlay = document.createElement('div');
+            overlay.innerHTML = `<div style="position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:99999;display:flex;align-items:center;justify-content:center;font-family:system-ui"><div style="background:#1a0a0a;border:1px solid #ef4444;border-radius:16px;padding:32px 40px;text-align:center;max-width:400px"><div style="font-size:32px;margin-bottom:16px">📡</div><div style="color:#fff;font-size:20px;font-weight:700;margin-bottom:8px">Broadcast Ended</div><div style="color:rgba(255,255,255,0.65);font-size:15px">The teacher has ended the live broadcast. Redirecting you back...</div></div></div>`;
+            document.body.appendChild(overlay);
+            setTimeout(() => { window.location.href = '/student'; }, 2000);
             return;
          }
          setSpectatorState(data.state);
@@ -833,6 +873,7 @@ function CircuitSandbox({ expId, bridgeState, setBridgeSims, isBroadcaster, isSp
 // ─── Detail (main experiment layout) ─────────────────────────────────────────
 function Detail({ exp, tab, setTab, onBack, sidebarOpen, markCompleted, bridgeSims, setBridgeSims, isBroadcaster, isSpectator, classId }) {
   const { user, enrolledClass } = useAuth();
+  const { toasts, addToast } = useToast();
 
   // beforeunload guard — warn on browser close/refresh if bridgeState has data
   useEffect(() => {
@@ -885,6 +926,7 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, markCompleted, bridgeSi
 
   return (
     <div style={{ background: "var(--canvas)", minHeight: "100vh" }}>
+      <Toast toasts={toasts} />
       <div className="no-print" style={{ background: "var(--card)", borderBottom: `1px solid ${C.border}`, padding: "20px 60px", display: "flex", alignItems: "center", gap: 12, fontSize: 14, color: C.muted }}>
         <button onClick={onBack} style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "none", color: C.teal, fontWeight: 600, cursor: "pointer", fontSize: 14, padding: 0 }}>
           <ArrowLeft size={16} /> Course Overview
@@ -966,6 +1008,7 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, markCompleted, bridgeSi
             </div>
           )}
 
+          <div key={tab} className="tab-content-enter">
           {tab === "aim" && (
             <div>
               <Section title="Aim">{exp.aim}</Section>
@@ -994,9 +1037,20 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, markCompleted, bridgeSi
                       {bridgeIds.includes(exp.id) ? (
                         <UnifiedBridgeSim bridgeId={exp.id} />
                       ) : (
-                        <div style={{ padding: "40px 20px", textAlign: "center", color: C.muted, background: "var(--card)", borderRadius: 8, border: `1px solid ${C.border}` }}>
-                          <Activity size={32} color={C.border} style={{ marginBottom: 12 }} />
-                          <div>The reference diagram for {exp.title} is currently under development.</div>
+                        <div style={{ padding: "60px 40px", textAlign: "center", background: "linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0fdf4 100%)", borderRadius: 16, border: '1px solid rgba(14,165,233,0.15)', position: 'relative', overflow: 'hidden' }}>
+                          <div style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, background: 'radial-gradient(circle, rgba(14,165,233,0.1) 0%, transparent 70%)', borderRadius: '50%' }} />
+                          <div style={{ position: 'absolute', bottom: -40, left: -40, width: 160, height: 160, background: 'radial-gradient(circle, rgba(34,197,94,0.08) 0%, transparent 70%)', borderRadius: '50%' }} />
+                          <div style={{ position: 'relative', zIndex: 1 }}>
+                            <div style={{ width: 72, height: 72, borderRadius: 20, background: 'linear-gradient(135deg, rgba(14,165,233,0.15), rgba(34,197,94,0.15))', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', animation: 'pulse 3s ease-in-out infinite' }}>
+                              <Activity size={36} color="#0ea5e9" />
+                            </div>
+                            <div style={{ fontSize: 20, fontWeight: 800, color: C.ink, marginBottom: 10 }}>Diagram Coming Soon</div>
+                            <div style={{ fontSize: 15, color: C.muted, lineHeight: 1.7, maxWidth: 380, margin: '0 auto 20px' }}>The interactive reference diagram for <strong style={{ color: C.ink }}>{exp.title}</strong> is currently being built by our team.</div>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 20px', background: 'rgba(14,165,233,0.1)', borderRadius: 999, fontSize: 13, fontWeight: 700, color: '#0ea5e9', border: '1px solid rgba(14,165,233,0.2)' }}>
+                              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#0ea5e9', animation: 'pulse 2s infinite', display: 'inline-block' }} />
+                              In development
+                            </div>
+                          </div>
                         </div>
                       )}
                     </Section>
@@ -1048,6 +1102,7 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, markCompleted, bridgeSi
             </Section>
           )}
           {tab === "feedback" && <Section title="Feedback"><Feedback /></Section>}
+          </div>
         </div>
       </div>
 
