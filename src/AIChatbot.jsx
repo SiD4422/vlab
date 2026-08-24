@@ -122,9 +122,11 @@ export default function AIChatbot({ currentExperiment }) {
         onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
         onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
         title="Viva Examiner AI"
+        aria-label="Open Professor V-Lab AI tutor"
       >
-        <MessageSquare size={28} />
+        <MessageSquare size={28} aria-hidden="true" />
       </button>
+
     );
   }
 
@@ -173,17 +175,20 @@ export default function AIChatbot({ currentExperiment }) {
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           <button 
             onClick={(e) => { e.stopPropagation(); setIsMinimized(!isMinimized); }}
+            aria-label={isMinimized ? 'Expand chat' : 'Minimize chat'}
             style={{ background: 'transparent', border: 'none', color: C.textMuted, cursor: 'pointer', padding: '4px' }}
           >
-            {isMinimized ? <Maximize2 size={18} /> : <Minimize2 size={18} />}
+            {isMinimized ? <Maximize2 size={18} aria-hidden="true" /> : <Minimize2 size={18} aria-hidden="true" />}
           </button>
           <button 
             onClick={(e) => { e.stopPropagation(); setIsOpen(false); }}
+            aria-label="Close chat"
             style={{ background: 'transparent', border: 'none', color: C.textMuted, cursor: 'pointer', padding: '4px' }}
           >
-            <X size={18} />
+            <X size={18} aria-hidden="true" />
           </button>
         </div>
+
       </div>
 
       {!isMinimized && (
@@ -292,6 +297,7 @@ export default function AIChatbot({ currentExperiment }) {
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Type your answer..."
                   disabled={loading}
+                  aria-label="Message to Professor V-Lab"
                   style={{
                     flex: 1,
                     background: C.bgDark,
@@ -307,6 +313,7 @@ export default function AIChatbot({ currentExperiment }) {
                 <button
                   type="submit"
                   disabled={loading || !input.trim()}
+                  aria-label="Send message"
                   style={{
                     background: input.trim() && !loading ? C.primary : C.bgLighter,
                     color: 'white',
@@ -322,8 +329,9 @@ export default function AIChatbot({ currentExperiment }) {
                     flexShrink: 0
                   }}
                 >
-                  <Send size={18} style={{ marginLeft: '2px' }} />
+                  <Send size={18} style={{ marginLeft: '2px' }} aria-hidden="true" />
                 </button>
+
               </form>
             </div>
         </>

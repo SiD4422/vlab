@@ -83,6 +83,9 @@ export default function Home({ onOpen, collapsedCategories, toggleCategory, sear
         justifyContent: "center", alignItems: "center",
       }}>
         <video autoPlay loop muted playsInline src="/hero-bg.mp4"
+          poster="/hero-poster.jpg"
+          preload="none"
+          aria-hidden="true"
           style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 0, filter: "blur(4px)" }}
         />
         <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", background: "rgba(18, 24, 38, 0.75)", zIndex: 1 }} />
@@ -166,20 +169,26 @@ export default function Home({ onOpen, collapsedCategories, toggleCategory, sear
               </div>
             ) : (
               <>
-                <form onSubmit={joinClass} style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#fff', padding: 6, borderRadius: 16, border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
+              <form onSubmit={joinClass} style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#fff', padding: 6, borderRadius: 16, border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
                 <div style={{ position: 'relative' }}>
+                  <label htmlFor="class-code-input" style={{ position: 'absolute', width: 1, height: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0 }}>
+                    Class Code
+                  </label>
                   <input
+                    id="class-code-input"
                     type="text" placeholder="Class Code (VLAB-...)" value={inviteCode}
                     onChange={e => setInviteCode(e.target.value.toUpperCase())}
                     style={{ width: 260, padding: '12px 16px 12px 42px', borderRadius: 12, border: '2px solid transparent', background: '#f8fafc', fontSize: 14, fontWeight: 600, color: '#1e293b', textTransform: 'uppercase', outline: 'none', transition: 'all 0.2s' }}
                     onFocus={e => { e.target.style.background = '#fff'; e.target.style.border = '2px solid rgba(13,148,136,0.3)'; }}
                     onBlur={e => { e.target.style.background = '#f8fafc'; e.target.style.border = '2px solid transparent'; }}
                   />
-                  <div style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}>
+                  <div style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} aria-hidden="true">
                     <BookOpen size={18} />
                   </div>
                 </div>
                 <button type="submit" disabled={joining || !inviteCode.trim()}
+                  aria-busy={joining}
+                  aria-label={joining ? 'Joining class...' : 'Join class'}
                   style={{ display: 'flex', alignItems: 'center', gap: 8, background: (joining || !inviteCode.trim()) ? '#94a3b8' : 'linear-gradient(135deg, #0d9488, #0f766e)', color: '#fff', border: 'none', padding: '12px 24px', borderRadius: 12, fontWeight: 700, fontSize: 14, cursor: (joining || !inviteCode.trim()) ? 'not-allowed' : 'pointer', transition: 'all 0.2s', boxShadow: (joining || !inviteCode.trim()) ? 'none' : '0 4px 12px rgba(13,148,136,0.3)' }}
                   onMouseOver={e => { if (!joining && inviteCode.trim()) e.currentTarget.style.transform = 'translateY(-1px)'; }}
                   onMouseOut={e => { if (!joining && inviteCode.trim()) e.currentTarget.style.transform = 'translateY(0)'; }}
@@ -187,6 +196,7 @@ export default function Home({ onOpen, collapsedCategories, toggleCategory, sear
                   {joining ? <Loader2 className="spin" size={18} /> : <Link2 size={18} />} Join Class
                 </button>
               </form>
+
               {joinError && (
                 <div style={{ marginTop: 10, padding: '8px 14px', background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 8, color: '#991b1b', fontSize: 13, fontWeight: 600 }}>
                   {joinError}
@@ -206,13 +216,18 @@ export default function Home({ onOpen, collapsedCategories, toggleCategory, sear
           <div>
             <h2 style={{ fontSize: 32, fontWeight: 800, color: C.ink, margin: "0 0 8px" }}>Available Experiments</h2>
             <div style={{ position: "relative", marginTop: 16, width: "100%", maxWidth: 400 }}>
-              <Search size={18} color={C.muted} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }} />
-              <input
-                type="text" placeholder="Search experiments by name or tag..." value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                style={{ width: "100%", background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: "12px 16px 12px 42px", color: C.ink, fontSize: 15, boxSizing: "border-box" }}
-              />
-            </div>
+                <label htmlFor="experiment-search" style={{ position: 'absolute', width: 1, height: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0 }}>
+                  Search experiments
+                </label>
+                <Search size={18} color={C.muted} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }} aria-hidden="true" />
+                <input
+                  id="experiment-search"
+                  type="text" placeholder="Search experiments by name or tag..." value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  style={{ width: "100%", background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: "12px 16px 12px 42px", color: C.ink, fontSize: 15, boxSizing: "border-box" }}
+                />
+              </div>
+
             <p style={{ color: C.muted, fontSize: 16, margin: 0 }}>Select an experiment to begin the virtual lab session.</p>
           </div>
           <div style={{ fontSize: 14, fontWeight: 700, color: C.copperDark, background: "#f4ece0", padding: "6px 12px", borderRadius: 999 }}>

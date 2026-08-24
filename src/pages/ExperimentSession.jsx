@@ -9,16 +9,24 @@
  *   bridgeSims lives in StudentApp (or TeacherDashboardView for broadcast)
  *   and is passed down as props — resets when the student navigates away.
  */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
 import {
   Zap, BookOpen, ClipboardCheck, ListOrdered, Sparkles, MessageSquare,
   Link2, Target, ArrowLeft, Activity, FileText,
-  AlertTriangle, XCircle, Sidebar,
+  AlertTriangle, XCircle, Sidebar, Loader2,
 } from 'lucide-react';
-import StrainGaugeSim from '../simulations/StrainGaugeSim';
-import UnifiedBridgeSim, { BridgeProcedurePanel } from '../simulations/UnifiedBridgeSim';
+// Lazy-load the heavy simulation components — only fetched when Simulation tab is opened
+const StrainGaugeSim = lazy(() => import('../simulations/StrainGaugeSim'));
+const UnifiedBridgeSim = lazy(() => import('../simulations/UnifiedBridgeSim').then(m => ({ default: m.default })));
+const BridgeProcedurePanel = lazy(() => import('../simulations/UnifiedBridgeSim').then(m => ({ default: m.BridgeProcedurePanel })));
+// Lazy-load heavy experiment tab components
+const QuizTab = lazy(() => import('../experiment-tabs/QuizTab'));
+const VivaPrepTab = lazy(() => import('../experiment-tabs/VivaPrepTab'));
+const LabReportTab = lazy(() => import('../experiment-tabs/LabReportTab'));
+const CircuitSandboxTab = lazy(() => import('../experiment-tabs/CircuitSandboxTab'));
+const FeedbackTab = lazy(() => import('../experiment-tabs/FeedbackTab'));
 import AIChatbot from '../AIChatbot';
 import { C } from '../App';
 import { rtdb } from '../services/firebase';
@@ -27,11 +35,16 @@ import { useAuth } from '../contexts/AuthContext';
 import Toast from '../components/Toast';
 import Section from '../components/Section';
 import { useToast } from '../hooks/useToast';
-import QuizTab from '../experiment-tabs/QuizTab';
-import VivaPrepTab from '../experiment-tabs/VivaPrepTab';
-import LabReportTab from '../experiment-tabs/LabReportTab';
-import CircuitSandboxTab from '../experiment-tabs/CircuitSandboxTab';
-import FeedbackTab from '../experiment-tabs/FeedbackTab';
+
+function TabSpinner() {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 20px', gap: 12, color: C.muted }}>
+      <Loader2 size={22} style={{ animation: 'spin 1s linear infinite' }} />
+      <span style={{ fontSize: 14, fontWeight: 500 }}>Loading…</span>
+    </div>
+  );
+}
+
 
 // ─── Tabs definition ───────────────────────────────────────────────
 const TABS = [
@@ -233,63 +246,71 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
             )}
 
             {tab === 'simulation' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
-                {exp.id === 'strain-gauge' ? (
-                  <Section title="Interactive Simulation"><StrainGaugeSim /></Section>
-                ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
-                    <Section title="Reference Diagram" id="tour-reference">
-                      {BRIDGE_IDS.includes(exp.id) ? (
-                        <UnifiedBridgeSim bridgeId={exp.id} />
-                      ) : (
-                        <div style={{ padding: '60px 40px', textAlign: 'center', background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0fdf4 100%)', borderRadius: 16, border: '1px solid rgba(14,165,233,0.15)', position: 'relative', overflow: 'hidden' }}>
-                          <div style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, background: 'radial-gradient(circle, rgba(14,165,233,0.1) 0%, transparent 70%)', borderRadius: '50%' }} />
-                          <div style={{ position: 'absolute', bottom: -40, left: -40, width: 160, height: 160, background: 'radial-gradient(circle, rgba(34,197,94,0.08) 0%, transparent 70%)', borderRadius: '50%' }} />
-                          <div style={{ position: 'relative', zIndex: 1 }}>
-                            <div style={{ width: 72, height: 72, borderRadius: 20, background: 'linear-gradient(135deg, rgba(14,165,233,0.15), rgba(34,197,94,0.15))', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', animation: 'pulse 3s ease-in-out infinite' }}>
-                              <Activity size={36} color="#0ea5e9" />
-                            </div>
-                            <div style={{ fontSize: 20, fontWeight: 800, color: C.ink, marginBottom: 10 }}>Diagram Coming Soon</div>
-                            <div style={{ fontSize: 15, color: C.muted, lineHeight: 1.7, maxWidth: 380, margin: '0 auto 20px' }}>The interactive reference diagram for <strong style={{ color: C.ink }}>{exp.title}</strong> is currently being built by our team.</div>
-                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 20px', background: 'rgba(14,165,233,0.1)', borderRadius: 999, fontSize: 13, fontWeight: 700, color: '#0ea5e9', border: '1px solid rgba(14,165,233,0.2)' }}>
-                              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#0ea5e9', animation: 'pulse 2s infinite', display: 'inline-block' }} />
-                              In development
+              <Suspense fallback={<TabSpinner />}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+                  {exp.id === 'strain-gauge' ? (
+                    <Section title="Interactive Simulation"><StrainGaugeSim /></Section>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
+                      <Section title="Reference Diagram" id="tour-reference">
+                        {BRIDGE_IDS.includes(exp.id) ? (
+                          <UnifiedBridgeSim bridgeId={exp.id} />
+                        ) : (
+                          <div style={{ padding: '60px 40px', textAlign: 'center', background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0fdf4 100%)', borderRadius: 16, border: '1px solid rgba(14,165,233,0.15)', position: 'relative', overflow: 'hidden' }}>
+                            <div style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, background: 'radial-gradient(circle, rgba(14,165,233,0.1) 0%, transparent 70%)', borderRadius: '50%' }} />
+                            <div style={{ position: 'absolute', bottom: -40, left: -40, width: 160, height: 160, background: 'radial-gradient(circle, rgba(34,197,94,0.08) 0%, transparent 70%)', borderRadius: '50%' }} />
+                            <div style={{ position: 'relative', zIndex: 1 }}>
+                              <div style={{ width: 72, height: 72, borderRadius: 20, background: 'linear-gradient(135deg, rgba(14,165,233,0.15), rgba(34,197,94,0.15))', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', animation: 'pulse 3s ease-in-out infinite' }}>
+                                <Activity size={36} color="#0ea5e9" />
+                              </div>
+                              <div style={{ fontSize: 20, fontWeight: 800, color: C.ink, marginBottom: 10 }}>Diagram Coming Soon</div>
+                              <div style={{ fontSize: 15, color: C.muted, lineHeight: 1.7, maxWidth: 380, margin: '0 auto 20px' }}>The interactive reference diagram for <strong style={{ color: C.ink }}>{exp.title}</strong> is currently being built by our team.</div>
+                              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 20px', background: 'rgba(14,165,233,0.1)', borderRadius: 999, fontSize: 13, fontWeight: 700, color: '#0ea5e9', border: '1px solid rgba(14,165,233,0.2)' }}>
+                                <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#0ea5e9', animation: 'pulse 2s infinite', display: 'inline-block' }} />
+                                In development
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      )}
-                    </Section>
-                    <Section title="Circuit Sandbox Workspace" id="tour-sandbox">
-                      <CircuitSandboxTab
-                        expId={exp.id}
-                        bridgeState={bridgeSims[exp.id]}
-                        setBridgeSims={setBridgeSims}
-                        isBroadcaster={isBroadcaster}
-                        isSpectator={isSpectator}
-                        classId={classId}
-                        teacherId={user?.uid}
-                      />
-                    </Section>
-                  </div>
-                )}
-              </div>
+                        )}
+                      </Section>
+                      <Section title="Circuit Sandbox Workspace" id="tour-sandbox">
+                        <CircuitSandboxTab
+                          expId={exp.id}
+                          bridgeState={bridgeSims[exp.id]}
+                          setBridgeSims={setBridgeSims}
+                          isBroadcaster={isBroadcaster}
+                          isSpectator={isSpectator}
+                          classId={classId}
+                          teacherId={user?.uid}
+                        />
+                      </Section>
+                    </div>
+                  )}
+                </div>
+              </Suspense>
             )}
 
             {tab === 'pretest' && (
-              <Section title="Pretest">
-                <QuizTab questions={exp.pretest} />
-              </Section>
+              <Suspense fallback={<TabSpinner />}>
+                <Section title="Pretest">
+                  <QuizTab questions={exp.pretest} />
+                </Section>
+              </Suspense>
             )}
 
             {tab === 'posttest' && (
-              <Section title="Posttest">
-                <QuizTab questions={exp.posttest} onComplete={markCompleted} />
-                <VivaPrepTab exp={exp} bridgeState={bridgeSims[exp.id]} setBridgeSims={setBridgeSims} />
-              </Section>
+              <Suspense fallback={<TabSpinner />}>
+                <Section title="Posttest">
+                  <QuizTab questions={exp.posttest} onComplete={markCompleted} />
+                  <VivaPrepTab exp={exp} bridgeState={bridgeSims[exp.id]} setBridgeSims={setBridgeSims} />
+                </Section>
+              </Suspense>
             )}
 
             {tab === 'report' && (
-              <LabReportTab exp={exp} bridgeState={bridgeSims[exp.id]} setBridgeSims={setBridgeSims} />
+              <Suspense fallback={<TabSpinner />}>
+                <LabReportTab exp={exp} bridgeState={bridgeSims[exp.id]} setBridgeSims={setBridgeSims} />
+              </Suspense>
             )}
 
             {tab === 'procedure' && (
@@ -298,11 +319,13 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
                   {exp.procedure.map((s, i) => <li key={i}>{s}</li>)}
                 </ol>
                 {BRIDGE_IDS.includes(exp.id) && (
-                  <BridgeProcedurePanel
-                    bridgeId={exp.id}
-                    bridgeState={bridgeSims[exp.id]}
-                    onStateChange={newSt => setBridgeSims(prev => ({ ...prev, [exp.id]: newSt }))}
-                  />
+                  <Suspense fallback={<TabSpinner />}>
+                    <BridgeProcedurePanel
+                      bridgeId={exp.id}
+                      bridgeState={bridgeSims[exp.id]}
+                      onStateChange={newSt => setBridgeSims(prev => ({ ...prev, [exp.id]: newSt }))}
+                    />
+                  </Suspense>
                 )}
               </Section>
             )}
@@ -316,10 +339,13 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
             )}
 
             {tab === 'feedback' && (
-              <Section title="Feedback">
-                <FeedbackTab />
-              </Section>
+              <Suspense fallback={<TabSpinner />}>
+                <Section title="Feedback">
+                  <FeedbackTab />
+                </Section>
+              </Suspense>
             )}
+
           </div>
         </div>
       </div>

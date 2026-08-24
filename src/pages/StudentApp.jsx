@@ -109,7 +109,7 @@ export default function StudentApp() {
       
       <div id="app-ui">
       {/* Sticky Navbar */}
-      <div className="no-print" style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
+      <nav aria-label="Main navigation" className="no-print" style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
         background: (scrolled || view !== "home" || liveSession) ? "rgba(18, 24, 38, 0.85)" : "transparent",
         backdropFilter: (scrolled || view !== "home" || liveSession) ? "blur(12px)" : "none",
         borderBottom: (scrolled || view !== "home" || liveSession) ? `3px solid ${C.copper}` : "3px solid transparent",
@@ -117,12 +117,12 @@ export default function StudentApp() {
       }}>
         <div style={{ padding: "16px 40px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-            <button onClick={() => setMenuOpen(true)} style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}>
+            <button onClick={() => setMenuOpen(true)} aria-label="Open navigation menu" aria-expanded={menuOpen} aria-controls="sidebar-menu" style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}>
               <Menu size={28} />
             </button>
-            <button onClick={() => setView("home")} style={{ display: "flex", alignItems: "center", gap: 14, background: "none", border: "none", cursor: "pointer", textAlign: "left", padding: 0 }}>
+            <button onClick={() => setView("home")} aria-label="Go to home" style={{ display: "flex", alignItems: "center", gap: 14, background: "none", border: "none", cursor: "pointer", textAlign: "left", padding: 0 }}>
             <div style={{ width: 44, height: 44, borderRadius: 8, background: C.copper, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Globe size={24} color="#fff" />
+              <Globe size={24} color="#fff" aria-hidden="true" />
             </div>
             <div>
               <div style={{ color: "#fff", fontWeight: 800, fontSize: 18, letterSpacing: 0.2 }}>State University</div>
@@ -130,14 +130,14 @@ export default function StudentApp() {
             </div>
           </button>
           </div>
-          <div style={{ display: "flex", gap: 28, fontSize: 14, color: "#c3c9d6", fontWeight: 600 }}>
-            <span style={{ color: view === "home" ? "#fff" : "#c3c9d6", cursor: "pointer" }} onClick={() => setView("home")}>Home</span>
-            <a href="#" onClick={(e) => { e.preventDefault(); setView("team"); }} style={{ color: view === "team" ? "#fff" : "#c3c9d6", cursor: "pointer", textDecoration: "none" }}>Developers</a>
-            <span style={{ color: "#c3c9d6", cursor: "pointer" }} onClick={() => navigate("/about")} onMouseOver={(e) => e.currentTarget.style.color = "#fff"} onMouseOut={(e) => e.currentTarget.style.color = "#c3c9d6"}>About</span>
+          <div role="list" style={{ display: "flex", gap: 28, fontSize: 14, color: "#c3c9d6", fontWeight: 600 }}>
+            <button role="listitem" style={{ background: "none", border: "none", color: view === "home" ? "#fff" : "#c3c9d6", cursor: "pointer", fontWeight: 600, fontSize: 14, padding: 0 }} onClick={() => setView("home")} aria-current={view === "home" ? "page" : undefined}>Home</button>
+            <button role="listitem" style={{ background: "none", border: "none", color: view === "team" ? "#fff" : "#c3c9d6", cursor: "pointer", fontWeight: 600, fontSize: 14, padding: 0 }} onClick={() => setView("team")} aria-current={view === "team" ? "page" : undefined}>Developers</button>
+            <button role="listitem" style={{ background: "none", border: "none", color: "#c3c9d6", cursor: "pointer", fontWeight: 600, fontSize: 14, padding: 0 }} onClick={() => navigate("/about")}>About</button>
             <button onClick={() => setUnlocked(!unlocked)} style={{ display: "none" }}>Toggle</button>
           </div>
         </div>
-      </div>
+      </nav>
 
       {liveSession && view === "home" && (
         <div style={{ paddingTop: 76 }}>
@@ -240,7 +240,7 @@ export default function StudentApp() {
       )}
 
       {/* Sidebar Menu */}
-      <div className="no-print" style={{ position: "fixed", top: 0, left: menuOpen ? 0 : "-350px", width: "350px", height: "100vh",
+      <div id="sidebar-menu" role="dialog" aria-modal="true" aria-label="Navigation menu" className="no-print" style={{ position: "fixed", top: 0, left: menuOpen ? 0 : "-350px", width: "350px", height: "100vh",
         background: "rgba(18, 24, 38, 0.75)", backdropFilter: "blur(24px)", zIndex: 1000, transition: "left 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
         borderRight: "1px solid rgba(255,255,255,0.08)",
         boxShadow: menuOpen ? "20px 0 40px rgba(0,0,0,0.5)" : "none",
@@ -249,11 +249,11 @@ export default function StudentApp() {
         <div style={{ padding: "32px 24px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `1px solid rgba(255,255,255,0.08)` }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div style={{ width: 36, height: 36, borderRadius: 8, background: "linear-gradient(135deg, #c1712f 0%, #8f5320 100%)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Globe size={18} color="#fff" />
+              <Globe size={18} color="#fff" aria-hidden="true" />
             </div>
             <span style={{ color: "#fff", fontWeight: 800, fontSize: 18, letterSpacing: 0.5 }}>V-Lab</span>
           </div>
-          <button onClick={() => setMenuOpen(false)} style={{ background: "rgba(255,255,255,0.1)", border: "none", color: "#fff", cursor: "pointer", width: 32, height: 32, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.2s" }}><X size={18} /></button>
+          <button onClick={() => setMenuOpen(false)} aria-label="Close navigation menu" style={{ background: "rgba(255,255,255,0.1)", border: "none", color: "#fff", cursor: "pointer", width: 32, height: 32, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.2s" }}><X size={18} /></button>
         </div>
                 <div className="sidebar-scroll" style={{ padding: "24px", flex: 1, overflowY: "auto", minHeight: 0 }}>
           <div style={{ marginBottom: 20 }}>
@@ -346,7 +346,7 @@ export default function StudentApp() {
         {/* User Profile */}
         <div style={{ marginTop: "auto", padding: "24px", borderTop: "1px solid rgba(255,255,255,0.08)", background: "rgba(0,0,0,0.2)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <img src={user?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=fallback"} alt="Avatar" style={{ width: 40, height: 40, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.1)", background: "var(--shellSoft)" }} />
+            <img src={user?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=fallback"} alt={user?.name ? `${user.name}'s avatar` : 'User avatar'} style={{ width: 40, height: 40, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.1)", background: "var(--shellSoft)" }} />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ color: "#fff", fontSize: 14, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user?.name}</div>
               <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user?.email}</div>
@@ -354,20 +354,22 @@ export default function StudentApp() {
             <button 
               onClick={() => setShowLogoutModal(true)}
               title="Sign Out"
+              aria-label="Sign out of your account"
               style={{ background: "rgba(255,255,255,0.1)", border: "none", color: "#fff", cursor: "pointer", width: 32, height: 32, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.2s" }}
             >
               <LogOut size={14} />
             </button>
           </div>
         </div>
+
         </div>
       </div>
       
       {/* Logout Modal */}
       {showLogoutModal && (
-        <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", background: "rgba(15, 23, 42, 0.7)", backdropFilter: "blur(8px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div role="dialog" aria-modal="true" aria-labelledby="logout-modal-title" style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", background: "rgba(15, 23, 42, 0.7)", backdropFilter: "blur(8px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <div style={{ background: C.card, padding: 32, borderRadius: 16, width: "90%", maxWidth: 400, boxShadow: "0 20px 40px rgba(0,0,0,0.2)", border: `1px solid ${C.border}` }}>
-            <h3 style={{ margin: "0 0 12px", fontSize: 20, fontWeight: 800, color: C.ink }}>Sign Out</h3>
+            <h3 id="logout-modal-title" style={{ margin: "0 0 12px", fontSize: 20, fontWeight: 800, color: C.ink }}>Sign Out</h3>
             <p style={{ margin: "0 0 24px", color: C.muted, fontSize: 15, lineHeight: 1.6 }}>Are you sure you want to sign out of your account?</p>
             <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
               <button onClick={() => setShowLogoutModal(false)} style={{ padding: "10px 20px", borderRadius: 8, border: `1px solid ${C.border}`, background: "transparent", color: C.ink, fontWeight: 600, cursor: "pointer" }}>Cancel</button>
@@ -376,6 +378,7 @@ export default function StudentApp() {
           </div>
         </div>
       )}
+
       
       {/* Global AI Chatbot Widget */}
       <AIChatbot currentExperiment={active?.title} />

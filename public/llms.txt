@@ -1,0 +1,46 @@
+# V-Lab — Sensors Modeling & Simulation Lab
+
+V-Lab is a virtual laboratory platform for Electrical & Electronics Engineering students at State University. It provides interactive simulations, AI-powered viva evaluation, and automated lab report generation.
+
+## Platform
+
+- [Home](https://vlab-tawny.vercel.app/student)
+- [About V-Lab](https://vlab-tawny.vercel.app/about)
+
+## Experiments
+
+V-Lab provides interactive simulations for the following experiments:
+
+### DC Bridges
+- Wheatstone Bridge
+- Kelvin Bridge
+
+### AC Bridges
+- Maxwell Bridge
+- Hay Bridge
+- Schering Bridge
+
+### Sensors & Transducers
+- Strain Gauge (Static & Dynamic Characteristics)
+- LVDT (Linear Variable Differential Transformer)
+- Thermocouple
+- RTD (Resistance Temperature Detector)
+- Thermistor
+- Photodiode & LDR
+- Piezoelectric Sensor
+- Hall Effect Sensor
+- Load Cell
+- Capacitive Displacement Sensor
+- Op-Amp Characteristics
+
+## Features
+
+- Interactive circuit simulations with live graphing
+- AI-powered viva voce examiner (Professor V-Lab)
+- Automated lab report PDF generation
+- Class enrollment and teacher dashboard
+- Live experiment broadcasting
+
+## Institution
+
+State University, Department of Electrical & Electronics Engineering.

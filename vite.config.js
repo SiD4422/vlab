@@ -47,4 +47,19 @@ const vercelApiMock = () => ({
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), vercelApiMock()],
+  build: {
+    rollupOptions: {
+      output: {
+        // manualChunks as a function — required by Vite v8/rolldown
+        manualChunks(id) {
+          if (id.includes('node_modules/firebase')) return 'vendor-firebase';
+          if (id.includes('node_modules/recharts')) return 'vendor-recharts';
+          if (id.includes('node_modules/lucide-react')) return 'vendor-lucide';
+          if (id.includes('node_modules/react-dom') || id.includes('node_modules/react-router-dom')) return 'vendor-react';
+        },
+      },
+    },
+  },
 })
+
+
