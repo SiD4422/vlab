@@ -10,12 +10,12 @@
 //   3. node phase0-backfill.js
 // ============================================================
 
-const admin = require('firebase-admin');
+const { initializeApp, cert } = require('firebase-admin/app');
+const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 const serviceAccount = require('./serviceAccountKey.json');
 
-admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
-
-const db = admin.firestore();
+initializeApp({ credential: cert(serviceAccount) });
+const db = getFirestore();
 const ORG_ID = 'srm_univ';
 const COLLECTIONS = ['users', 'classes', 'submissions', 'groups'];
 
@@ -66,7 +66,7 @@ async function seedOrganizationsCollection() {
     dept_name: 'Dept. of Electrical Engineering',
     subscription_tier: 'campus',
     pilot_expires_at: null,
-    created_at: admin.firestore.FieldValue.serverTimestamp(),
+    created_at: FieldValue.serverTimestamp(),
   });
   console.log(`[DONE]  organizations  — seeded '${ORG_ID}' document.`);
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, updateProfile } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, runTransaction } from 'firebase/firestore';
 import { auth, googleProvider, db } from './services/firebase';
 import { useNavigate } from 'react-router-dom';
 import './LoginScreen.css';
@@ -17,6 +17,7 @@ export default function LoginScreen() {
   const [registrationNo, setRegistrationNo] = useState('');
   const [department, setDepartment] = useState('');
   const [section, setSection] = useState('');
+  const [inviteCode, setInviteCode] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,13 +30,39 @@ export default function LoginScreen() {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         await updateProfile(userCredential.user, { displayName: fullName });
         
+        // ── Validate invite code & resolve org_id ──────────────────────────
+        const trimmedCode = inviteCode.trim().toUpperCase();
+        let resolvedOrgId = 'srm_univ'; // Fallback for SRM users without a code
+
+        if (trimmedCode) {
+          const codeRef = doc(db, 'invite_codes', trimmedCode);
+          let codeData;
+          try {
+            // Atomic transaction: validates + increments in one operation
+            await runTransaction(db, async (tx) => {
+              const codeSnap = await tx.get(codeRef);
+              if (!codeSnap.exists()) throw new Error('Invite code not found.');
+              codeData = codeSnap.data();
+              if (codeData.revoked) throw new Error('This invite code has been revoked.');
+              const expires = codeData.expires_at?.toDate ? codeData.expires_at.toDate() : new Date(codeData.expires_at.seconds * 1000);
+              if (expires < new Date()) throw new Error('This invite code has expired.');
+              if (codeData.used_count >= codeData.max_uses) throw new Error('This invite code has reached its usage limit.');
+              if (codeData.role !== role) throw new Error(`This code is only valid for ${codeData.role}s, not ${role}s.`);
+              tx.update(codeRef, { used_count: codeData.used_count + 1 });
+            });
+            resolvedOrgId = codeData.org_id;
+          } catch (txErr) {
+            throw new Error(txErr.message);
+          }
+        }
+
         // Write user document to Firestore
         await setDoc(doc(db, 'users', userCredential.user.uid), {
           uid: userCredential.user.uid,
           name: fullName,
           email: userCredential.user.email,
           role: role,
-          org_id: 'srm_univ', // Temporary default until invite codes are built
+          org_id: resolvedOrgId,
           ...(role === 'student' ? {
             registrationNo,
             department,
@@ -167,6 +194,16 @@ export default function LoginScreen() {
           )}
           {isSignUp && role === 'teacher' && (
             <input type="text" placeholder="Department" value={department} onChange={e => setDepartment(e.target.value)} className="login-input" required />
+          )}
+          {isSignUp && (
+            <input
+              type="text"
+              placeholder="Invite Code (required for other colleges)"
+              value={inviteCode}
+              onChange={e => setInviteCode(e.target.value.toUpperCase())}
+              className="login-input"
+              style={{ letterSpacing: inviteCode ? 3 : 0, fontFamily: inviteCode ? 'monospace' : 'inherit' }}
+            />
           )}
           <input 
             required 

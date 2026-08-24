@@ -9,6 +9,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 const TeacherDashboardView = lazy(() => import("./pages/TeacherDashboardView"));
 const StudentApp = lazy(() => import("./pages/StudentApp"));
 const About = lazy(() => import("./pages/About"));
+const SuperAdminDashboard = lazy(() => import("./pages/SuperAdminDashboard"));
 
 /* ---------------------------------------------------------------
    DESIGN TOKENS — circuit-board palette: ink navy shell, copper
@@ -85,6 +86,9 @@ export default function App() {
 
         {/* Public: About page */}
         <Route path="/about" element={<About />} />
+
+        {/* Super Admin: protected inside the component itself by UID check */}
+        <Route path="/admin" element={user ? <SuperAdminDashboard /> : <Navigate to="/" replace />} />
 
         {/* Catch-all: redirect to root */}
         <Route path="*" element={<Navigate to="/" replace />} />
