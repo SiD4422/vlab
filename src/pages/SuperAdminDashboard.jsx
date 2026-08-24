@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 // ─── CONSTANTS ───────────────────────────────────────────────────────────────
 // Add your Firebase UID here to protect this page.
 // Find it in Firebase Console → Authentication → Users → your email → copy the "User UID"
-const SUPER_ADMIN_UIDS = ['REPLACE_WITH_YOUR_FIREBASE_UID'];
+const SUPER_ADMIN_UIDS = ['1jxQ32su82ZXGLB0qSHQny0QSl42'];
 
 const TIERS = ['pilot', 'department', 'campus'];
 const ROLES = ['student', 'teacher'];
