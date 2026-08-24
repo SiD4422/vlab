@@ -35,6 +35,7 @@ export default function LoginScreen() {
           name: fullName,
           email: userCredential.user.email,
           role: role,
+          org_id: 'srm_univ', // Temporary default until invite codes are built
           ...(role === 'student' ? {
             registrationNo,
             department,
