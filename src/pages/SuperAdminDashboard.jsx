@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, doc, getDocs, setDoc, updateDoc, getDoc, query, orderBy } from 'firebase/firestore';
+import { collection, doc, getDocs, setDoc, updateDoc, getDoc, query, orderBy, writeBatch } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -60,8 +60,10 @@ export default function SuperAdminDashboard() {
   // ── State ──
   const [orgs, setOrgs] = useState([]);
   const [codes, setCodes] = useState([]);
+  const [invoiceRequests, setInvoiceRequests] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('orgs'); // 'orgs' | 'codes'
+  const [activeTab, setActiveTab] = useState('invoices'); // 'orgs' | 'codes' | 'invoices'
+  const [approveMsg, setApproveMsg] = useState({});
 
   // New Org form
   const [orgId, setOrgId] = useState('');
@@ -86,13 +88,73 @@ export default function SuperAdminDashboard() {
 
   async function fetchData() {
     setLoading(true);
-    const [orgSnap, codeSnap] = await Promise.all([
+    const [orgSnap, codeSnap, invoiceSnap] = await Promise.all([
       getDocs(collection(db, 'organizations')),
       getDocs(query(collection(db, 'invite_codes'), orderBy('created_at', 'desc'))),
+      getDocs(query(collection(db, 'invoice_requests'), orderBy('createdAt', 'desc'))),
     ]);
     setOrgs(orgSnap.docs.map(d => ({ id: d.id, ...d.data() })));
     setCodes(codeSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+    setInvoiceRequests(invoiceSnap.docs.map(d => ({ id: d.id, ...d.data() })));
     setLoading(false);
+  }
+
+  // Approve invoice: create org (if needed), generate codes, mark as approved
+  async function approveInvoice(req) {
+    setApproveMsg(m => ({ ...m, [req.id]: { type: 'loading', text: 'Processing…' } }));
+    try {
+      // 1. Determine org_id from college name slug
+      const slug = req.collegeName.toLowerCase().trim().replace(/[^a-z0-9]+/g, '_');
+
+      // 2. Create org if doesn't exist
+      const orgRef = doc(db, 'organizations', slug);
+      const orgSnap = await getDoc(orgRef);
+      if (!orgSnap.exists()) {
+        await setDoc(orgRef, {
+          org_id: slug, org_name: req.collegeName,
+          dept_name: req.deptName || 'Dept. of Electrical Engineering',
+          logo_url: '/srm-logo-final.webp',
+          subscription_tier: req.planId || 'department',
+          pilot_expires_at: req.planId === 'pilot' ? ttlDate(45) : null,
+          created_at: new Date(),
+        });
+      }
+
+      // 3. Generate teacher code (always) + bulk student code
+      const teacherCode = generateCode();
+      const studentCode = generateCode();
+      const planMaxUses = req.planId === 'pilot' ? 5 : req.planId === 'campus' ? 2000 : 200;
+      const planDays = req.planId === 'pilot' ? 45 : 365;
+
+      const batch = writeBatch(db);
+      batch.set(doc(db, 'invite_codes', teacherCode), {
+        code: teacherCode, org_id: slug, role: 'teacher',
+        expires_at: ttlDate(planDays), max_uses: req.planId === 'campus' ? 50 : 10,
+        used_count: 0, created_at: new Date(), revoked: false,
+      });
+      batch.set(doc(db, 'invite_codes', studentCode), {
+        code: studentCode, org_id: slug, role: 'student',
+        expires_at: ttlDate(planDays), max_uses: planMaxUses,
+        used_count: 0, created_at: new Date(), revoked: false,
+      });
+      // 4. Mark invoice as approved
+      batch.update(doc(db, 'invoice_requests', req.id), {
+        status: 'codes_sent', approvedAt: new Date(),
+        teacherCode, studentCode, orgSlug: slug,
+      });
+      await batch.commit();
+
+      setApproveMsg(m => ({
+        ...m, [req.id]: {
+          type: 'ok',
+          text: `✅ Done! Teacher code: ${teacherCode} | Student code: ${studentCode}\nOrg: ${slug} created. Send these codes to ${req.email}`,
+        }
+      }));
+      fetchData();
+    } catch (err) {
+      console.error(err);
+      setApproveMsg(m => ({ ...m, [req.id]: { type: 'err', text: err.message } }));
+    }
   }
 
   async function handleCreateOrg(e) {
@@ -173,12 +235,91 @@ export default function SuperAdminDashboard() {
 
       {/* Tabs */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 32, background: '#131e30', padding: 6, borderRadius: 12, width: 'fit-content', border: '1px solid #1e2d45' }}>
+        <button style={tabStyle('invoices')} onClick={() => setActiveTab('invoices')}>
+          📥 Invoice Requests ({invoiceRequests.length})
+          {invoiceRequests.filter(r => r.status === 'pending').length > 0 && (
+            <span style={{ marginLeft: 6, background: '#ef4444', color: '#fff', borderRadius: 999, padding: '1px 7px', fontSize: 11, fontWeight: 800 }}>
+              {invoiceRequests.filter(r => r.status === 'pending').length}
+            </span>
+          )}
+        </button>
         <button style={tabStyle('orgs')} onClick={() => setActiveTab('orgs')}>🏫 Organizations ({orgs.length})</button>
         <button style={tabStyle('codes')} onClick={() => setActiveTab('codes')}>🔑 Invite Codes ({codes.length})</button>
       </div>
 
       {loading ? (
         <div style={{ color: '#475569', textAlign: 'center', padding: 60 }}>Loading…</div>
+      ) : activeTab === 'invoices' ? (
+        <div style={S.card}>
+          <div style={S.cardTitle}>Invoice Requests — Payment Approval Queue</div>
+          <table style={S.table}>
+            <thead>
+              <tr>
+                <th style={S.th}>Invoice</th>
+                <th style={S.th}>College</th>
+                <th style={S.th}>Plan</th>
+                <th style={S.th}>Contact</th>
+                <th style={S.th}>Status</th>
+                <th style={S.th}>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {invoiceRequests.map(req => {
+                const statusColor = req.status === 'codes_sent' ? '#10b981' : req.status === 'pending' ? '#f59e0b' : '#64748b';
+                const msg = approveMsg[req.id];
+                return (
+                  <>
+                    <tr key={req.id}>
+                      <td style={S.td}>
+                        <div style={{ fontFamily: 'monospace', fontSize: 12, color: '#0d9488' }}>{req.invoiceNo}</div>
+                        <div style={{ fontSize: 11, color: '#475569' }}>{req.createdAt?.toDate?.()?.toLocaleDateString?.() || new Date(req.createdAt?.seconds * 1000).toLocaleDateString()}</div>
+                      </td>
+                      <td style={S.td}>
+                        <div style={{ fontWeight: 700, color: '#e2e8f0', fontSize: 13 }}>{req.collegeName}</div>
+                        <div style={{ fontSize: 11, color: '#475569' }}>{req.deptName}</div>
+                      </td>
+                      <td style={S.td}><span style={S.badge(TIER_COLORS[req.planId] || '#64748b')}>{req.planName} — {req.planPrice}</span></td>
+                      <td style={S.td}>
+                        <div style={{ fontSize: 13, color: '#94a3b8' }}>{req.contactName}</div>
+                        <div style={{ fontSize: 12, color: '#0d9488' }}>{req.email}</div>
+                        {req.phone && <div style={{ fontSize: 11, color: '#475569' }}>{req.phone}</div>}
+                      </td>
+                      <td style={S.td}><span style={S.badge(statusColor)}>{req.status}</span></td>
+                      <td style={S.td}>
+                        {req.status === 'pending' && (
+                          <button
+                            onClick={() => approveInvoice(req)}
+                            disabled={msg?.type === 'loading'}
+                            style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)', color: '#10b981', borderRadius: 8, padding: '6px 14px', fontSize: 12, cursor: 'pointer', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                            {msg?.type === 'loading' ? '⏳ Processing…' : '✅ Payment Received — Send Codes'}
+                          </button>
+                        )}
+                        {req.status === 'codes_sent' && (
+                          <div style={{ fontSize: 11 }}>
+                            <div style={{ color: '#64748b' }}>Teacher: <span style={{ fontFamily: 'monospace', color: '#0d9488' }}>{req.teacherCode}</span></div>
+                            <div style={{ color: '#64748b' }}>Student: <span style={{ fontFamily: 'monospace', color: '#8b5cf6' }}>{req.studentCode}</span></div>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                    {msg && (
+                      <tr key={req.id + '_msg'}>
+                        <td colSpan={6} style={{ padding: '0 12px 12px' }}>
+                          <div style={msg.type === 'ok' ? { ...S.ok, whiteSpace: 'pre-line' } : S.err}>{msg.text}</div>
+                        </td>
+                      </tr>
+                    )}
+                  </>
+                );
+              })}
+              {invoiceRequests.length === 0 && (
+                <tr><td colSpan={6} style={{ ...S.td, color: '#475569', textAlign: 'center', padding: 60 }}>
+                  No invoice requests yet. Share your <strong>/pricing</strong> page with colleges!
+                </td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       ) : activeTab === 'orgs' ? (
         <div style={S.grid}>
           {/* Create Org Form */}

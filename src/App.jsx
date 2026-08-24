@@ -10,6 +10,7 @@ const TeacherDashboardView = lazy(() => import("./pages/TeacherDashboardView"));
 const StudentApp = lazy(() => import("./pages/StudentApp"));
 const About = lazy(() => import("./pages/About"));
 const SuperAdminDashboard = lazy(() => import("./pages/SuperAdminDashboard"));
+const Pricing = lazy(() => import("./pages/Pricing"));
 
 /* ---------------------------------------------------------------
    DESIGN TOKENS — circuit-board palette: ink navy shell, copper
@@ -86,6 +87,9 @@ export default function App() {
 
         {/* Public: About page */}
         <Route path="/about" element={<About />} />
+
+        {/* Public: Pricing page */}
+        <Route path="/pricing" element={<Pricing />} />
 
         {/* Super Admin: protected inside the component itself by UID check */}
         <Route path="/admin" element={user ? <SuperAdminDashboard /> : <Navigate to="/" replace />} />
