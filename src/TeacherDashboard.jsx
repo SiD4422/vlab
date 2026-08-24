@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { db } from './services/firebase';
 import { collection, query, where, getDocs, setDoc, doc, updateDoc, writeBatch, getDoc, arrayRemove } from 'firebase/firestore';
-import { User, Users, BookOpen, Plus, Loader2, CheckCircle2, X, ChevronRight, Clock, FileText, Edit3, LayoutDashboard, GraduationCap, ClipboardList, LogOut, Search, Trash2, UserPlus } from 'lucide-react';
+import { User, Users, BookOpen, Plus, Loader2, CheckCircle2, X, ChevronRight, Clock, FileText, Edit3, LayoutDashboard, GraduationCap, ClipboardList, LogOut, Search, Trash2, UserPlus, Sparkles } from 'lucide-react';
 import Profile from './Profile';
 import { EXPERIMENTS } from './data/experiments';
+import { useCollege } from './contexts/CollegeContext';
+import { useNavigate } from 'react-router-dom';
 
 const GRADIENTS = [
   'linear-gradient(135deg,#f093fb 0%,#f5576c 100%)',
@@ -43,6 +45,9 @@ function NavItem({ icon: Icon, label, active, onClick, badge }) {
 }
 
 export default function TeacherDashboard({ user, onLogout, onUpdate }) {
+  const { subscriptionTier } = useCollege();
+  const navigate = useNavigate();
+  
   const [classes,setClasses]         = useState([]);
   const [submissions,setSubmissions] = useState([]);
   const [loading,setLoading]         = useState(true);
@@ -240,6 +245,25 @@ export default function TeacherDashboard({ user, onLogout, onUpdate }) {
               <Search size={15} style={{ position:'absolute',left:12,top:'50%',transform:'translateY(-50%)',color:'#94a3b8' }} />
               <input placeholder="Search…" value={searchQ} onChange={e=>setSearchQ(e.target.value)} style={{ paddingLeft:36,paddingRight:12,height:36,borderRadius:18,border:'1px solid #e2e8f0',fontSize:13,color:'#1e293b',outline:'none',width:200,background:'rgba(255,255,255,0.8)',boxShadow:'inset 0 1px 3px rgba(0,0,0,0.02)',transition:'all 0.2s',fontFamily:'inherit' }} onFocus={e=>e.target.style.outline='2px solid rgba(99,102,241,0.3)'} onBlur={e=>e.target.style.outline='none'} />
             </div>
+            
+            {/* ─── Plan Upgrade Widget ─── */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#fff', borderRadius: 999, padding: '4px 6px 4px 16px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: subscriptionTier === 'pilot' ? '#f59e0b' : subscriptionTier === 'department' ? '#0d9488' : '#8b5cf6' }}>
+                <span style={{ color: '#94a3b8', fontWeight: 600, marginRight: 4 }}>Plan:</span>
+                {subscriptionTier.charAt(0).toUpperCase() + subscriptionTier.slice(1)}
+              </div>
+              {subscriptionTier === 'pilot' && (
+                <button
+                  onClick={() => navigate('/pricing')}
+                  style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'linear-gradient(135deg, #0d9488, #0891b2)', color: '#fff', border: 'none', padding: '6px 14px', borderRadius: 999, fontSize: 12, fontWeight: 800, cursor: 'pointer', boxShadow: '0 2px 6px rgba(13,148,136,0.3)', transition: 'transform 0.2s' }}
+                  onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+                  onMouseLeave={e => e.currentTarget.style.transform = 'none'}
+                >
+                  <Sparkles size={14} /> Upgrade
+                </button>
+              )}
+            </div>
+            
             {activeNav==='classes' && (
               <button onClick={()=>setShowCreateForm(v=>!v)} style={{ display:'flex',alignItems:'center',gap:8,background:'linear-gradient(135deg,#6366f1 0%,#4f46e5 100%)',color:'#fff',border:'none',padding:'10px 24px',borderRadius:999,fontWeight:800,fontSize:14,cursor:'pointer',boxShadow:'0 4px 14px rgba(79,70,229,0.4), inset 0 1px 0 rgba(255,255,255,0.2)',transition:'transform 0.2s, box-shadow 0.2s',textShadow:'0 1px 2px rgba(0,0,0,0.1)' }} onMouseEnter={e=>{e.target.style.transform='translateY(-2px)'; e.target.style.boxShadow='0 6px 20px rgba(79,70,229,0.5), inset 0 1px 0 rgba(255,255,255,0.2)';}} onMouseLeave={e=>{e.target.style.transform='none'; e.target.style.boxShadow='0 4px 14px rgba(79,70,229,0.4), inset 0 1px 0 rgba(255,255,255,0.2)';}}>
                 <Plus size={18} strokeWidth={3} /> Create Class

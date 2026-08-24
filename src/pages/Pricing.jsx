@@ -13,8 +13,8 @@ const PLANS = [
     glow: 'rgba(245,158,11,0.3)',
     features: [
       '1 Teacher account',
-      '1 Class (up to 60 students)',
-      'All circuit experiments',
+      '1 Class (up to 20 students max)',
+      '2 Circuit Experiments (1 AC, 1 DC)',
       'Basic analytics dashboard',
       'Email support',
     ],
