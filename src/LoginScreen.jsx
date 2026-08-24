@@ -257,6 +257,16 @@ export default function LoginScreen() {
             </button>
           </div>
           
+          <div style={{ marginTop: 30, paddingTop: 20, borderTop: '1px solid rgba(148, 163, 184, 0.2)', textAlign: 'center' }}>
+            <button 
+              type="button" 
+              onClick={() => navigate('/pricing')}
+              style={{ background: 'rgba(15, 118, 110, 0.1)', border: '1px solid rgba(15, 118, 110, 0.2)', color: '#0f766e', fontWeight: 700, borderRadius: 999, padding: '8px 20px', cursor: 'pointer', fontSize: 12, transition: 'all 0.2s', letterSpacing: 0.5 }}
+            >
+              Are you an Institution? View Pricing
+            </button>
+          </div>
+          
           <div style={{ marginTop: 20, textAlign: 'center', borderTop: '1px solid rgba(148, 163, 184, 0.1)', paddingTop: 16 }}>
             <button 
               type="button"
