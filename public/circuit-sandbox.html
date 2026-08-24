@@ -96,10 +96,10 @@
   .analysis-body::-webkit-scrollbar-track{background:#0f172a;}
   .analysis-body::-webkit-scrollbar-thumb{background:#334155;border-radius:2px;}
   .a-section{margin-bottom:20px;}
-  .a-section-title{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#475569;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #1e293b;}
-  .a-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid rgba(30,41,59,0.5);}
+  .a-section-title{font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#94a3b8;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid rgba(148,163,184,0.2);}
+  .a-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid rgba(148,163,184,0.1);}
   .a-row:last-child{border-bottom:none;}
-  .a-key{font-family:var(--mono);font-size:11px;color:#64748b;}
+  .a-key{font-family:var(--mono);font-size:12px;color:#cbd5e1;font-weight:600;}
   .a-val{font-family:var(--mono);font-size:13px;font-weight:800;color:#0ff;text-shadow:0 0 5px #0ff, 0 0 15px #0ff;}
   .a-val.warn{color:#f59e0b;}
   .a-val.ok{color:#34d399;}
@@ -689,7 +689,7 @@ function renderAnalysisContent(readings){
   else html+=`<div class="a-row"><span class="a-key">KVL</span><span class="a-val na">&#8212;</span></div>`;
   if(kclOk!==null)html+=`<div class="a-row"><span class="a-key">KCL (Nodes)</span><span class="a-badge ${kclOk?'ok':'warn'}">${kclOk?'&#10003; PASS':'&#9888; CHECK'}</span></div>`;
   else html+=`<div class="a-row"><span class="a-key">KCL</span><span class="a-val na">&#8212;</span></div>`;
-  html+=`<div style="font-family:var(--mono);font-size:9px;color:#334155;margin-top:8px;line-height:1.6;">&epsilon; = 1e-6 · MNA solver with GMIN regularization</div></div>`;
+  html+=`<div style="font-family:var(--mono);font-size:10px;color:#64748b;margin-top:12px;line-height:1.6;">&epsilon; = 1e-6 · MNA solver with GMIN regularization</div></div>`;
 
   body.innerHTML=html;
 }
