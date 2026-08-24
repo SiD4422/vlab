@@ -121,9 +121,7 @@ export default function StudentApp() {
               <Menu size={28} />
             </button>
             <button onClick={() => setView("home")} aria-label="Go to home" style={{ display: "flex", alignItems: "center", gap: 14, background: "none", border: "none", cursor: "pointer", textAlign: "left", padding: 0 }}>
-            <div style={{ width: 150, height: 44, overflow: 'hidden', flexShrink: 0, borderRadius: 4 }}>
-              <img src="/srm-logo.webp" alt="SRM Logo" style={{ width: 150, height: 80, objectFit: 'cover', objectPosition: 'top' }} />
-            </div>
+            <img src="/srm-logo-final.webp" alt="SRM Logo" style={{ height: 36, objectFit: 'contain' }} />
             <div>
               <div style={{ color: "#fff", fontWeight: 800, fontSize: 18, letterSpacing: 0.2 }}>SRM University</div>
               <div style={{ color: "#c3c9d6", fontSize: 12, fontWeight: 600 }}>Dept. of Electrical Engineering</div>
@@ -204,9 +202,7 @@ export default function StudentApp() {
           {/* Branding & Contact */}
           <div style={{ flex: "1 1 300px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-              <div style={{ width: 140, height: 40, overflow: 'hidden', flexShrink: 0, borderRadius: 4 }}>
-                <img src="/srm-logo.webp" alt="SRM Logo" style={{ width: 140, height: 75, objectFit: 'cover', objectPosition: 'top' }} />
-              </div>
+              <img src="/srm-logo-final.webp" alt="SRM Logo" style={{ height: 32, objectFit: 'contain' }} />
               <div>
                 <div style={{ color: "#fff", fontWeight: 800, fontSize: 16 }}>SRM University</div>
               </div>
