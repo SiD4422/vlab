@@ -121,7 +121,7 @@ export default function StudentApp() {
               <Menu size={28} />
             </button>
             <button onClick={() => setView("home")} aria-label="Go to home" style={{ display: "flex", alignItems: "center", gap: 14, background: "none", border: "none", cursor: "pointer", textAlign: "left", padding: 0 }}>
-            <img src="/srm-logo.webp" alt="SRM University Logo" style={{ width: 56, height: 56, objectFit: 'contain', background: '#fff', borderRadius: '50%', padding: '4px', border: `2px solid ${C.copper}` }} />
+            <img src="/srm-logo.webp" alt="SRM University Logo" style={{ height: 44, objectFit: 'contain' }} />
             <div>
               <div style={{ color: "#fff", fontWeight: 800, fontSize: 18, letterSpacing: 0.2 }}>SRM University</div>
               <div style={{ color: "#c3c9d6", fontSize: 12, fontWeight: 600 }}>Dept. of Electrical Engineering</div>
@@ -202,7 +202,7 @@ export default function StudentApp() {
           {/* Branding & Contact */}
           <div style={{ flex: "1 1 300px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-              <img src="/srm-logo.webp" alt="SRM University Logo" style={{ width: 48, height: 48, objectFit: 'contain', background: '#fff', borderRadius: '50%', padding: '4px' }} />
+              <img src="/srm-logo.webp" alt="SRM University Logo" style={{ height: 40, objectFit: 'contain' }} />
               <div>
                 <div style={{ color: "#fff", fontWeight: 800, fontSize: 16 }}>SRM University</div>
               </div>

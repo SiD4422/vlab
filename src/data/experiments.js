@@ -1,5 +1,71 @@
 export const EXPERIMENTS = [
   {
+    "id": "wheatstone-bridge",
+    "tag": "DC-01",
+    "title": "Wheatstone Bridge",
+    "aim": "To determine the value of an unknown resistance using a Wheatstone bridge.",
+    "objectives": [
+      "Understand the principle of a Wheatstone bridge.",
+      "Balance the bridge to find the null point.",
+      "Calculate unknown resistance accurately."
+    ],
+    "theory": [
+      "A Wheatstone bridge is an electrical circuit used to measure an unknown electrical resistance by balancing two legs of a bridge circuit.",
+      "It consists of four resistors forming a quadrilateral. A galvanometer is connected between two opposite junctions, and a voltage source is connected across the other two.",
+      "The bridge is balanced when the current through the galvanometer is zero.",
+      "At balance, the ratio of the resistances in one leg equals the ratio in the other leg: R1/R2 = R3/Rx.",
+      "The unknown resistance Rx can be calculated as: Rx = (R3 × R2) / R1."
+    ],
+    "procedure": [
+      "Open the Circuit Sandbox and place four resistors in a diamond shape.",
+      "Place an unknown resistor (Rx) as one of the arms.",
+      "Connect a galvanometer across the middle of the bridge and a 9V battery across the ends.",
+      "Adjust the standard resistors until the galvanometer reads exactly 0 mA.",
+      "Use the balance equation to calculate the value of Rx and verify it in the inspector."
+    ],
+    "references": [
+      "A.K. Sawhney - Electrical Measurements"
+    ],
+    "pretest": [
+      {
+        "q": "The Wheatstone bridge is best used for measuring:",
+        "options": ["Very low resistance", "Medium resistance (1Ω to 1MΩ)", "Very high resistance", "Capacitance"],
+        "answer": 1
+      },
+      {
+        "q": "At balance condition, the current through the galvanometer is:",
+        "options": ["Maximum", "Minimum", "Zero", "Infinity"],
+        "answer": 2
+      }
+    ],
+    "posttest": [
+      {
+        "q": "If the battery and galvanometer are interchanged at balance, the balance condition:",
+        "options": ["Remains unchanged", "Changes", "Bridge burns", "Current becomes maximum"],
+        "answer": 0
+      },
+      {
+        "q": "Which of the following is a practical application of a Wheatstone bridge?",
+        "options": ["Measuring voltage", "Measuring current", "Strain gauge measurement", "Measuring frequency"],
+        "answer": 2
+      }
+    ],
+    "viva": [
+      {
+        "id": "wb_q1",
+        "question": "Why is a standard Wheatstone bridge not suitable for measuring very low resistances (below 1 ohm)?",
+        "options": ["It is too sensitive for low values.", "Contact and lead resistances cause significant measurement errors.", "It requires an AC supply for low resistance.", "The galvanometer will draw too much current and burn."],
+        "correctIndex": 1
+      },
+      {
+        "id": "wb_q2",
+        "question": "What happens to the balance point if the voltage of the battery driving the bridge is doubled?",
+        "options": ["The balance point shifts.", "The bridge cannot be balanced.", "The balance condition remains completely unaffected.", "The sensitivity decreases."],
+        "correctIndex": 2
+      }
+    ]
+  },
+  {
     "id": "kelvin-bridge",
     "tag": "DC-02",
     "title": "Kelvin Bridge",
