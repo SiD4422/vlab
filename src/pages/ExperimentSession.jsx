@@ -112,6 +112,27 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
     return () => window.removeEventListener('message', handleMessage);
   }, [exp.id, setBridgeSims, addToast]);
 
+  // Tab-switch detection (Anti-Cheat)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && tab === 'pretest' || tab === 'posttest' || tab === 'viva') {
+        setBridgeSims(prev => {
+          const current = prev[exp.id] || {};
+          return {
+            ...prev,
+            [exp.id]: {
+              ...current,
+              tabSwitches: (current.tabSwitches || 0) + 1
+            }
+          };
+        });
+        addToast('Warning', 'Tab switch detected! Your teacher will be notified in the submission report.', 'error');
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [exp.id, setBridgeSims, addToast, tab]);
+
   const startTour = () => {
     const driverObj = driver({
       showProgress: true,

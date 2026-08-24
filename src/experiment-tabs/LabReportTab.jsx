@@ -57,6 +57,7 @@ export default function LabReportTab({ exp, bridgeState, setBridgeSims }) {
       classId: enrolledClass.id, teacherUid: enrolledClass.teacherUid,
       experimentId: exp.id, experimentName: exp.title,
       vivaScore, vivaResponses, teacherScore: null,
+      tabSwitches: bridgeState?.tabSwitches || 0,
       labData: bridgeState || {}, submittedAt: new Date().toISOString(), status: 'completed',
     };
     try {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { db } from './services/firebase';
 import { collection, query, where, getDocs, setDoc, doc, updateDoc, writeBatch, getDoc, arrayRemove } from 'firebase/firestore';
-import { User, Users, BookOpen, Plus, Loader2, CheckCircle2, X, ChevronRight, Clock, FileText, Edit3, LayoutDashboard, GraduationCap, ClipboardList, LogOut, Search, Trash2, UserPlus, Sparkles } from 'lucide-react';
+import { User, Users, BookOpen, Plus, Loader2, CheckCircle2, X, ChevronRight, Clock, FileText, Edit3, LayoutDashboard, GraduationCap, ClipboardList, LogOut, Search, Trash2, UserPlus, Sparkles, AlertTriangle, UploadCloud } from 'lucide-react';
 import Profile from './Profile';
 import { EXPERIMENTS } from './data/experiments';
 import { useCollege } from './contexts/CollegeContext';
@@ -598,6 +598,15 @@ export default function TeacherDashboard({ user, onLogout, onUpdate }) {
                       <div style={{ display:'flex',gap:12,flexWrap:'wrap' }}>
                         {[{label:'Circuit Captured',ok:hasAct},{label:'Scope Captured',ok:!!ld.labActivity?.scopeImg},{label:'Observations Filled',ok:rows>0},{label:'Viva Attempted',ok:!!ld.vivaSubmitted}].map(c=>(
                           <div key={c.label} style={{ display:'flex',alignItems:'center',gap:8,padding:'8px 16px',borderRadius:999,fontSize:13,fontWeight:700,background:c.ok?'#ecfdf5':'#fef2f2',color:c.ok?'#065f46':'#991b1b',border:`1px solid ${c.ok?'#a7f3d0':'#fca5a5'}` }}>
+                            {c.ok?<CheckCircle2 size={16}/>:<XCircle size={16}/>} {c.label}
+                          </div>
+                        ))}
+                        {selectedSubmission.tabSwitches > 0 && (
+                          <div style={{ display:'flex',alignItems:'center',gap:8,padding:'8px 16px',borderRadius:999,fontSize:13,fontWeight:800,background:'#fef2f2',color:'#dc2626',border:'1px solid #fca5a5',boxShadow:'0 2px 8px rgba(220,38,38,0.2)' }}>
+                            <AlertTriangle size={16} strokeWidth={3} /> {selectedSubmission.tabSwitches} Tab Switch(es) Detected
+                          </div>
+                        )}
+                      </div>
                             {c.ok?<CheckCircle2 size={15}/>:<X size={15}/>} {c.label}
                           </div>
                         ))}
@@ -680,6 +689,34 @@ export default function TeacherDashboard({ user, onLogout, onUpdate }) {
                 <div style={{ color:'#64748b',fontSize:14,marginTop:4,fontWeight:500 }}>{managingClass.className} · Invite Code: <strong style={{ color:'#4f46e5',background:'#e0e7ff',padding:'2px 8px',borderRadius:6,fontFamily:'monospace',fontSize:15 }}>{managingClass.inviteCode}</strong></div>
               </div>
               <div style={{ display:'flex',gap:12, alignItems:'center' }}>
+                <label style={{ background: '#f8fafc', border: '1px solid #cbd5e1', color: '#475569', padding: '8px 16px', borderRadius: 10, fontSize: 13, fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, transition: 'all 0.2s' }} onMouseEnter={e=>e.target.style.background='#f1f5f9'} onMouseLeave={e=>e.target.style.background='#f8fafc'}>
+                  <UploadCloud size={16} /> Bulk Import
+                  <input type="file" accept=".csv" style={{ display: 'none' }} onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = async (evt) => {
+                      const text = evt.target.result;
+                      const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+                      if (lines.length < 2) return alert('CSV must have a header row and data.');
+                      // Assuming header: Name, Email, RegNo
+                      const newRoster = [];
+                      for (let i = 1; i < lines.length; i++) {
+                        const cols = lines[i].split(',');
+                        if (cols.length >= 2) {
+                          newRoster.push({ name: cols[0].trim(), email: cols[1].trim(), regNo: cols[2] ? cols[2].trim() : '', status: 'Pending Invite' });
+                        }
+                      }
+                      // Save to class doc
+                      const classRef = doc(db, 'classes', managingClass.id);
+                      const updatedRoster = [...(managingClass.roster || []), ...newRoster];
+                      await updateDoc(classRef, { roster: updatedRoster });
+                      setManagingClass({ ...managingClass, roster: updatedRoster });
+                      alert(`Successfully added ${newRoster.length} students to the pending roster.`);
+                    };
+                    reader.readAsText(file);
+                  }} />
+                </label>
                 <select 
                   value={broadcastExpId} 
                   onChange={e=>setBroadcastExpId(e.target.value)}
@@ -722,6 +759,21 @@ export default function TeacherDashboard({ user, onLogout, onUpdate }) {
                       <button onClick={()=>removeStudent(st.id)} disabled={removingStudentId===st.id} style={{ background:'transparent',border:'1px solid #fca5a5',color:'#ef4444',padding:'8px 16px',borderRadius:10,fontSize:13,fontWeight:700,cursor:removingStudentId===st.id?'not-allowed':'pointer',display:'flex',alignItems:'center',gap:6,opacity:removingStudentId===st.id?0.5:1,transition:'all 0.2s' }} onMouseEnter={e=>{if(removingStudentId!==st.id){e.target.style.background='#fef2f2'}}} onMouseLeave={e=>e.target.style.background='transparent'}>
                         {removingStudentId===st.id?<Loader2 className="spin" size={15}/>:<X size={15}/>} Remove
                       </button>
+                    </div>
+                  ))}
+                  
+                  {/* Pending Roster from CSV Upload */}
+                  {managingClass.roster && managingClass.roster.map((st, i) => (
+                    <div key={'roster'+i} style={{ display:'flex',alignItems:'center',justifyContent:'space-between',padding:'16px 20px',background:'#f8fafc',border:'1px dashed #cbd5e1',borderRadius:16 }}>
+                      <div style={{ display:'flex',alignItems:'center',gap:16 }}>
+                        <div style={{ width:48,height:48,borderRadius:'50%',background:'#e2e8f0',overflow:'hidden',flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center' }}>
+                          <User size={24} color="#94a3b8"/>
+                        </div>
+                        <div>
+                          <div style={{ fontWeight:800,fontSize:16,color:'#475569' }}>{st.name} <span style={{ fontSize: 11, background: '#fef3c7', color: '#d97706', padding: '2px 8px', borderRadius: 999, marginLeft: 8 }}>Pending Invite</span></div>
+                          <div style={{ color:'#94a3b8',fontSize:13,marginTop:4,fontWeight:500 }}>{st.email}{st.regNo&&` · Reg: ${st.regNo}`}</div>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
