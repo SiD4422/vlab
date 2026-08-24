@@ -1,6 +1,6 @@
 # V-Lab — Sensors Modeling & Simulation Lab
 
-V-Lab is a virtual laboratory platform for Electrical & Electronics Engineering students at State University. It provides interactive simulations, AI-powered viva evaluation, and automated lab report generation.
+V-Lab is a virtual laboratory platform for Electrical & Electronics Engineering students at SRM University. It provides interactive simulations, AI-powered viva evaluation, and automated lab report generation.
 
 ## Platform
 
@@ -43,4 +43,4 @@ V-Lab provides interactive simulations for the following experiments:
 
 ## Institution
 
-State University, Department of Electrical & Electronics Engineering.
+SRM University, Department of Electrical & Electronics Engineering.

@@ -100,15 +100,15 @@
   .a-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid rgba(30,41,59,0.5);}
   .a-row:last-child{border-bottom:none;}
   .a-key{font-family:var(--mono);font-size:11px;color:#64748b;}
-  .a-val{font-family:var(--mono);font-size:12px;font-weight:700;color:#2dd4bf;}
+  .a-val{font-family:var(--mono);font-size:13px;font-weight:800;color:#0ff;text-shadow:0 0 5px #0ff, 0 0 15px #0ff;}
   .a-val.warn{color:#f59e0b;}
   .a-val.ok{color:#34d399;}
   .a-val.na{color:#475569;}
-  .a-comp-card{background:#1e293b;border-radius:8px;padding:10px 12px;margin-bottom:8px;}
-  .a-comp-name{font-family:var(--mono);font-size:11px;font-weight:700;color:#94a3b8;margin-bottom:6px;}
-  .a-comp-row{display:flex;justify-content:space-between;margin-bottom:2px;}
-  .a-comp-key{font-family:var(--mono);font-size:10px;color:#475569;}
-  .a-comp-val{font-family:var(--mono);font-size:10px;font-weight:600;color:#7dd3fc;}
+  .a-comp-card{background:#1e293b;border-radius:8px;padding:10px 12px;margin-bottom:8px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.05), 0 0 15px rgba(56,189,248,0.1);}
+  .a-comp-name{font-family:var(--mono);font-size:13px;font-weight:800;color:#fff;margin-bottom:6px;letter-spacing:0.04em;text-shadow:0 0 6px rgba(255,255,255,0.8);}
+  .a-comp-row{display:flex;justify-content:space-between;margin-bottom:3px;}
+  .a-comp-key{font-family:var(--mono);font-size:11px;color:#e2e8f0;font-weight:600;}
+  .a-comp-val{font-family:var(--mono);font-size:13px;font-weight:800;color:#0ff;text-shadow:0 0 5px #0ff, 0 0 15px #0ff, 0 0 20px #0ff;}
   .a-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;font-family:var(--mono);font-size:10px;font-weight:700;}
   .a-badge.ok{background:rgba(52,211,153,0.12);color:#34d399;border:1px solid rgba(52,211,153,0.25);}
   .a-badge.warn{background:rgba(245,158,11,0.12);color:#f59e0b;border:1px solid rgba(245,158,11,0.25);}
@@ -135,7 +135,7 @@
 <body>
 <div class="app">
   <div class="topbar">
-    <div class="brand">&#9889; CIRCUIT SANDBOX</div>
+    <div class="brand">&#9889; WHEATSTONE BRIDGE</div>
     <div class="sep"></div>
     <button id="btnRun" class="primary">&#9208; Pause</button>
     <button id="btnClear">&#128465; Clear</button>
@@ -232,7 +232,7 @@ function solveCircuit(components,wires,dt,t,history){
     if(c.type==='ground'||c.type==='switch'||c.type==='junction')return;
     const n1=root(c.id,0),n2=root(c.id,1);
     switch(c.type){
-      case 'resistor':case 'bulb':stampG(n1,n2,1/Math.max(c.value,1e-6));break;
+      case 'resistor':case 'unknown_resistor':case 'bulb':stampG(n1,n2,1/Math.max(c.value,1e-6));break;
       case 'voltmeter':stampG(n1,n2,1/10e6);break;
       case 'ammeter':stampG(n1,n2,1/0.001);break;
       case 'galvanometer':stampG(n1,n2,1/(c.value||100));break;
@@ -255,7 +255,7 @@ function solveCircuit(components,wires,dt,t,history){
     if(c.type==='switch'){readings[c.id]={on:c.on};return;}
     const n1=root(c.id,0),n2=root(c.id,1);const Vd=V(n1)-V(n2);
     switch(c.type){
-      case 'resistor':case 'bulb':{const Rv=Math.max(c.value,1e-6);const I=Vd/Rv;readings[c.id]={V:Vd,I,P:Vd*I};break;}
+      case 'resistor':case 'unknown_resistor':case 'bulb':{const Rv=Math.max(c.value,1e-6);const I=Vd/Rv;readings[c.id]={V:Vd,I,P:Vd*I};break;}
       case 'voltmeter':readings[c.id]={V:Vd};break;
       case 'ammeter':readings[c.id]={I:Vd/0.001};break;
       case 'galvanometer':readings[c.id]={I:Vd/(c.value||100),V:Vd};break;
@@ -285,6 +285,7 @@ function gaussSolve(Ain,zin){
 const GRID=40;
 const COMP_TYPES={
   resistor:{label:'Resistor',unit:'&#937;',def:100,terms:2},
+  unknown_resistor:{label:'Unknown Resistor (Rx)',unit:'&#937;',def:0,terms:2},
   bulb:{label:'Bulb',unit:'&#937;',def:20,terms:2},
   capacitor:{label:'Capacitor',unit:'&#181;F',def:100,terms:2},
   inductor:{label:'Inductor',unit:'mH',def:100,terms:2},
@@ -298,7 +299,7 @@ const COMP_TYPES={
   junction:{label:'Junction Node',unit:'',def:null,terms:1},
 };
 // Plain unit strings for JS logic
-const UNITS={resistor:'Ohm',bulb:'Ohm',capacitor:'uF',inductor:'mH',battery:'V',acsource:'V',galvanometer:'Ohm'};
+const UNITS={resistor:'Ohm',unknown_resistor:'Ohm',bulb:'Ohm',capacitor:'uF',inductor:'mH',battery:'V',acsource:'V',galvanometer:'Ohm'};
 
 function localTerminals(type){if(type==='ground')return[{dx:0,dy:-28}];if(type==='junction')return[{dx:0,dy:0}];return[{dx:-40,dy:0},{dx:40,dy:0}];}
 function rotatePt(dx,dy,deg){const rad=deg*Math.PI/180;return{x:dx*Math.cos(rad)-dy*Math.sin(rad),y:dx*Math.sin(rad)+dy*Math.cos(rad)};}
@@ -307,6 +308,7 @@ function absTerminal(c,idx){const lt=localTerminals(c.type)[idx];const r=rotateP
 function iconInner(c){
   switch(c.type){
     case 'resistor':return`<path class="lead" d="M-40,0 L-22,0"/><path class="lead" d="M22,0 L40,0"/><path class="icon-line" d="M-22,0 L-14,0 L-10,-9 L-2,9 L6,-9 L14,9 L18,0 L22,0"/>`;
+    case 'unknown_resistor':return`<path class="lead" d="M-40,0 L-22,0"/><path class="lead" d="M22,0 L40,0"/><path class="icon-line" stroke="#f59e0b" d="M-22,0 L-14,0 L-10,-9 L-2,9 L6,-9 L14,9 L18,0 L22,0"/><text x="0" y="-14" fill="#f59e0b" font-family="IBM Plex Mono" font-size="12" font-weight="700" text-anchor="middle">Rx</text>`;
     case 'bulb':{const p=Math.min(1,(c._P||0)/2);return`<path class="lead" d="M-40,0 L-16,0"/><path class="lead" d="M16,0 L40,0"/><circle cx="0" cy="0" r="16" fill="rgba(245,165,36,${0.12+0.7*p})" stroke="#f5a524" stroke-width="2"/><path class="icon-line" stroke="#f5a524" d="M-9,-9 L9,9 M9,-9 L-9,9"/>`;}
     case 'capacitor':return`<path class="lead" d="M-40,0 L-6,0"/><path class="lead" d="M6,0 L40,0"/><path class="icon-line" d="M-6,-14 L-6,14 M6,-14 L6,14"/>`;
     case 'inductor':return`<path class="lead" d="M-40,0 L-24,0"/><path class="lead" d="M24,0 L40,0"/><path class="icon-line" d="M-24,0 Q-16,-16 -8,0 Q0,-16 8,0 Q16,-16 24,0"/>`;
@@ -338,7 +340,16 @@ Object.defineProperty(window,'_sbComponents',{get:()=>components});
 Object.defineProperty(window,'_sbCompTypes',{get:()=>COMP_TYPES});
 Object.defineProperty(window,'_sbSimTime',{get:()=>simTime});
 
-function addComponent(type,x,y){const def=COMP_TYPES[type];const c={id:uid(),type,x,y,rotation:0,value:def.def};if(type==='switch')c.on=true;if(def.extra)c[def.extra.key]=def.extra.def;components.push(c);return c;}
+function addComponent(type,x,y){
+  const def=COMP_TYPES[type];
+  let initVal = def.def;
+  if (type === 'unknown_resistor') initVal = Math.floor(Math.random() * 900) + 100; // Random value between 100 and 999
+  const c={id:uid(),type,x,y,rotation:0,value:initVal};
+  if(type==='switch')c.on=true;
+  if(def.extra)c[def.extra.key]=def.extra.def;
+  components.push(c);
+  return c;
+}
 function removeComponent(id){components=components.filter(c=>c.id!==id);wires=wires.filter(w=>w.a.compId!==id&&w.b.compId!==id);delete simHistory[id];}
 function addWire(a,b){if(a.compId===b.compId&&a.t===b.t)return;wires.push({id:'w'+uid(),a,b});}
 
@@ -357,7 +368,7 @@ function render(){
     const terms=localTerminals(c.type);
     let termHtml=terms.map((lt,idx)=>`<circle class="terminal" data-role="terminal" data-comp="${c.id}" data-t="${idx}" cx="${lt.dx}" cy="${lt.dy}" r="6"/>`).join('');
     const isSel=selected&&selected.kind==='comp'&&selected.id===c.id;
-    const valLabel=(def.def!==null)?`${fmtVal(c.value)}`:'';
+    const valLabel=(def.def!==null && c.type!=='unknown_resistor')?`${fmtVal(c.value)}`:(c.type==='unknown_resistor'?'? &#937;':'');
     html+=`<g class="comp-body ${isSel?'selected':''}" data-role="body" data-comp="${c.id}" transform="translate(${c.x},${c.y}) rotate(${c.rotation||0})">
       <rect class="body-outline" x="-46" y="-24" width="92" height="48" rx="10" fill="transparent" stroke="transparent" pointer-events="all"/>
       ${iconInner(c)}${termHtml}</g>
@@ -381,7 +392,7 @@ function render(){
 function fmtVal(v){if(v===null||v===undefined)return'';if(Math.abs(v)>=1000)return(v/1000).toFixed(v%1000===0?0:1)+'k';return(v%1===0)?String(v):v.toFixed(2);}
 
 function renderPalette(){
-  const groups=[['Sources',['battery','acsource','ground']],['Passive',['resistor','bulb','capacitor','inductor','switch','junction']],['Meters',['voltmeter','ammeter','galvanometer']]];
+  const groups=[['Sources',['battery','acsource','ground']],['Passive',['resistor','unknown_resistor','bulb','capacitor','inductor','switch','junction']],['Meters',['voltmeter','ammeter','galvanometer']]];
   let html='';
   groups.forEach(([title,types])=>{html+=`<h4>${title}</h4>`;types.forEach(t=>{html+=`<div class="pitem" data-type="${t}" id="pitem-${t}">${paletteIcon(t)}<span>${COMP_TYPES[t].label}</span></div>`;});});
   document.getElementById('palette').innerHTML=html;
@@ -395,16 +406,54 @@ function renderInspector(){
   const c=components.find(x=>x.id===selected.id);if(!c){selected=null;renderInspector();return;}
   const def=COMP_TYPES[c.type];
   let fields='';
-  if(def.def!==null&&c.type!=='switch')fields+=`<div class="field"><label>${def.label} value</label><input type="number" id="fVal" value="${c.value}" step="any"></div>`;
+  if(def.def!==null&&c.type!=='switch'&&c.type!=='unknown_resistor')fields+=`<div class="field"><label>${def.label} value</label><input type="number" id="fVal" value="${c.value}" step="any"></div>`;
+  if(c.type==='unknown_resistor') {
+    const isRev = c._revealed;
+    fields+=`
+      <div class="field">
+        <label>Value</label>
+        <div id="rxHiddenLabel" style="font-family:var(--mono);color:var(--${isRev?'accent':'warn'});font-size:14px;padding:6px 0;font-weight:bold;">${isRev?c.value+' &#937; (Revealed)':'Hidden (? &#937;)'}</div>
+      </div>
+      <div class="field" style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border);">
+        <label style="color:var(--accent);">Verify Your Calculation</label>
+        <div style="display:flex; gap:8px; margin-top:6px;">
+          <input type="number" id="fSubmitRx" placeholder="e.g. 450" step="any" style="flex:1;" ${isRev?'disabled':''}>
+          <button id="btnCheckRx" class="primary" ${isRev?'disabled':''}>Check</button>
+        </div>
+        <div id="rxResult" style="font-size:12px; font-weight:600; margin-top:8px;">${isRev?'&#9989; Verified':' '}</div>
+      </div>
+    `;
+  }
   if(def.extra)fields+=`<div class="field"><label>${def.extra.label} (${def.extra.unit})</label><input type="number" id="fExtra" value="${c[def.extra.key]}" step="any"></div>`;
   let switchBtn=c.type==='switch'?`<button id="btnToggleSw" style="width:100%;margin-bottom:10px;">${c.on?'ON &#8212; click to open':'OFF &#8212; click to close'}</button>`:'';
-  const readoutDefs={resistor:['V','I','P'],bulb:['V','I','P'],capacitor:['V','I'],inductor:['V','I'],voltmeter:['V'],ammeter:['I'],galvanometer:['I','V'],battery:['V','I'],acsource:['V','I'],ground:[],switch:[]};
+  const readoutDefs={resistor:['V','I','P'],unknown_resistor:['V','I','P'],bulb:['V','I','P'],capacitor:['V','I'],inductor:['V','I'],voltmeter:['V'],ammeter:['I'],galvanometer:['I','V'],battery:['V','I'],acsource:['V','I'],ground:[],switch:[]};
   const rk=readoutDefs[c.type]||[];
   const readoutHtml=rk.map(k=>`<div class="readout"><div class="k">${k==='V'?'Voltage (V)':k==='I'?'Current (A)':'Power (W)'}</div><div class="v" id="ro-${k}">--</div></div>`).join('');
   el.innerHTML=`<h4>Inspector</h4><div class="insp-title">${def.label}</div><div class="insp-sub">id: ${c.id}</div>${switchBtn}${fields}${rk.length?`<div class="readout-grid">${readoutHtml}</div>`:''}<div class="insp-actions"><button id="btnRotate">&#8635; Rotate</button><button id="btnDelete">&#128465; Delete</button></div>`;
   const fVal=document.getElementById('fVal');if(fVal)fVal.oninput=()=>{c.value=parseFloat(fVal.value)||0;render();};
   const fExtra=document.getElementById('fExtra');if(fExtra)fExtra.oninput=()=>{c[def.extra.key]=parseFloat(fExtra.value)||0;};
   const btnSw=document.getElementById('btnToggleSw');if(btnSw)btnSw.onclick=()=>{c.on=!c.on;render();renderInspector();};
+  
+  const btnCheckRx=document.getElementById('btnCheckRx');
+  if(btnCheckRx){
+    btnCheckRx.onclick=()=>{
+      const val=parseFloat(document.getElementById('fSubmitRx').value);
+      const resEl=document.getElementById('rxResult');
+      const hiddenLabel=document.getElementById('rxHiddenLabel');
+      if(isNaN(val)){resEl.textContent="Please enter a number."; resEl.style.color="var(--warn)"; return;}
+      const actual=c.value;
+      const diff=Math.abs(val-actual);
+      const tolerance=Math.max(actual*0.02, 1); // 2% tolerance
+      if(diff<=tolerance){
+        resEl.innerHTML="&#9989; Correct! Excellent work."; resEl.style.color="var(--accent)";
+        hiddenLabel.innerHTML=actual+" &#937; (Revealed)"; hiddenLabel.style.color="var(--accent)";
+        c._revealed=true; document.getElementById('fSubmitRx').disabled=true; btnCheckRx.disabled=true;
+      } else {
+        resEl.innerHTML="&#10060; Incorrect. Keep balancing!"; resEl.style.color="var(--danger)";
+      }
+    };
+  }
+
   document.getElementById('btnRotate').onclick=()=>{c.rotation=((c.rotation||0)+45)%360;render();};
   document.getElementById('btnDelete').onclick=()=>{removeComponent(c.id);selected=null;render();renderInspector();};
 }
@@ -498,7 +547,7 @@ function applyReadings(readings){
     const r=readings[c.id];if(!r)return;
     const txt=document.querySelector(`[data-role="reading"][data-comp="${c.id}"]`);
     if(txt){
-      if(c.type==='resistor')txt.textContent=`${fmtSI(r.I,'A')}`;
+      if(c.type==='resistor'||c.type==='unknown_resistor')txt.textContent=`${fmtSI(r.I,'A')}`;
       else if(c.type==='bulb'){txt.textContent=`${fmtSI(r.I,'A')} ${r.P.toFixed(2)}W`;c._P=r.P;}
       else if(c.type==='capacitor'||c.type==='inductor')txt.textContent=`${r.V.toFixed(2)}V ${fmtSI(r.I,'A')}`;
       else if(c.type==='voltmeter')txt.textContent=`${r.V.toFixed(3)} V`;

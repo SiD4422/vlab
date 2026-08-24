@@ -121,11 +121,9 @@ export default function StudentApp() {
               <Menu size={28} />
             </button>
             <button onClick={() => setView("home")} aria-label="Go to home" style={{ display: "flex", alignItems: "center", gap: 14, background: "none", border: "none", cursor: "pointer", textAlign: "left", padding: 0 }}>
-            <div style={{ width: 44, height: 44, borderRadius: 8, background: C.copper, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Globe size={24} color="#fff" aria-hidden="true" />
-            </div>
+            <img src="/srm-logo.png" alt="SRM University Logo" style={{ width: 56, height: 56, objectFit: 'contain', background: '#fff', borderRadius: '50%', padding: '4px', border: `2px solid ${C.copper}` }} />
             <div>
-              <div style={{ color: "#fff", fontWeight: 800, fontSize: 18, letterSpacing: 0.2 }}>State University</div>
+              <div style={{ color: "#fff", fontWeight: 800, fontSize: 18, letterSpacing: 0.2 }}>SRM University</div>
               <div style={{ color: "#c3c9d6", fontSize: 12, fontWeight: 600 }}>Dept. of Electrical Engineering</div>
             </div>
           </button>
@@ -204,11 +202,9 @@ export default function StudentApp() {
           {/* Branding & Contact */}
           <div style={{ flex: "1 1 300px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-              <div style={{ width: 36, height: 36, borderRadius: 8, background: C.copper, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Globe size={18} color="#fff" />
-              </div>
+              <img src="/srm-logo.png" alt="SRM University Logo" style={{ width: 48, height: 48, objectFit: 'contain', background: '#fff', borderRadius: '50%', padding: '4px' }} />
               <div>
-                <div style={{ color: "#fff", fontWeight: 800, fontSize: 16 }}>State University</div>
+                <div style={{ color: "#fff", fontWeight: 800, fontSize: 16 }}>SRM University</div>
               </div>
             </div>
             <p style={{ fontSize: 14, lineHeight: 1.6, marginBottom: 24, maxWidth: 280 }}>
@@ -230,7 +226,7 @@ export default function StudentApp() {
 
         {/* Copyright */}
         <div style={{ borderTop: `1px solid ${C.border}`, padding: "20px 40px", textAlign: "center", fontSize: 13, color: "#8891a3" }}>
-          © {new Date().getFullYear()} State University, Department of Electrical &amp; Electronics Engineering. All rights reserved.
+          © {new Date().getFullYear()} SRM University, Department of Electrical &amp; Electronics Engineering. All rights reserved.
         </div>
       </div>
 
