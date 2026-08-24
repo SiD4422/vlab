@@ -121,8 +121,8 @@ export default function StudentApp() {
               <Menu size={28} />
             </button>
             <button onClick={() => setView("home")} aria-label="Go to home" style={{ display: "flex", alignItems: "center", gap: 14, background: "none", border: "none", cursor: "pointer", textAlign: "left", padding: 0 }}>
-            <div style={{ width: 140, height: 44, overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
-              <img src="/srm-logo.webp" alt="SRM Logo" style={{ position: 'absolute', top: -4, left: 0, width: 140, height: 'auto', display: 'block' }} />
+            <div style={{ width: 130, height: 44, overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
+              <img src="/srm-logo.webp" alt="SRM Logo" style={{ position: 'absolute', top: '50%', left: 0, width: 130, height: 'auto', transform: 'translateY(-60%)' }} />
             </div>
             <div>
               <div style={{ color: "#fff", fontWeight: 800, fontSize: 18, letterSpacing: 0.2 }}>SRM University</div>
@@ -204,8 +204,8 @@ export default function StudentApp() {
           {/* Branding & Contact */}
           <div style={{ flex: "1 1 300px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-              <div style={{ width: 130, height: 40, overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
-                <img src="/srm-logo.webp" alt="SRM Logo" style={{ position: 'absolute', top: -4, left: 0, width: 130, height: 'auto', display: 'block' }} />
+              <div style={{ width: 120, height: 40, overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
+                <img src="/srm-logo.webp" alt="SRM Logo" style={{ position: 'absolute', top: '50%', left: 0, width: 120, height: 'auto', transform: 'translateY(-60%)' }} />
               </div>
               <div>
                 <div style={{ color: "#fff", fontWeight: 800, fontSize: 16 }}>SRM University</div>
