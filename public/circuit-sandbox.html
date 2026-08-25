@@ -459,10 +459,19 @@ function renderInspector(){
 }
 
 // svgPoint accounting for zoom/pan
-function svgPoint(evt){const rect=svg.getBoundingClientRect();return{x:(evt.clientX-rect.left-panX)/zoom,y:(evt.clientY-rect.top-panY)/zoom};}
+function svgPoint(evt){
+  const rect=svg.getBoundingClientRect();
+  return{x:(evt.clientX-rect.left-panX)/zoom,y:(evt.clientY-rect.top-panY)/zoom};
+}
 function snap(v){return Math.round(v/GRID)*GRID;}
 
+svg.style.touchAction = 'none'; // Prevent browser scrolling while dragging on mobile
+
 svg.addEventListener('pointerdown',(e)=>{
+  // Only handle primary pointer (prevents multi-touch bugs on some devices)
+  if (!e.isPrimary && e.pointerType === 'touch') return;
+  svg.setPointerCapture(e.pointerId);
+
   const pt=svgPoint(e);const target=e.target;
   if(drawingWire){
     if(target.dataset&&target.dataset.role==='terminal'){addWire(drawingWire.from,{compId:target.dataset.comp,t:parseInt(target.dataset.t)});}
@@ -480,12 +489,26 @@ svg.addEventListener('pointerdown',(e)=>{
   selected=null;render();renderInspector();
 });
 svg.addEventListener('pointermove',(e)=>{
+  if (!e.isPrimary && e.pointerType === 'touch') return;
   const pt=svgPoint(e);
   if(drawingWire){drawingWire.cur=pt;drawWireDraft();}
   if(!drag)return;
   if(drag.mode==='move'||drag.mode==='move-or-toggle'){const dx=pt.x-drag.startPt.x,dy=pt.y-drag.startPt.y;if(Math.abs(dx)>4||Math.abs(dy)>4)drag.moved=true;const c=components.find(x=>x.id===drag.compId);c.x=snap(drag.origin.x+dx);c.y=snap(drag.origin.y+dy);render();}
 });
-svg.addEventListener('pointerup',(e)=>{if(!drag)return;if(drag.mode==='move-or-toggle'&&!drag.moved){const c=components.find(x=>x.id===drag.compId);if(c)c.on=!c.on;render();renderInspector();}drag=null;});
+svg.addEventListener('pointerup',(e)=>{
+  if (!e.isPrimary && e.pointerType === 'touch') return;
+  svg.releasePointerCapture(e.pointerId);
+  if(!drag)return;
+  if(drag.mode==='move-or-toggle'&&!drag.moved){const c=components.find(x=>x.id===drag.compId);if(c)c.on=!c.on;render();renderInspector();}
+  drag=null;
+});
+svg.addEventListener('pointercancel',(e)=>{
+  svg.releasePointerCapture(e.pointerId);
+  drag=null;
+  drawingWire=null;
+  removeWireDraft();
+  render();
+});
 
 function drawWireDraft(){removeWireDraft();if(!drawingWire)return;const ca=components.find(c=>c.id===drawingWire.from.compId);if(!ca)return;const p1=absTerminal(ca,drawingWire.from.t);const p2=drawingWire.cur;const vp=document.getElementById('viewport-g');const d=document.createElementNS('http://www.w3.org/2000/svg','path');d.setAttribute('class','wire-draft');d.setAttribute('id','wireDraft');d.setAttribute('d',`M${p1.x},${p1.y} L${p2.x},${p2.y}`);vp.appendChild(d);}
 function removeWireDraft(){const d=document.getElementById('wireDraft');if(d)d.remove();}
