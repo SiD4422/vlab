@@ -58,6 +58,38 @@ export function AuthProvider({ children }) {
                 const classData = { id: classSnap.docs[0].id, ...classSnap.docs[0].data() };
                 setEnrolledClass(classData);
                 localStorage.setItem('vlab_class', JSON.stringify(classData));
+              } else if (firebaseUser.email) {
+                // Auto-enroll via CSV Bulk Upload (pendingEmails)
+                const pendingQ = query(collection(db, 'classes'), where('pendingEmails', 'array-contains', firebaseUser.email.toLowerCase()));
+                const pendingSnap = await getDocs(pendingQ);
+                
+                if (!pendingSnap.empty) {
+                  const targetClassDoc = pendingSnap.docs[0];
+                  const targetClass = targetClassDoc.data();
+                  
+                  // Add user to studentUids and remove from pendingEmails
+                  const updatedUids = [...(targetClass.studentUids || []), firebaseUser.uid];
+                  const updatedPending = (targetClass.pendingEmails || []).filter(e => e !== firebaseUser.email.toLowerCase());
+                  
+                  // Also update visual roster status
+                  const updatedRoster = (targetClass.roster || []).map(r => 
+                    r.email.toLowerCase() === firebaseUser.email.toLowerCase() 
+                      ? { ...r, status: 'Joined' } 
+                      : r
+                  );
+
+                  // Using dynamic import of updateDoc to avoid needing to mess with top-level imports if it wasn't exported here
+                  const { updateDoc } = await import('firebase/firestore');
+                  await updateDoc(targetClassDoc.ref, {
+                    studentUids: updatedUids,
+                    pendingEmails: updatedPending,
+                    roster: updatedRoster
+                  });
+
+                  const classData = { id: targetClassDoc.id, ...targetClass, studentUids: updatedUids };
+                  setEnrolledClass(classData);
+                  localStorage.setItem('vlab_class', JSON.stringify(classData));
+                }
               }
             } catch (e) {
               console.error('Error fetching enrolled class:', e);

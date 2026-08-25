@@ -710,8 +710,18 @@ export default function TeacherDashboard({ user, onLogout, onUpdate }) {
                       // Save to class doc
                       const classRef = doc(db, 'classes', managingClass.id);
                       const updatedRoster = [...(managingClass.roster || []), ...newRoster];
-                      await updateDoc(classRef, { roster: updatedRoster });
-                      setManagingClass({ ...managingClass, roster: updatedRoster });
+                      const newEmails = newRoster.map(s => s.email.toLowerCase());
+                      const updatedPendingEmails = [...(managingClass.pendingEmails || []), ...newEmails];
+                      
+                      await updateDoc(classRef, { 
+                        roster: updatedRoster,
+                        pendingEmails: updatedPendingEmails 
+                      });
+                      setManagingClass({ 
+                        ...managingClass, 
+                        roster: updatedRoster,
+                        pendingEmails: updatedPendingEmails
+                      });
                       alert(`Successfully added ${newRoster.length} students to the pending roster.`);
                     };
                     reader.readAsText(file);
