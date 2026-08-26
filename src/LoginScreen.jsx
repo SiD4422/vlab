@@ -105,7 +105,7 @@ export default function LoginScreen() {
     <div style={{ display: 'flex', height: '100vh', width: '100vw', fontFamily: "'Inter', sans-serif", background: '#fff' }}>
       
       {/* LEFT PANEL: Branding & Value Prop */}
-      <div style={{ 
+      <div className="animate-left-panel" style={{ 
         flex: 1.2, 
         background: '#0f172a', 
         position: 'relative', 
@@ -150,7 +150,7 @@ export default function LoginScreen() {
       </div>
 
       {/* RIGHT PANEL: Authentication Form */}
-      <div style={{ 
+      <div className="animate-right-panel" style={{ 
         flex: 1, 
         background: '#ffffff', 
         display: 'flex', 
@@ -161,7 +161,7 @@ export default function LoginScreen() {
       }}>
         <div style={{ width: '100%', maxWidth: 400 }}>
           
-          <div style={{ marginBottom: 40 }}>
+          <div className="animate-fade-up-1" style={{ marginBottom: 40 }}>
             <h2 style={{ fontSize: 32, fontWeight: 800, color: '#0f172a', margin: '0 0 8px', letterSpacing: '-0.02em' }}>
               {isSignUp ? "Create an account" : "Welcome back"}
             </h2>
@@ -171,7 +171,7 @@ export default function LoginScreen() {
           </div>
           
           {isSignUp && (
-            <div style={{ display: 'flex', background: '#f8fafc', padding: 4, borderRadius: 10, marginBottom: 28, border: '1px solid #e2e8f0' }}>
+            <div className="animate-fade-up-1" style={{ display: 'flex', background: '#f8fafc', padding: 4, borderRadius: 10, marginBottom: 28, border: '1px solid #e2e8f0' }}>
               <button 
                 type="button"
                 onClick={() => setRole('student')}
@@ -202,13 +202,13 @@ export default function LoginScreen() {
           )}
 
           {error && (
-            <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', padding: '12px 16px', borderRadius: 8, fontSize: 14, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8, fontWeight: 500 }}>
+            <div className="animate-fade-up-1" style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', padding: '12px 16px', borderRadius: 8, fontSize: 14, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8, fontWeight: 500 }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
               {error}
             </div>
           )}
         
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 24 }}>
+          <div className="animate-fade-up-2" style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 24 }}>
             {isSignUp && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div style={{ fontSize: 12, fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid #e2e8f0', paddingBottom: 8, marginBottom: 4 }}>
@@ -270,7 +270,7 @@ export default function LoginScreen() {
             </div>
           </div>
           
-          <div style={{ marginTop: 40, paddingTop: 24, borderTop: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div className="animate-fade-up-3" style={{ marginTop: 40, paddingTop: 24, borderTop: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column', gap: 12 }}>
             <button 
               type="button" 
               onClick={() => navigate('/pricing')}
