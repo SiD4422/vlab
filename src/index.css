@@ -162,6 +162,19 @@ code {
     
     div { margin-left: 0 !important; }
     
+    .experiment-root, .print-wrapper, .premium-panel {
+      padding: 0 !important;
+      margin: 0 !important;
+      max-width: 100% !important;
+      box-shadow: none !important;
+      background: #fff !important;
+    }
+
+    /* Hide floating widgets (chat bubble) */
+    [style*="position: fixed"], [style*="position:fixed"] {
+      display: none !important;
+    }
+
     .print-report-container {
       display: block !important;
       width: 100% !important;

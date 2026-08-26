@@ -147,7 +147,7 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
   };
 
   return (
-    <div style={{ background: 'var(--canvas)', minHeight: '100vh' }}>
+    <div className="experiment-root" style={{ background: 'var(--canvas)', minHeight: '100vh' }}>
       <Toast toasts={toasts} />
 
       {/* Breadcrumb bar */}
