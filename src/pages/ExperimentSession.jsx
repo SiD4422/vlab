@@ -168,7 +168,7 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
         </button>
       </div>
 
-      <div style={{ display: 'flex', gap: 40, padding: '40px 60px 80px', alignItems: 'flex-start', maxWidth: 1400, margin: '0 auto' }}>
+      <div className="print-wrapper" style={{ display: 'flex', gap: 40, padding: '40px 60px 80px', alignItems: 'flex-start', maxWidth: 1400, margin: '0 auto' }}>
         {/* Sidebar tabs */}
         <div className="app-sidebar" style={{ width: sidebarOpen ? 240 : 0, overflow: 'hidden', flexShrink: 0, transition: 'width 0.15s', position: 'sticky', top: 116 }} id="tour-tabs">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -198,11 +198,11 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
 
         {/* Main content panel */}
         <div className="premium-panel" style={{ flex: 1, minWidth: 0, padding: '56px 64px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+          <div className="no-print" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
             <span className="status-badge pending" style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', padding: '4px 10px', borderRadius: 6 }}>{exp.tag}</span>
             <span className="text-muted" style={{ fontSize: 13, fontWeight: 600 }}>Required Module</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', margin: '0 0 32px' }}>
+          <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', margin: '0 0 32px' }}>
             <h2 style={{ fontSize: 36, fontWeight: 800, color: 'var(--ink)', margin: 0, letterSpacing: -0.5 }}>{exp.title}</h2>
             {tab === 'simulation' && exp.id !== 'strain-gauge' && (
               <button onClick={startTour} className="manage-btn" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', fontSize: 14 }}>

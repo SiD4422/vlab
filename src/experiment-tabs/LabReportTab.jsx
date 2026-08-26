@@ -172,7 +172,7 @@ Do NOT use conversational filler like "Here is the conclusion". Return ONLY the 
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingBottom: 24, marginBottom: 32 }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#dcfce7', color: '#166534', padding: '12px 20px', borderRadius: 12, minWidth: 120 }}>
-          <div style={{ fontSize: 18, fontWeight: 700 }}>DC-02</div>
+          <div style={{ fontSize: 18, fontWeight: 700 }}>{exp.tag || 'DC-01'}</div>
           <div style={{ fontSize: 12, opacity: 0.8, marginTop: 4 }}>Required Module</div>
         </div>
         <div style={{ textAlign: 'center', flex: 1, padding: '0 20px' }}>
