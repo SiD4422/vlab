@@ -142,20 +142,19 @@ code {
 
   /* --- Lab Report Print Styles --- */
   @media print {
+    @page { margin: 15mm; size: A4; }
+    
     body {
       background: #fff !important;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
+      font-size: 11pt;
+      line-height: 1.5;
+      color: #000 !important;
     }
     
     .no-print { display: none !important; }
-    
     .app-sidebar { display: none !important; }
-    
-    /* In print, content should take full width without the 280px sidebar offset */
-    div {
-        margin-left: 0 !important;
-    }
     
     .print-report-container {
       display: block !important;
@@ -166,27 +165,74 @@ code {
       border: none !important;
     }
 
-    .print-report-container img {
-      max-width: 100% !important;
-      height: auto !important;
+    /* Professional Section Formatting */
+    .report-accordion {
+      page-break-inside: avoid;
+      border: none !important;
+      background: transparent !important;
+      margin-bottom: 24px !important;
+      border-radius: 0 !important;
     }
 
-    .report-accordion, table, tr, .snapshot-card {
-      page-break-inside: avoid;
+    .print-only { 
+      display: flex !important; 
+      border-bottom: 2px solid #000 !important;
+      padding: 0 0 8px 0 !important;
+      margin-bottom: 12px !important;
+      border-radius: 0 !important;
+    }
+
+    .print-only span {
+      font-size: 14pt !important;
+      font-weight: bold !important;
+      color: #000 !important;
+    }
+
+    .print-only div {
+      background: transparent !important;
+      border: 1px solid #000 !important;
+      color: #000 !important;
     }
     
     .print-force-open { 
       display: block !important; 
-      border-top: 1px solid var(--border) !important; 
-    }
-    
-    .print-only { 
-      display: flex !important; 
-    }
-    
-    /* Ensure inputs display their values like normal text */
-    input[type="text"] {
-      border: none !important;
+      border-top: none !important;
       padding: 0 !important;
     }
+    
+    /* Ensure inputs and tables display correctly */
+    input[type="text"] {
+      border: none !important;
+      border-bottom: 1px solid #000 !important;
+      border-radius: 0 !important;
+      padding: 4px 0 !important;
+      font-weight: bold;
+      color: #000 !important;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    th, td {
+      border: 1px solid #000 !important;
+      color: #000 !important;
+      padding: 8px !important;
+    }
+
+    th {
+      background-color: #f3f4f6 !important;
+      font-weight: bold !important;
+    }
+
+    img, svg {
+      max-width: 100% !important;
+      height: auto !important;
+      page-break-inside: avoid;
+      border: 1px solid #ddd !important;
+    }
+
+    h1, h2, h4 { color: #000 !important; }
   }
