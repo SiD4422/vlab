@@ -678,10 +678,7 @@ export default function TeacherDashboard({ user, onLogout, onUpdate }) {
                           </div>
                         )}
                       </div>
-                            {c.ok?<CheckCircle2 size={15}/>:<X size={15}/>} {c.label}
-                          </div>
-                        ))}
-                      </div>
+
                     </div>
                   );
                 })()}
