@@ -142,7 +142,7 @@ code {
 
   /* --- Lab Report Print Styles --- */
   @media print {
-    @page { margin: 15mm; size: A4; }
+    @page { margin: 5mm; size: A4; }
     
     body {
       background: #fff !important;
@@ -151,14 +151,21 @@ code {
       font-size: 11pt;
       line-height: 1.5;
       color: #000 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
     }
     
     .no-print { display: none !important; }
     .app-sidebar { display: none !important; }
     
+    div { margin-left: 0 !important; }
+    
     .print-report-container {
       display: block !important;
       width: 100% !important;
+      max-width: 100% !important;
       padding: 0 !important;
       margin: 0 !important;
       background: #fff !important;
@@ -167,11 +174,14 @@ code {
 
     /* Professional Section Formatting */
     .report-accordion {
-      page-break-inside: avoid;
+      page-break-inside: avoid !important;
+      break-inside: avoid-page !important;
       border: none !important;
       background: transparent !important;
-      margin-bottom: 24px !important;
+      margin-bottom: 30px !important;
       border-radius: 0 !important;
+      width: 100% !important;
+      display: block !important;
     }
 
     .print-only { 
