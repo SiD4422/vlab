@@ -24,6 +24,7 @@ try {
   app = initializeApp(firebaseConfig);
   authService = getAuth(app);
   googleProviderService = new GoogleAuthProvider();
+  googleProviderService.setCustomParameters({ prompt: 'select_account' });
   realtimeDb = getDatabase(app);
   
   // Force long-polling to bypass WebSocket blocks (common cause of infinite hangs)
