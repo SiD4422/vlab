@@ -105,7 +105,7 @@ export default function LabReportTab({ exp, bridgeState, setBridgeSims }) {
   };
 
   const generateAIConclusion = async () => {
-    const apiKey = localStorage.getItem('gemini_api_key');
+    const apiKey = localStorage.getItem('gemini_api_key') || import.meta.env.VITE_GEMINI_API_KEY;
     if (!apiKey) {
       showMsg('error', 'Please configure your Gemini API Key in the AI Chatbot (bottom right) first.');
       return;
@@ -117,10 +117,18 @@ export default function LabReportTab({ exp, bridgeState, setBridgeSims }) {
     setGeneratingConclusion(true);
     try {
       const readings = JSON.stringify(bridgeState.rows);
-      const prompt = `You are a helpful lab assistant. The student just finished the experiment "${exp.title}". Here are their observation table readings: ${readings}. Write a professional, concise 1-2 paragraph conclusion that summarizes these specific findings and the underlying principle. Return ONLY the conclusion text.`;
+      const prompt = `You are a strict Engineering Professor grading a lab record.
+Experiment Name: ${exp.title}
+Student's Recorded Data (JSON format): ${readings}
+
+Task: Write a highly specific, scientific "Conclusion" section for the student's lab report.
+1. Explicitly state whether the data confirms the theoretical principles of the ${exp.title}.
+2. Reference specific numbers from the student's data (e.g., "As seen in Trial 1, when X was Y...") to prove your point.
+3. Explain the physical phenomenon observed.
+Do NOT use conversational filler like "Here is the conclusion". Return ONLY the raw, professional text of the conclusion in 1-2 paragraphs.`;
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: { temperature: 0.4, maxOutputTokens: 300 } }) }
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`,
+        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: { temperature: 0.4, maxOutputTokens: 2000 } }) }
       );
       const data = await response.json();
       if (!response.ok) throw new Error(data.error?.message);
@@ -301,11 +309,35 @@ export default function LabReportTab({ exp, bridgeState, setBridgeSims }) {
 
       <AccordionSection title="8. Result" icon={Trophy} color="#14b8a6" defaultOpen={false}>
         {bridgeState?.rows?.length > 0 && bridge ? (
-          <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', padding: 16, borderRadius: 8, color: '#065f46', fontSize: 15 }}>
-            The calculated values have been recorded. Averages can be derived from the table above.
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', padding: 16, borderRadius: 8, color: '#065f46', fontSize: 15 }}>
+              The calculated values have been recorded. Averages can be derived from the table above.
+            </div>
+            
+            <div className="no-print" style={{ padding: 20, border: '1px solid var(--border)', borderRadius: 8, background: '#fff' }}>
+              <h4 style={{ margin: '0 0 12px 0', color: 'var(--ink)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Sparkles size={18} color="#8b5cf6" />
+                AI Lab Conclusion
+              </h4>
+              
+              {aiConclusion ? (
+                <div style={{ fontSize: 15, lineHeight: 1.6, color: 'var(--ink)', whiteSpace: 'pre-wrap' }}>
+                  {aiConclusion}
+                </div>
+              ) : (
+                <button 
+                  onClick={generateAIConclusion} 
+                  disabled={generatingConclusion}
+                  style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#8b5cf6', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: 8, fontWeight: 600, cursor: generatingConclusion ? 'not-allowed' : 'pointer', opacity: generatingConclusion ? 0.7 : 1 }}
+                >
+                  {generatingConclusion ? <Loader2 size={16} className="spin" /> : <Sparkles size={16} />}
+                  {generatingConclusion ? 'Analyzing physics engine data...' : 'Generate AI Conclusion'}
+                </button>
+              )}
+            </div>
           </div>
         ) : (
-          <div style={{ fontSize: 14, color: C.muted, fontStyle: 'italic', padding: '16px 0' }}>Result is pending completion of the lab trials.</div>
+          <div style={{ fontSize: 14, color: C.muted, fontStyle: 'italic', padding: '16px 0' }}>Result is pending completion of the lab trials. Build your circuit and record readings in the Simulation tab first.</div>
         )}
       </AccordionSection>
 
