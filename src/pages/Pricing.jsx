@@ -8,9 +8,11 @@ const PLANS = [
     name: 'Pilot',
     price: '₹0',
     period: '45 days',
-    tagline: 'Try before you commit',
-    color: '#94a3b8',
-    glow: 'rgba(255,255,255,0.05)',
+    tagline: 'For individuals getting started.',
+    accent: '#3b82f6', // Blue
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
+    ),
     features: [
       '1 Teacher account',
       '1 Class (up to 20 students max)',
@@ -18,19 +20,21 @@ const PLANS = [
       'Basic analytics dashboard',
       'Email support',
     ],
-    cta: 'Start Free Pilot',
-    ctaStyle: { background: 'transparent', border: '1px solid #cbd5e1', color: '#fff' },
-    note: 'No credit card. No commitment.',
+    cta: 'Get Started',
+    ctaStyle: { background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' },
+    note: 'No credit card required',
   },
   {
     id: 'pro_teacher',
     name: 'Pro Teacher',
     price: '₹4,999',
-    period: 'per semester',
-    tagline: 'For individual faculty',
-    color: '#38bdf8',
-    glow: 'rgba(56,189,248,0.2)',
+    period: '/ semester',
+    tagline: 'For growing classrooms.',
+    accent: '#8b5cf6', // Purple
     popular: true,
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+    ),
     features: [
       '1 Teacher account',
       'Unlimited classes & students',
@@ -39,18 +43,20 @@ const PLANS = [
       'AI Viva & Lab Report generation',
       'Export PDF reports for NBA/NAAC',
     ],
-    cta: 'Get Pro Teacher',
-    ctaStyle: { background: 'linear-gradient(135deg, #38bdf8, #818cf8)', border: 'none', color: '#fff', boxShadow: '0 4px 14px rgba(56,189,248,0.3)' },
+    cta: 'Start Free Trial',
+    ctaStyle: { background: 'linear-gradient(135deg, #8b5cf6, #3b82f6)', border: 'none', color: '#fff' },
     note: 'Perfect for petty cash or out-of-pocket.',
   },
   {
     id: 'department',
     name: 'Department',
     price: '₹35,000',
-    period: 'per year',
-    tagline: 'For a single department',
-    color: '#818cf8',
-    glow: 'rgba(129,140,248,0.1)',
+    period: '/ year',
+    tagline: 'For a single department.',
+    accent: '#10b981', // Green
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+    ),
     features: [
       'Up to 10 Teacher accounts',
       'Everything in Pro Teacher',
@@ -59,29 +65,31 @@ const PLANS = [
       'Priority email support',
     ],
     cta: 'Request Invoice',
-    ctaStyle: { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' },
-    note: 'Includes annual renewal reminder 30 days early.',
+    ctaStyle: { background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' },
+    note: 'Includes annual renewal reminder',
   },
   {
     id: 'campus',
     name: 'Campus',
-    price: '₹1,20,000',
-    period: 'per year',
-    tagline: 'White-label for your institution',
-    color: '#a78bfa',
-    glow: 'rgba(167,139,250,0.1)',
+    price: 'Custom',
+    period: '',
+    tagline: 'For large institutions.',
+    accent: '#f59e0b', // Amber/Yellow
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+    ),
     features: [
       'Everything in Department',
-      'Unlimited teachers across ALL departments',
-      'Your college logo & name on every screen',
-      'Custom domain (vlab.yourcollege.edu.in)',
-      'Dedicated onboarding & training session',
-      'Quarterly usage reports for NAAC/NBA',
+      'Unlimited teachers & departments',
+      'Your college logo & branding',
+      'Custom domain (vlab.college.edu)',
+      'Dedicated onboarding & training',
+      'Quarterly NAAC/NBA reports',
       'SLA-backed 99.5% uptime',
     ],
-    cta: 'Request Invoice',
-    ctaStyle: { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' },
-    note: 'GST invoice provided. PO & NEFT/RTGS accepted.',
+    cta: 'Contact Sales',
+    ctaStyle: { background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' },
+    note: 'White-label setup included',
   },
 ];
 
@@ -90,123 +98,132 @@ export default function Pricing() {
   const [selectedPlan, setSelectedPlan] = useState(null);
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0f172a', color: '#f8fafc', fontFamily: "'Inter', sans-serif", position: 'relative', overflow: 'hidden' }}>
+    <div style={{ minHeight: '100vh', background: '#08080c', color: '#f8fafc', fontFamily: "'Inter', sans-serif" }}>
       
-      {/* Background Grids & Glows */}
-      <div style={{ 
-        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-        backgroundImage: 'radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px)',
-        backgroundSize: '24px 24px',
-        opacity: 0.4, zIndex: 0
-      }} />
-      <div style={{
-        position: 'absolute', top: '-10%', left: '20%', width: '60%', height: '50%',
-        background: 'radial-gradient(ellipse at top, rgba(56,189,248,0.15) 0%, transparent 60%)',
-        filter: 'blur(40px)', zIndex: 0, pointerEvents: 'none'
-      }} />
-
-      <div style={{ position: 'relative', zIndex: 10 }}>
-        {/* Nav */}
-        <nav style={{ padding: '20px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-          <button onClick={() => navigate('/')} style={{ background: 'none', border: 'none', color: '#fff', fontWeight: 900, fontSize: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 24, height: 24, borderRadius: 6, background: 'linear-gradient(135deg, #38bdf8, #818cf8)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-            </div>
-            V-Lab Enterprise
-          </button>
-          <button onClick={() => navigate('/')} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#cbd5e1', borderRadius: 8, padding: '8px 18px', cursor: 'pointer', fontWeight: 600, fontSize: 13, transition: 'all 0.2s' }} onMouseEnter={e=>{e.target.style.background='rgba(255,255,255,0.1)'}} onMouseLeave={e=>{e.target.style.background='rgba(255,255,255,0.05)'}}>
-            ← Back to App
-          </button>
-        </nav>
-
-        {/* Hero */}
-        <div style={{ textAlign: 'center', padding: '80px 40px 60px' }}>
-          <div style={{ display: 'inline-block', background: 'rgba(56,189,248,0.1)', border: '1px solid rgba(56,189,248,0.2)', color: '#38bdf8', borderRadius: 999, padding: '6px 18px', fontSize: 12, fontWeight: 700, letterSpacing: 1, marginBottom: 24 }}>
-            TRANSPARENT PRICING
+      {/* Nav */}
+      <nav style={{ padding: '24px 48px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <button onClick={() => navigate('/')} style={{ background: 'none', border: 'none', color: '#fff', fontWeight: 700, fontSize: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 28, height: 28, borderRadius: 6, border: '1px solid rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
           </div>
-          <h1 style={{ fontSize: 'clamp(40px, 5vw, 64px)', fontWeight: 800, color: '#fff', margin: '0 0 20px', lineHeight: 1.1, letterSpacing: '-0.02em' }}>
-            Virtual Labs for Every<br />
-            <span style={{ background: 'linear-gradient(90deg, #38bdf8, #818cf8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Engineering Department</span>
-          </h1>
-          <p style={{ fontSize: 18, color: '#94a3b8', maxWidth: 600, margin: '0 auto 12px', lineHeight: 1.6 }}>
-            No complex procurement. No hidden fees. We accept Purchase Orders, NEFT & RTGS for seamless onboarding.
-          </p>
-          <p style={{ fontSize: 13, color: '#64748b' }}>GST invoice provided for all paid plans. All pricing in INR.</p>
-        </div>
+          V-Lab
+        </button>
+        <button onClick={() => navigate('/')} style={{ background: 'transparent', border: 'none', color: '#cbd5e1', cursor: 'pointer', fontWeight: 500, fontSize: 14 }}>
+          Log in
+        </button>
+      </nav>
 
-        {/* Plans */}
-        <div style={{ display: 'flex', gap: 24, maxWidth: 1200, margin: '0 auto', padding: '0 32px 80px', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'stretch' }}>
-          {PLANS.map(plan => (
+      {/* Hero */}
+      <div style={{ textAlign: 'center', padding: '60px 20px 40px' }}>
+        <div style={{ fontSize: 11, fontWeight: 800, color: '#8b5cf6', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 16 }}>
+          PRICING
+        </div>
+        <h1 style={{ fontSize: 'clamp(40px, 5vw, 56px)', fontWeight: 800, color: '#fff', margin: '0 0 16px', lineHeight: 1.1, letterSpacing: '-0.02em' }}>
+          Choose the plan that<br />
+          fits <span style={{ background: 'linear-gradient(90deg, #8b5cf6, #3b82f6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>your institution</span>
+        </h1>
+        <p style={{ fontSize: 16, color: '#94a3b8', maxWidth: 600, margin: '0 auto', lineHeight: 1.5 }}>
+          Simple, transparent pricing. Upgrade, downgrade or cancel anytime.
+        </p>
+      </div>
+
+      {/* Plans Container */}
+      <div style={{ display: 'flex', gap: 20, maxWidth: 1280, margin: '0 auto', padding: '0 24px 60px', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'stretch' }}>
+        {PLANS.map(plan => {
+          // The gradient border wrapper for the popular plan
+          const isPopular = plan.popular;
+          return (
             <div key={plan.id} style={{
-              flex: '1 1 280px', maxWidth: 320,
-              background: plan.popular ? 'linear-gradient(180deg, rgba(30,41,59,0.8) 0%, rgba(15,23,42,0.8) 100%)' : 'rgba(15,23,42,0.5)',
-              border: plan.popular ? `1px solid ${plan.color}` : '1px solid rgba(255,255,255,0.08)',
+              flex: '1 1 260px', maxWidth: 300,
+              background: isPopular ? 'linear-gradient(180deg, #8b5cf6, rgba(59,130,246,0.2))' : 'transparent',
+              padding: isPopular ? '1px' : '0', // The 1px padding creates the gradient border effect
               borderRadius: 20,
-              padding: '36px 28px',
               position: 'relative',
-              boxShadow: plan.popular ? `0 24px 48px -12px ${plan.glow}` : 'none',
-              display: 'flex', flexDirection: 'column',
-              backdropFilter: 'blur(12px)',
-              transform: plan.popular ? 'translateY(-8px)' : 'none',
+              display: 'flex', flexDirection: 'column'
             }}>
-              {plan.popular && (
-                <div style={{ position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg, #38bdf8, #818cf8)', color: '#fff', borderRadius: 999, padding: '6px 20px', fontSize: 11, fontWeight: 800, letterSpacing: 1, whiteSpace: 'nowrap', boxShadow: '0 4px 12px rgba(56,189,248,0.3)' }}>
+              
+              {isPopular && (
+                <div style={{ position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)', background: '#3b82f6', color: '#fff', borderRadius: 999, padding: '4px 12px', fontSize: 10, fontWeight: 800, letterSpacing: '0.05em', textTransform: 'uppercase', whiteSpace: 'nowrap', zIndex: 10 }}>
                   MOST POPULAR
                 </div>
               )}
-              <div style={{ marginBottom: 24 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: plan.popular ? plan.color : '#cbd5e1', letterSpacing: 1, marginBottom: 12 }}>{plan.name.toUpperCase()}</div>
-                <div style={{ fontSize: 44, fontWeight: 800, color: '#fff', lineHeight: 1, letterSpacing: '-0.02em' }}>{plan.price}</div>
-                <div style={{ fontSize: 14, color: '#64748b', marginTop: 8, fontWeight: 500 }}>{plan.period}</div>
-                <div style={{ fontSize: 14, color: '#94a3b8', marginTop: 12, lineHeight: 1.5 }}>{plan.tagline}</div>
-              </div>
 
-              <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 24, marginBottom: 32, flex: 1 }}>
-                {plan.features.map((f, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 14, fontSize: 14, color: '#cbd5e1', lineHeight: 1.5 }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={plan.popular ? plan.color : '#64748b'} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}><polyline points="20 6 9 17 4 12"></polyline></svg>
-                    {f}
+              {/* Actual Card Inside */}
+              <div style={{
+                background: '#12121a',
+                border: isPopular ? 'none' : '1px solid rgba(255,255,255,0.08)',
+                borderRadius: isPopular ? 19 : 20,
+                padding: '32px 24px',
+                flex: 1,
+                display: 'flex', flexDirection: 'column'
+              }}>
+                
+                {/* Header (Icon + Text) */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 12, background: `rgba(${hexToRgb(plan.accent)}, 0.1)`, color: plan.accent, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ width: 22, height: 22 }}>{plan.icon}</div>
                   </div>
-                ))}
+                  <div>
+                    <div style={{ fontSize: 18, fontWeight: 700, color: '#fff', marginBottom: 2 }}>{plan.name}</div>
+                    <div style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.3 }}>{plan.tagline}</div>
+                  </div>
+                </div>
+
+                {/* Price */}
+                <div style={{ marginBottom: 24, display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                  <span style={{ fontSize: 36, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', lineHeight: 1 }}>{plan.price}</span>
+                  <span style={{ fontSize: 13, color: '#94a3b8', fontWeight: 500 }}>{plan.period}</span>
+                </div>
+
+                {/* Features */}
+                <div style={{ flex: 1, marginBottom: 32 }}>
+                  {plan.features.map((f, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 16, fontSize: 13, color: '#cbd5e1' }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={plan.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                      </svg>
+                      <span style={{ marginTop: 1 }}>{f}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* CTA */}
+                <button
+                  onClick={() => setSelectedPlan(plan)}
+                  style={{ ...plan.ctaStyle, width: '100%', padding: '12px 0', borderRadius: 8, fontWeight: 600, fontSize: 14, cursor: 'pointer', marginBottom: 16, transition: 'opacity 0.2s' }}
+                  onMouseEnter={e => e.currentTarget.style.opacity = 0.8}
+                  onMouseLeave={e => e.currentTarget.style.opacity = 1}
+                >
+                  {plan.cta}
+                </button>
+                <div style={{ textAlign: 'center', fontSize: 12, color: '#64748b' }}>{plan.note}</div>
               </div>
 
-              <button
-                onClick={() => setSelectedPlan(plan)}
-                style={{ ...plan.ctaStyle, width: '100%', padding: '14px 0', borderRadius: 10, fontWeight: 700, fontSize: 15, cursor: 'pointer', marginBottom: 12, transition: 'transform 0.2s' }}
-                onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-                onMouseLeave={e => e.currentTarget.style.transform = 'none'}
-              >
-                {plan.cta}
-              </button>
-              <div style={{ textAlign: 'center', fontSize: 12, color: '#64748b' }}>{plan.note}</div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Trust signals bottom bar */}
+      <div style={{ padding: '0 24px 60px' }}>
+        <div style={{ maxWidth: 1000, margin: '0 auto', background: '#12121a', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 16, padding: '32px 40px', display: 'flex', gap: 20, justifyContent: 'space-between', flexWrap: 'wrap' }}>
+          {[
+            { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>, label: '14-day free trial', sub: 'Test all features. No risk.' },
+            { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>, label: 'Secure & Compliant', sub: 'Firebase Mumbai Data Region.' },
+            { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.5 2v6h-6M2.13 15.57a10 10 0 1 0 3.84-10.56l-3.33 2.01"></path></svg>, label: 'PO & NEFT Accepted', sub: 'No credit card required.' },
+            { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg>, label: '24/7 Support', sub: 'We\'re here to help.' },
+          ].map((t, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {t.icon}
+              </div>
+              <div>
+                <div style={{ fontWeight: 600, color: '#f8fafc', fontSize: 14, marginBottom: 2 }}>{t.label}</div>
+                <div style={{ color: '#94a3b8', fontSize: 13 }}>{t.sub}</div>
+              </div>
             </div>
           ))}
-        </div>
-
-        {/* Trust signals */}
-        <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '80px 40px', textAlign: 'center', background: 'linear-gradient(180deg, transparent, rgba(15,23,42,0.8))' }}>
-          <div style={{ maxWidth: 800, margin: '0 auto' }}>
-            <h3 style={{ color: '#fff', fontSize: 28, fontWeight: 800, marginBottom: 16, letterSpacing: '-0.02em' }}>Built for how Indian colleges actually work</h3>
-            <p style={{ color: '#94a3b8', fontSize: 16, lineHeight: 1.7, maxWidth: 650, margin: '0 auto' }}>
-              We know your accounts department doesn't use Stripe. We accept <strong style={{ color: '#fff' }}>NEFT, RTGS, and Purchase Orders</strong>.
-              After your payment clears, your Teacher invite codes are sent to your registered email automatically.
-              Need a formal quotation for your Principal? Fill the form above — you'll get a PDF in under 2 minutes.
-            </p>
-            <div style={{ display: 'flex', gap: 40, justifyContent: 'center', marginTop: 50, flexWrap: 'wrap' }}>
-              {[
-                { icon: '🔒', label: 'Data stays in India', sub: 'Firebase Asia-South1 (Mumbai)' },
-                { icon: '📄', label: 'GST Invoice', sub: 'Included with every plan' },
-                { icon: '🏦', label: 'PO & NEFT accepted', sub: 'No credit card required' },
-                { icon: '📧', label: 'Codes via email', sub: 'Auto-sent after payment' },
-              ].map((t, i) => (
-                <div key={i} style={{ textAlign: 'center', padding: '24px', background: 'rgba(255,255,255,0.02)', borderRadius: 16, border: '1px solid rgba(255,255,255,0.05)' }}>
-                  <div style={{ fontSize: 32, marginBottom: 12 }}>{t.icon}</div>
-                  <div style={{ fontWeight: 700, color: '#e2e8f0', fontSize: 15 }}>{t.label}</div>
-                  <div style={{ color: '#64748b', fontSize: 13, marginTop: 4 }}>{t.sub}</div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
 
@@ -216,4 +233,12 @@ export default function Pricing() {
       )}
     </div>
   );
+}
+
+// Helper to convert hex to rgb for rgba() usage
+function hexToRgb(hex) {
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? 
+    `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` 
+    : '255,255,255';
 }
