@@ -4,14 +4,14 @@ import { getFirestore, initializeFirestore } from "firebase/firestore";
 import { getDatabase } from "firebase/database";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCli8_QsZSqt-LURHpgjNMV91wV5nYHFec",
-  authDomain: "vlab-4946a.firebaseapp.com",
-  projectId: "vlab-4946a",
-  storageBucket: "vlab-4946a.firebasestorage.app",
-  messagingSenderId: "106401534256",
-  appId: "1:106401534256:web:5f702801a7973ad54af8f5",
-  measurementId: "G-NPBN867CS0",
-  databaseURL: "https://vlab-4946a-default-rtdb.firebaseio.com"
+  apiKey:            import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId:             import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId:     import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+  databaseURL:       import.meta.env.VITE_FIREBASE_DATABASE_URL,
 };
 
 let app;

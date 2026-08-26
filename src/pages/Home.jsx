@@ -118,11 +118,16 @@ export default function Home({ onOpen, collapsedCategories, toggleCategory, sear
           </button>
         </div>
 
-        {/* Floating sticker */}
-        <div style={{ position: "absolute", bottom: "50px", right: "50px", zIndex: 10, width: "120px", height: "120px", background: "linear-gradient(135deg, #c1712f 0%, #8f5320 100%)", borderRadius: "50%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "#fff", boxShadow: "0 8px 32px rgba(0,0,0,0.5), inset 0 4px 8px rgba(255,255,255,0.3)", transform: "rotate(-10deg)", border: "4px dashed rgba(255,255,255,0.3)", userSelect: "none" }}>
-          <Zap size={32} style={{ marginBottom: 4 }} color="#fff" />
-          <span style={{ fontSize: "14px", fontWeight: "900", letterSpacing: "1px" }}>V-LAB</span>
-          <span style={{ fontSize: "10px", fontWeight: "700", opacity: 0.9 }}>CERTIFIED</span>
+        {/* Clean stat badge — professional alternative to the spinning sticker */}
+        <div style={{ position: "absolute", bottom: "40px", right: "40px", zIndex: 10, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
+          <div style={{ background: "rgba(13,148,136,0.15)", border: "1px solid rgba(13,148,136,0.3)", borderRadius: 12, padding: "12px 20px", backdropFilter: "blur(12px)", textAlign: "right" }}>
+            <div style={{ fontSize: 28, fontWeight: 900, color: "#14b8a6", lineHeight: 1 }}>{EXPERIMENTS.length}</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.6)", letterSpacing: "0.08em", textTransform: "uppercase", marginTop: 4 }}>Lab Modules</div>
+          </div>
+          <div style={{ background: "rgba(193,113,47,0.15)", border: "1px solid rgba(193,113,47,0.3)", borderRadius: 12, padding: "12px 20px", backdropFilter: "blur(12px)", textAlign: "right" }}>
+            <div style={{ fontSize: 28, fontWeight: 900, color: "#c1712f", lineHeight: 1 }}>AI</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.6)", letterSpacing: "0.08em", textTransform: "uppercase", marginTop: 4 }}>Powered</div>
+          </div>
         </div>
       </div>
 

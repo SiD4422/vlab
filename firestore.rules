@@ -57,7 +57,18 @@ service cloud.firestore {
     // ─────────────────────────────────────────────────────────────────────────
     match /submissions/{submissionId} {
       allow read: if request.auth != null && sameOrg(resource.data);
-      allow create, update: if request.auth != null && sameOrg(request.resource.data);
+      // Students can only create/update their OWN submissions — prevents grade overwriting
+      allow create: if request.auth != null
+        && request.auth.uid == request.resource.data.studentUid
+        && sameOrg(request.resource.data);
+      allow update: if request.auth != null
+        && (
+          // Student updating their own un-graded submission
+          (request.auth.uid == resource.data.studentUid && resource.data.teacherScore == null)
+          ||
+          // Teacher grading a submission in their org
+          (callerDoc().role == 'teacher' && sameOrg(resource.data))
+        );
     }
 
     // ─────────────────────────────────────────────────────────────────────────

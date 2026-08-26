@@ -142,7 +142,7 @@ function generateInvoicePDF(data, plan) {
   // Payment instructions
   y += 4;
   pdf.setFillColor(248, 250, 252);
-  pdf.rect(margin, y, W - 2 * margin, numericAmount > 0 ? 40 : 18, 'F');
+  pdf.rect(margin, y, W - 2 * margin, numericAmount > 0 ? 44 : 18, 'F');
   pdf.setTextColor(100, 116, 139);
   pdf.setFontSize(8);
   pdf.setFont('helvetica', 'bold');
@@ -150,15 +150,15 @@ function generateInvoicePDF(data, plan) {
   pdf.setFont('helvetica', 'normal');
   pdf.setTextColor(51, 65, 85);
   if (numericAmount > 0) {
-    pdf.text('Bank Transfer (NEFT / RTGS):', margin + 4, y + 12);
-    pdf.text('Account Name: VLab Technologies', margin + 4, y + 18);
-    pdf.text('Account No: XXXX-XXXX-XXXX  |  IFSC: XXXXXX  |  Bank: HDFC Bank', margin + 4, y + 24);
-    pdf.text('UPI: vlab@upi  |  Reference: use your Invoice Number as payment remark', margin + 4, y + 30);
-    pdf.text('After payment, reply to this email with your UTR/transaction ID. Invite codes sent within 24 hours.', margin + 4, y + 36);
+    pdf.text('Our team will send you complete payment details (NEFT/RTGS/UPI) within 2 business hours', margin + 4, y + 12);
+    pdf.text('of receiving this invoice request.', margin + 4, y + 18);
+    pdf.text('Please email this invoice to: contact@vlab.edu.in with subject line "Payment - ' + data.invoiceNo + '"', margin + 4, y + 26);
+    pdf.text('After payment, share your UTR/transaction ID. Invite codes will be emailed within 24 hours.', margin + 4, y + 34);
+    pdf.text('We accept: NEFT · RTGS · UPI · Purchase Order (PO)', margin + 4, y + 40);
   } else {
     pdf.text('This is a free pilot. Reply to get your onboarding invite codes immediately.', margin + 4, y + 12);
   }
-  y += numericAmount > 0 ? 48 : 26;
+  y += numericAmount > 0 ? 52 : 26;
 
   // Footer
   pdf.setFillColor(11, 17, 32);
@@ -223,18 +223,18 @@ export default function InvoiceRequestModal({ plan, onClose }) {
   );
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-      <div style={{ background: '#111d2e', border: `1px solid ${plan.color}44`, borderRadius: 20, padding: 36, width: '100%', maxWidth: 480, maxHeight: '90vh', overflowY: 'auto', boxShadow: `0 0 60px ${plan.glow}` }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+      <div style={{ background: '#12121a', border: `1px solid ${plan.accent}33`, borderRadius: 20, padding: 36, width: '100%', maxWidth: 480, maxHeight: '90vh', overflowY: 'auto', boxShadow: `0 0 60px ${plan.accent}22` }}>
 
         {step === 'form' ? (
           <>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
               <div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: plan.color, letterSpacing: 1, marginBottom: 4 }}>{plan.name.toUpperCase()} PLAN</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: plan.accent, letterSpacing: 1, marginBottom: 4 }}>{plan.name.toUpperCase()} PLAN</div>
                 <div style={{ fontSize: 22, fontWeight: 800, color: '#fff' }}>{plan.price} <span style={{ fontSize: 13, fontWeight: 400, color: '#64748b' }}>{plan.period}</span></div>
                 <div style={{ fontSize: 13, color: '#64748b', marginTop: 4 }}>A PDF invoice will download instantly for your records.</div>
               </div>
-              <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#475569', cursor: 'pointer', fontSize: 22, padding: 0, lineHeight: 1 }}>✕</button>
+              <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', cursor: 'pointer', fontSize: 18, padding: '4px 10px', borderRadius: 8, lineHeight: 1, transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'} onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}>✕</button>
             </div>
 
             <form onSubmit={handleSubmit}>
@@ -260,14 +260,14 @@ export default function InvoiceRequestModal({ plan, onClose }) {
               <textarea
                 placeholder="e.g. Need demo session, custom domain required, etc."
                 value={form.message} onChange={set('message')}
-                style={{ width: '100%', boxSizing: 'border-box', background: '#0d1626', border: '1px solid #1e2d45', borderRadius: 8, padding: '10px 14px', color: '#e2e8f0', fontSize: 14, outline: 'none', minHeight: 80, resize: 'vertical', marginBottom: 12 }}
+                style={{ width: '100%', boxSizing: 'border-box', background: '#0d1626', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '10px 14px', color: '#e2e8f0', fontSize: 14, outline: 'none', minHeight: 80, resize: 'vertical', marginBottom: 12 }}
               />
 
               {error && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#ef4444', padding: '10px 14px', borderRadius: 8, fontSize: 13, marginBottom: 12 }}>{error}</div>}
 
               <button
                 type="submit" disabled={loading}
-                style={{ width: '100%', padding: '14px 0', background: plan.ctaBg, border: 'none', borderRadius: 12, color: '#fff', fontWeight: 800, fontSize: 15, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1 }}>
+                style={{ ...plan.ctaStyle, width: '100%', padding: '14px 0', borderRadius: 10, fontWeight: 700, fontSize: 15, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1, transition: 'opacity 0.2s' }}>
                 {loading ? 'Generating Invoice…' : '📄 Download Invoice PDF'}
               </button>
               <div style={{ textAlign: 'center', fontSize: 12, color: '#475569', marginTop: 10 }}>
@@ -283,18 +283,18 @@ export default function InvoiceRequestModal({ plan, onClose }) {
             <div style={{ fontSize: 14, color: '#64748b', lineHeight: 1.7, marginBottom: 24 }}>
               Your PDF invoice <strong style={{ color: '#94a3b8' }}>{invoiceNo}</strong> has been saved to your Downloads folder.
               <br /><br />
-              <strong style={{ color: '#0d9488' }}>Next steps:</strong><br />
+              <strong style={{ color: plan.accent }}>Next steps:</strong><br />
               1. Share the PDF with your Accounts / Principal for approval.<br />
-              2. Pay via NEFT/RTGS to the bank details in the invoice.<br />
-              3. Reply to our email with your UTR number.<br />
+              2. Email it to us — we'll send payment details within 2 hours.<br />
+              3. Share your UTR/transaction ID after payment.<br />
               4. Your invite codes will be emailed within <strong style={{ color: '#94a3b8' }}>24 hours</strong>.
             </div>
-            <div style={{ background: '#0d1626', border: '1px solid #1e2d45', borderRadius: 12, padding: 16, marginBottom: 24, textAlign: 'left' }}>
+            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: 16, marginBottom: 24, textAlign: 'left' }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 6 }}>CONTACT US</div>
               <div style={{ fontSize: 14, color: '#94a3b8' }}>📧 contact@vlab.edu.in</div>
-              <div style={{ fontSize: 12, color: '#475569', marginTop: 4 }}>Reference your invoice number: <span style={{ fontFamily: 'monospace', color: '#0d9488' }}>{invoiceNo}</span></div>
+              <div style={{ fontSize: 12, color: '#475569', marginTop: 4 }}>Reference your invoice number: <span style={{ fontFamily: 'monospace', color: plan.accent }}>{invoiceNo}</span></div>
             </div>
-            <button onClick={onClose} style={{ padding: '12px 32px', background: plan.ctaBg, border: 'none', borderRadius: 12, color: '#fff', fontWeight: 700, cursor: 'pointer' }}>
+            <button onClick={onClose} style={{ ...plan.ctaStyle, padding: '12px 32px', borderRadius: 10, fontWeight: 700, cursor: 'pointer' }}>
               Done
             </button>
           </div>

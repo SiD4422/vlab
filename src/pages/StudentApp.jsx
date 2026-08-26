@@ -42,7 +42,6 @@ export default function StudentApp() {
     const sessionRef = ref(rtdb, `liveSessions/${enrolledClass.id}`);
     const unsub = onValue(sessionRef, snap => {
       const data = snap.val();
-      console.log("[StudentApp] Received liveSession update:", data);
       if (data && data.active) {
         setLiveSession(data);
       } else {
@@ -228,7 +227,7 @@ export default function StudentApp() {
 
         {/* Copyright */}
         <div style={{ borderTop: `1px solid ${C.border}`, padding: "20px 40px", textAlign: "center", fontSize: 13, color: "#8891a3" }}>
-          © {new Date().getFullYear()} SRM University, Department of Electrical &amp; Electronics Engineering. All rights reserved.
+          © {new Date().getFullYear()} {orgName}{deptName ? ` — ${deptName}` : ''}. All rights reserved.
         </div>
       </div>
 
