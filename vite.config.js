@@ -8,7 +8,14 @@ const vercelApiMock = () => ({
   name: 'vercel-api-mock',
   configureServer(server) {
     server.middlewares.use(async (req, res, next) => {
-      if (req.url === '/api/chat' && req.method === 'POST') {
+      if (req.url.startsWith('/api/') && req.method === 'POST') {
+        const endpoint = req.url.replace('/api/', '').split('?')[0];
+        const handlerPath = path.resolve(process.cwd(), `api/${endpoint}.js`);
+        
+        if (!fs.existsSync(handlerPath)) {
+           return next();
+        }
+
         let body = '';
         req.on('data', chunk => { body += chunk.toString(); });
         req.on('end', async () => {
@@ -16,6 +23,7 @@ const vercelApiMock = () => ({
             // Load environment variables for local dev
             const env = loadEnv(server.config.mode, process.cwd(), '');
             process.env.OPENROUTER_API_KEY = env.VITE_OPENROUTER_API_KEY || env.OPENROUTER_API_KEY;
+            process.env.GEMINI_API_KEY = env.VITE_GEMINI_API_KEY || env.GEMINI_API_KEY;
 
             // Mock req and res for the handler
             const handlerReq = { method: req.method, body: JSON.parse(body || '{}') };
@@ -28,7 +36,6 @@ const vercelApiMock = () => ({
             };
 
             // Dynamically import the handler (using a cache-buster to allow hot-reloading the backend)
-            const handlerPath = path.resolve(process.cwd(), 'api/chat.js');
             const handler = await import(`file://${handlerPath}?update=${Date.now()}`);
             await handler.default(handlerReq, handlerRes);
           } catch (e) {

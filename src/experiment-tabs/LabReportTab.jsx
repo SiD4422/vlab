@@ -105,34 +105,27 @@ export default function LabReportTab({ exp, bridgeState, setBridgeSims }) {
   };
 
   const generateAIConclusion = async () => {
-    const apiKey = localStorage.getItem('gemini_api_key') || import.meta.env.VITE_GEMINI_API_KEY;
-    if (!apiKey) {
-      showMsg('error', 'Please configure your Gemini API Key in the AI Chatbot (bottom right) first.');
-      return;
-    }
     if (!bridgeState?.rows || bridgeState.rows.length === 0) {
       showMsg('error', 'Please add some readings to your observation table first!');
       return;
     }
+    
     setGeneratingConclusion(true);
+    
     try {
-      const readings = JSON.stringify(bridgeState.rows);
-      const prompt = `You are a strict Engineering Professor grading a lab record.
-Experiment Name: ${exp.title}
-Student's Recorded Data (JSON format): ${readings}
-
-Task: Write a highly specific, scientific "Conclusion" section for the student's lab report.
-1. Explicitly state whether the data confirms the theoretical principles of the ${exp.title}.
-2. Reference specific numbers from the student's data (e.g., "As seen in Trial 1, when X was Y...") to prove your point.
-3. Explain the physical phenomenon observed.
-Do NOT use conversational filler like "Here is the conclusion". Return ONLY the raw, professional text of the conclusion in 1-2 paragraphs.`;
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`,
-        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: { temperature: 0.4, maxOutputTokens: 2000 } }) }
-      );
+      const response = await fetch('/api/generateConclusion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          experimentTitle: exp.title,
+          readings: JSON.stringify(bridgeState.rows)
+        })
+      });
+      
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error?.message);
-      setAiConclusion(data.candidates[0].content.parts[0].text);
+      if (!response.ok) throw new Error(data.error || 'Failed to generate conclusion');
+      
+      setAiConclusion(data.conclusion);
     } catch (e) {
       console.error(e);
       showMsg('error', 'Failed to generate conclusion: ' + e.message);
