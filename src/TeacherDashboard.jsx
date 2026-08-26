@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { db } from './services/firebase';
 import { collection, query, where, getDocs, setDoc, doc, updateDoc, writeBatch, getDoc, arrayRemove } from 'firebase/firestore';
-import { User, Users, BookOpen, Plus, Loader2, CheckCircle2, X, ChevronRight, Clock, FileText, Edit3, LayoutDashboard, GraduationCap, ClipboardList, LogOut, Search, Trash2, UserPlus, Sparkles, AlertTriangle, UploadCloud } from 'lucide-react';
+import { User, Users, BookOpen, Plus, Loader2, CheckCircle2, X, ChevronRight, Clock, FileText, Edit3, LayoutDashboard, GraduationCap, ClipboardList, LogOut, Search, Trash2, UserPlus, Sparkles, AlertTriangle, UploadCloud, Trophy, BarChart2, ShieldAlert } from 'lucide-react';
 import Profile from './Profile';
 import { EXPERIMENTS } from './data/experiments';
 import { useCollege } from './contexts/CollegeContext';
@@ -200,6 +200,11 @@ export default function TeacherDashboard({ user, onLogout, onUpdate }) {
   const pending  = submissions.filter(s=>s.teacherScore==null).length;
   const filtSubs = submissions.filter(s=>!searchQ||s.studentName?.toLowerCase().includes(searchQ.toLowerCase())||s.experimentName?.toLowerCase().includes(searchQ.toLowerCase()));
   const filtCls  = classes.filter(c=>!searchQ||c.className?.toLowerCase().includes(searchQ.toLowerCase()));
+
+  const avgViva = submissions.length > 0 ? (submissions.reduce((acc, sub) => acc + (sub.vivaScore || 0), 0) / submissions.length).toFixed(1) : '-';
+  const cheatingFlags = submissions.filter(s => (s.tabSwitches || 0) > 0).length;
+  const gradedSubs = submissions.filter(s => s.teacherScore != null);
+  const avgTeacher = gradedSubs.length > 0 ? (gradedSubs.reduce((acc, sub) => acc + sub.teacherScore, 0) / gradedSubs.length).toFixed(1) : '-';
 
   return (
     <div style={{ display:'flex',height:'100vh',overflow:'hidden',fontFamily:"'Inter', 'Segoe UI', sans-serif",background:'linear-gradient(145deg, #f0f4ff 0%, #faf7ff 40%, #f0fbff 100%)' }}>
@@ -405,6 +410,72 @@ export default function TeacherDashboard({ user, onLogout, onUpdate }) {
                       </div>
                     ))}
                   </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 32, marginBottom: 40 }}>
+                    {/* Left: Analytics Bars */}
+                    <div style={{ background: '#fff', borderRadius: 24, padding: 32, boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid #f1f5f9' }}>
+                       <div style={{ display:'flex',alignItems:'center',gap:10,marginBottom:24 }}>
+                         <div style={{ width:32,height:32,borderRadius:10,background:'linear-gradient(135deg,#14b8a6,#0ea5e9)',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 8px rgba(20,184,166,0.3)' }}>
+                           <BarChart2 size={16} color="#fff" />
+                         </div>
+                         <h3 style={{ margin: 0, fontSize: 18, color: '#1e1b4b', fontWeight: 800 }}>Class Averages</h3>
+                       </div>
+                       
+                       <div style={{ marginBottom: 20 }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 14, fontWeight: 700, color: '#64748b' }}>
+                             <span>AI Viva Score</span>
+                             <span style={{ color: '#10b981' }}>{avgViva} / 10</span>
+                          </div>
+                          <div style={{ height: 12, background: '#f1f5f9', borderRadius: 6, overflow: 'hidden' }}>
+                             <div style={{ height: '100%', width: `${avgViva === '-' ? 0 : (avgViva/10)*100}%`, background: 'linear-gradient(90deg, #10b981, #34d399)', borderRadius: 6 }} />
+                          </div>
+                       </div>
+                       
+                       <div style={{ marginBottom: 20 }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 14, fontWeight: 700, color: '#64748b' }}>
+                             <span>Teacher Grading</span>
+                             <span style={{ color: '#8b5cf6' }}>{avgTeacher} / 10</span>
+                          </div>
+                          <div style={{ height: 12, background: '#f1f5f9', borderRadius: 6, overflow: 'hidden' }}>
+                             <div style={{ height: '100%', width: `${avgTeacher === '-' ? 0 : (avgTeacher/10)*100}%`, background: 'linear-gradient(90deg, #6366f1, #8b5cf6)', borderRadius: 6 }} />
+                          </div>
+                       </div>
+                       
+                       <div style={{ padding: 16, background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 12, color: '#b91c1c', fontWeight: 700, fontSize: 14 }}>
+                             <ShieldAlert size={20} /> Integrity Alerts (Tab Switches)
+                          </div>
+                          <div style={{ fontSize: 24, fontWeight: 900, color: '#991b1b' }}>{cheatingFlags}</div>
+                       </div>
+                    </div>
+                  
+                    {/* Right: Leaderboard */}
+                    <div style={{ background: '#fff', borderRadius: 24, padding: 32, boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid #f1f5f9' }}>
+                       <div style={{ display:'flex',alignItems:'center',gap:10,marginBottom:24 }}>
+                         <div style={{ width:32,height:32,borderRadius:10,background:'linear-gradient(135deg,#f59e0b,#fcd34d)',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 8px rgba(245,158,11,0.3)' }}>
+                           <Trophy size={16} color="#fff" />
+                         </div>
+                         <h3 style={{ margin: 0, fontSize: 18, color: '#1e1b4b', fontWeight: 800 }}>Top Performers</h3>
+                       </div>
+                       
+                       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                          {[...submissions]
+                            .sort((a,b) => ((b.teacherScore||0)+(b.vivaScore||0)) - ((a.teacherScore||0)+(a.vivaScore||0)))
+                            .slice(0,3)
+                            .map((sub, i) => (
+                             <div key={sub.id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                <div style={{ width: 28, height: 28, borderRadius: '50%', background: i===0?'#fef3c7':i===1?'#f1f5f9':'#ffedd5', color: i===0?'#d97706':i===1?'#64748b':'#ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 12 }}>{i+1}</div>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                   <div style={{ fontSize: 14, fontWeight: 700, color: '#1e1b4b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{sub.studentName}</div>
+                                   <div style={{ fontSize: 12, color: '#64748b', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{sub.experimentName}</div>
+                                </div>
+                                <div style={{ fontSize: 14, fontWeight: 800, color: '#10b981' }}>{(sub.teacherScore||0)+(sub.vivaScore||0)}</div>
+                             </div>
+                          ))}
+                          {submissions.length === 0 && <div style={{ fontSize: 13, color: '#94a3b8', fontStyle: 'italic', textAlign: 'center', padding: '20px 0' }}>No graded submissions yet</div>}
+                       </div>
+                    </div>
+                  </div>
+
                   <div style={{ display:'flex',alignItems:'center',gap:10,marginBottom:20 }}>
                     <div style={{ width:32,height:32,borderRadius:10,background:'linear-gradient(135deg,#6366f1,#8b5cf6)',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 8px rgba(99,102,241,0.3)' }}>
                       <FileText size={16} color="#fff" />
