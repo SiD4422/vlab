@@ -102,7 +102,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <div style={{ display: 'flex', height: '100vh', width: '100vw', fontFamily: "'Inter', sans-serif", background: '#fff' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', width: '100%', fontFamily: "'Inter', sans-serif", background: '#fff' }}>
       
       {/* LEFT PANEL: Branding & Value Prop */}
       <div className="animate-left-panel" style={{ 
