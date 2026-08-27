@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   Zap, BookOpen, Link2, Target, ArrowLeft, Loader2, CheckCircle2,
-  Star, ChevronRight, Cpu, Activity, GraduationCap, Lock, Search,
+  ChevronRight, Cpu, Activity, GraduationCap, Lock, Search,
 } from 'lucide-react';
 import { C } from '../App';
 import { EXPERIMENTS } from '../data/experiments.js';
@@ -9,29 +9,6 @@ import { db } from '../services/firebase';
 import { doc, getDoc, arrayUnion, writeBatch } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 
-const RATINGS = {
-  "strain-gauge": 4.5, "lvdt": 4, "wheatstone-bridge": 4.5, "thermocouple": 3.5,
-  "rtd": 4, "thermistor": 3.5, "photodiode-ldr": 4, "piezoelectric": 3.5,
-  "hall-effect": 4, "load-cell": 4.5, "capacitive-displacement": 3.5, "op-amp": 4,
-};
-
-function StarRating({ rating, size = 15 }) {
-  return (
-    <div style={{ display: "flex", gap: 1, flexShrink: 0 }}>
-      {[0, 1, 2, 3, 4].map(i => {
-        const pct = Math.max(0, Math.min(1, rating - i)) * 100;
-        return (
-          <span key={i} style={{ position: "relative", width: size, height: size, display: "inline-block" }}>
-            <Star size={size} color={C.border} style={{ position: "absolute", top: 0, left: 0 }} />
-            <span style={{ position: "absolute", top: 0, left: 0, width: `${pct}%`, overflow: "hidden" }}>
-              <Star size={size} color={C.copper} fill={C.copper} />
-            </span>
-          </span>
-        );
-      })}
-    </div>
-  );
-}
 
 export default function Home({ onOpen, collapsedCategories, toggleCategory, searchQuery, setSearchQuery, completed }) {
   const { user, enrolledClass, setEnrolledClass } = useAuth();
@@ -290,7 +267,7 @@ export default function Home({ onOpen, collapsedCategories, toggleCategory, sear
                             )}
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", width: "100%" }}>
                               <span className={isLocked ? "status-badge pending" : "status-badge graded"} style={{ fontSize: 12 }}>{exp.tag}</span>
-                              {!isLocked && <StarRating rating={RATINGS[exp.id] ?? 4} size={14} />}
+                              {!isLocked && <span style={{ fontSize: 11, fontWeight: 700, color: '#64748b', background: 'rgba(100,116,139,0.1)', padding: '2px 8px', borderRadius: 999, letterSpacing: '0.04em' }}>SIMULATION</span>}
                               {isLocked && <Lock size={16} color="var(--muted)" />}
                             </div>
                             <div style={{ fontWeight: 800, color: 'var(--ink)', fontSize: 18, lineHeight: 1.3, marginTop: 4 }}>{exp.title}</div>
