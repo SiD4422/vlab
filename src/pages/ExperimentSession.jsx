@@ -19,6 +19,9 @@ import {
 } from 'lucide-react';
 // Lazy-load the heavy simulation components — only fetched when Simulation tab is opened
 const StrainGaugeSim = lazy(() => import('../simulations/StrainGaugeSim'));
+const ThermocoupleSim = lazy(() => import('../simulations/ThermocoupleSim'));
+const RTDSim = lazy(() => import('../simulations/RTDSim'));
+const PhotodiodeLDRSim = lazy(() => import('../simulations/PhotodiodeLDRSim'));
 const UnifiedBridgeSim = lazy(() => import('../simulations/UnifiedBridgeSim').then(m => ({ default: m.default })));
 const BridgeProcedurePanel = lazy(() => import('../simulations/UnifiedBridgeSim').then(m => ({ default: m.BridgeProcedurePanel })));
 // Lazy-load heavy experiment tab components
@@ -204,7 +207,7 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
           </div>
           <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', margin: '0 0 32px' }}>
             <h2 style={{ fontSize: 36, fontWeight: 800, color: 'var(--ink)', margin: 0, letterSpacing: -0.5 }}>{exp.title}</h2>
-            {tab === 'simulation' && exp.id !== 'strain-gauge' && (
+            {tab === 'simulation' && !['strain-gauge','thermocouple','rtd','photodiode-ldr'].includes(exp.id) && (
               <button onClick={startTour} className="manage-btn" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', fontSize: 14 }}>
                 <Sparkles size={16} /> Guide Me
               </button>
@@ -271,6 +274,12 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
                   {exp.id === 'strain-gauge' ? (
                     <Section title="Interactive Simulation"><StrainGaugeSim /></Section>
+                  ) : exp.id === 'thermocouple' ? (
+                    <Section title="Thermocouple Interactive Simulation"><ThermocoupleSim /></Section>
+                  ) : exp.id === 'rtd' ? (
+                    <Section title="RTD (PT100) Interactive Simulation"><RTDSim /></Section>
+                  ) : exp.id === 'photodiode-ldr' ? (
+                    <Section title="Photodiode / LDR Interactive Simulation"><PhotodiodeLDRSim /></Section>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
                       <Section title="Reference Diagram" id="tour-reference">
