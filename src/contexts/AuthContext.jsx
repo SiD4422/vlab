@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { auth, db } from '../services/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, collection, query, where, getDocs, arrayUnion } from 'firebase/firestore';
 
 const AuthContext = createContext(null);
 
@@ -10,7 +10,11 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('vlab_user')) || null);
   const [role, setRole] = useState(() => localStorage.getItem('vlab_role') || null);
   const [enrolledClass, setEnrolledClass] = useState(() => JSON.parse(localStorage.getItem('vlab_class')) || null);
-  
+  // Persist experiment progress across page refreshes
+  const [completedExperiments, setCompletedExperiments] = useState(
+    () => JSON.parse(localStorage.getItem('vlab_completed')) || []
+  );
+
   // If we have a cached user, we can consider auth "ready" immediately
   const [authReady, setAuthReady] = useState(() => !!localStorage.getItem('vlab_user'));
 
@@ -44,11 +48,20 @@ export function AuthProvider({ children }) {
           }
 
           const fullUser = { ...skeletonUser, role: resolvedRole, name: resolvedName, avatar: resolvedAvatar };
-          
+
           setUser(fullUser);
           setRole(resolvedRole);
           localStorage.setItem('vlab_user', JSON.stringify(fullUser));
           localStorage.setItem('vlab_role', resolvedRole);
+
+          // Fetch completed experiments from Firestore
+          try {
+            const completed = userDoc.exists() ? (userDoc.data().completedExperiments || []) : [];
+            setCompletedExperiments(completed);
+            localStorage.setItem('vlab_completed', JSON.stringify(completed));
+          } catch (e) {
+            console.error('Error fetching completedExperiments:', e);
+          }
 
           if (resolvedRole === 'student') {
             try {
@@ -104,9 +117,11 @@ export function AuthProvider({ children }) {
         setUser(null);
         setRole(null);
         setEnrolledClass(null);
+        setCompletedExperiments([]);
         localStorage.removeItem('vlab_user');
         localStorage.removeItem('vlab_role');
         localStorage.removeItem('vlab_class');
+        localStorage.removeItem('vlab_completed');
       }
 
       setAuthReady(true);
@@ -117,8 +132,25 @@ export function AuthProvider({ children }) {
 
   const logout = () => signOut(auth);
 
+  // Persists a completed experiment ID to both state, localStorage, and Firestore
+  const markExperimentComplete = async (experimentId) => {
+    if (completedExperiments.includes(experimentId)) return;
+    const updated = [...completedExperiments, experimentId];
+    setCompletedExperiments(updated);
+    localStorage.setItem('vlab_completed', JSON.stringify(updated));
+    if (user?.uid) {
+      try {
+        await updateDoc(doc(db, 'users', user.uid), {
+          completedExperiments: arrayUnion(experimentId)
+        });
+      } catch (e) {
+        console.error('Failed to persist completed experiment:', e);
+      }
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, setUser, role, authReady, enrolledClass, setEnrolledClass, logout }}>
+    <AuthContext.Provider value={{ user, setUser, role, authReady, enrolledClass, setEnrolledClass, logout, completedExperiments, markExperimentComplete }}>
       {children}
     </AuthContext.Provider>
   );

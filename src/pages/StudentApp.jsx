@@ -17,7 +17,7 @@ import { ref, onValue } from "firebase/database";
 
 export default function StudentApp() {
   const navigate = useNavigate();
-  const { user, setUser, enrolledClass, setEnrolledClass, logout } = useAuth();
+  const { user, setUser, enrolledClass, setEnrolledClass, logout, completedExperiments, markExperimentComplete } = useAuth();
   const { orgName, deptName, logoUrl } = useCollege();
   const params = new URLSearchParams(window.location.search);
   const spectatingExpId = params.get('spectate') === 'true' ? params.get('expId') : null;
@@ -32,7 +32,6 @@ export default function StudentApp() {
   const [collapsedCategories, setCollapsedCategories] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
   const [bridgeSims, setBridgeSims] = useState({});
-  const [completed, setCompleted] = useState([]);
   const [theme, setTheme] = useState(() => localStorage.getItem('vlab_theme') || 'light');
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [liveSession, setLiveSession] = useState(null);
@@ -60,9 +59,8 @@ export default function StudentApp() {
   }, [theme]);
 
   const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light');
-  const markCompleted = (id) => {
-    if(!completed.includes(id)) setCompleted([...completed, id]);
-  };
+  // markCompleted is now wired to AuthContext which persists to Firestore + localStorage
+  const markCompleted = (id) => markExperimentComplete(id);
 
   const toggleCategory = (title) => {
     setCollapsedCategories(prev => ({
@@ -173,7 +171,7 @@ export default function StudentApp() {
       )}
 
       {view === "home" ? (
-        <Home onOpen={openExperiment} unlocked={unlocked} collapsedCategories={collapsedCategories} toggleCategory={toggleCategory} searchQuery={searchQuery} setSearchQuery={setSearchQuery} completed={completed} />
+      <Home onOpen={openExperiment} unlocked={unlocked} collapsedCategories={collapsedCategories} toggleCategory={toggleCategory} searchQuery={searchQuery} setSearchQuery={setSearchQuery} completed={completedExperiments} />
       ) : view === "detail" && active ? (
         <ExperimentSession
           exp={active}
@@ -307,7 +305,7 @@ export default function StudentApp() {
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     {exps.map((exp, i) => {
                       const isLocked = false;
-                      const isCompleted = completed.includes(exp.id);
+                      const isCompleted = completedExperiments.includes(exp.id);
                       const globalIndex = EXPERIMENTS.findIndex(e => e.id === exp.id) + 1;
                       return (
                         <button
