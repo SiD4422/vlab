@@ -113,7 +113,7 @@ export default function LoginScreen() {
     <div style={{ display: 'flex', minHeight: '100vh', width: '100%', fontFamily: "'Inter', sans-serif", background: '#fff' }}>
       
       {/* LEFT PANEL: Branding & Value Prop */}
-      <div className="animate-left-panel" style={{ 
+      <div className="animate-left-panel login-left-panel" style={{ 
         flex: 1.2, 
         background: '#0f172a', 
         position: 'relative', 
@@ -158,7 +158,7 @@ export default function LoginScreen() {
       </div>
 
       {/* RIGHT PANEL: Authentication Form */}
-      <div className="animate-right-panel" style={{ 
+      <div className="animate-right-panel login-right-panel" style={{ 
         flex: 1, 
         background: '#ffffff', 
         display: 'flex', 

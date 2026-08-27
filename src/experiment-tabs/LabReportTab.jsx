@@ -2,8 +2,9 @@ import { useState } from 'react';
 import {
   Target, BookOpen, Zap, Sparkles, Activity, Calculator,
   BarChart2, Trophy, HelpCircle, CheckCircle2, XCircle,
-  Printer, Download, Loader2, User, GraduationCap, Building, IdCard,
+  Printer, Download, Loader2, User, GraduationCap, Building, IdCard, Award,
 } from 'lucide-react';
+import { generateLabCertificate } from '../components/CertificateGenerator';
 import { C } from '../App';
 import { db } from '../services/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
@@ -369,7 +370,7 @@ export default function LabReportTab({ exp, bridgeState, setBridgeSims }) {
         )}
       </AccordionSection>
 
-      <div className="no-print" style={{ display: 'flex', justifyContent: 'center', marginTop: 40 }}>
+      <div className="no-print" style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 40, flexWrap: 'wrap' }}>
         {enrolledClass && (
           <button
             onClick={submitToTeacher}
@@ -378,7 +379,34 @@ export default function LabReportTab({ exp, bridgeState, setBridgeSims }) {
             style={{ opacity: submitted ? 0.6 : 1, cursor: submitted ? 'default' : 'pointer', padding: '12px 32px', fontSize: 16, borderRadius: 999 }}
           >
             {submitting ? <Loader2 className="spin" size={16} /> : <CheckCircle2 size={16} />}
-            {submitted ? 'Report Submitted' : 'Submit Lab Report to Teacher'}
+            {submitted ? 'Report Submitted ✓' : 'Submit Lab Report to Teacher'}
+          </button>
+        )}
+
+        {/* Certificate button — appears after submission */}
+        {submitted && (
+          <button
+            onClick={() => generateLabCertificate({
+              studentName: user?.name || 'Student',
+              experimentName: exp?.title || 'Experiment',
+              vivaScore: Math.round((bridgeState?.vivaScore || 0) * 100),
+              teacherName: enrolledClass?.teacherName || 'Faculty',
+              className: enrolledClass?.className || '',
+              institutionName: enrolledClass?.institutionName || 'V-Lab Enterprise',
+            })}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 10,
+              background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+              color: '#fff', border: 'none',
+              padding: '12px 28px', borderRadius: 999,
+              fontSize: 15, fontWeight: 700, cursor: 'pointer',
+              boxShadow: '0 4px 20px rgba(245,158,11,0.4)',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(245,158,11,0.55)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(245,158,11,0.4)'; }}
+          >
+            <Award size={18} /> Download Certificate
           </button>
         )}
       </div>
