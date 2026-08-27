@@ -1944,5 +1944,280 @@ export const EXPERIMENTS = [
             "correctIndex": 1
       }
 ]
+  },
+  {
+    "id": "thermocouple",
+    "tag": "T-01",
+    "title": "Thermocouple Characteristics",
+    "aim": "To study the characteristics of a thermocouple and determine the Seebeck EMF as a function of temperature difference.",
+    "objectives": [
+      "Understand the Seebeck effect and thermoelectric EMF generation.",
+      "Measure the EMF output of J, K, T, and E type thermocouples.",
+      "Understand cold junction compensation (CJC) and its importance.",
+      "Plot EMF vs. temperature characteristics."
+    ],
+    "theory": [
+      "A thermocouple is a temperature sensor consisting of two dissimilar metal wires joined at one end (hot junction). When the hot junction is at a different temperature from the reference end (cold junction), a voltage (EMF) is generated.",
+      "This phenomenon is called the Seebeck effect, discovered by Thomas Johann Seebeck in 1821.",
+      "The EMF generated is given by: V = S × (T_hot - T_cold), where S is the Seebeck coefficient (μV/°C) and T is temperature in °C.",
+      "Different thermocouple types use different metal pairs: Type J (Iron-Constantan, S≈50.38 μV/°C), Type K (Chromel-Alumel, S≈40.44 μV/°C), Type T (Copper-Constantan, S≈40.68 μV/°C), Type E (Chromel-Constantan, S≈63.0 μV/°C).",
+      "Cold Junction Compensation (CJC) is essential because the cold junction is usually at ambient temperature, not 0°C. The instrument adds the equivalent EMF for the ambient temperature to give the correct reading.",
+      "Any error in CJC measurement adds directly to the temperature reading error: ΔV_error = S × ε_CJC."
+    ],
+    "procedure": [
+      "Open the Thermocouple Simulator in the Simulation tab.",
+      "Select thermocouple type (K is most common for general-purpose use).",
+      "Set the cold junction temperature to 25°C (room temperature).",
+      "Slowly increase the hot junction temperature from 0°C to maximum range using the slider.",
+      "Record the EMF output at every 100°C interval in the observation table.",
+      "Introduce a CJC error of +3°C and observe the shift in compensated EMF.",
+      "Plot the EMF vs. Temperature graph and verify linearity."
+    ],
+    "references": [
+      "A.K. Sawhney - A Course in Electrical and Electronic Measurements and Instrumentation",
+      "IEC 60584 - Thermocouples Standard"
+    ],
+    "pretest": [
+      {
+        "q": "The Seebeck effect states that when two dissimilar metals are joined and their junctions are at different temperatures:",
+        "options": ["A current flows only", "An EMF is generated", "Resistance changes", "No effect occurs"],
+        "answer": 1
+      },
+      {
+        "q": "Which thermocouple type has the highest Seebeck coefficient (most sensitive)?",
+        "options": ["Type J", "Type K", "Type T", "Type E"],
+        "answer": 3
+      }
+    ],
+    "posttest": [
+      {
+        "q": "Cold Junction Compensation is required because:",
+        "options": ["Hot junction burns out", "Cold junction is not always at 0°C", "Signal is too weak", "Metals corrode"],
+        "answer": 1
+      },
+      {
+        "q": "If the CJC sensor has a +2°C error, the temperature reading will be:",
+        "options": ["2°C too high", "2°C too low", "Unaffected", "Doubled"],
+        "answer": 1
+      }
+    ],
+    "viva": [
+      {
+        "id": "tc_q1",
+        "question": "What is the Seebeck effect?",
+        "options": [
+          "The cooling of a junction when current flows through it.",
+          "The generation of an EMF at the junction of two dissimilar metals when a temperature difference exists.",
+          "The change in resistance of a metal with temperature.",
+          "The absorption of heat when current flows through a resistor."
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "tc_q2",
+        "question": "Why is Cold Junction Compensation (CJC) necessary in a thermocouple measurement system?",
+        "options": [
+          "To prevent the cold junction from melting.",
+          "Because the thermocouple EMF tables are referenced to 0°C, but the cold junction is usually at ambient temperature.",
+          "To amplify the weak thermocouple signal.",
+          "To filter out electrical noise."
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "tc_q3",
+        "question": "Type K thermocouple uses which metal pair?",
+        "options": [
+          "Iron and Constantan",
+          "Copper and Constantan",
+          "Chromel and Alumel",
+          "Platinum and Rhodium"
+        ],
+        "correctIndex": 2
+      }
+    ]
+  },
+  {
+    "id": "rtd",
+    "tag": "T-02",
+    "title": "RTD (PT100) Characteristics",
+    "aim": "To study the resistance-temperature characteristics of a PT100 RTD and understand the effect of wiring configurations on measurement accuracy.",
+    "objectives": [
+      "Understand the principle of resistance temperature detectors (RTDs).",
+      "Apply the Callendar-Van Dusen equation to calculate resistance.",
+      "Compare 2-wire, 3-wire, and 4-wire measurement configurations.",
+      "Understand lead resistance errors and how to eliminate them."
+    ],
+    "theory": [
+      "An RTD (Resistance Temperature Detector) is a temperature sensor that exploits the fact that the electrical resistance of metals changes with temperature.",
+      "PT100 is the most common RTD, made of platinum with a resistance of 100 Ω at 0°C.",
+      "For temperatures above 0°C, the Callendar-Van Dusen equation applies: R(T) = R0 × (1 + A×T + B×T²), where R0=100 Ω, A=3.9083×10⁻³, B=-5.775×10⁻⁷.",
+      "For temperatures below 0°C, an additional C term applies: R(T) = R0 × (1 + A×T + B×T² + C×(T-100)×T³), where C=-4.183×10⁻¹².",
+      "2-wire configuration: Lead resistance adds directly to measured resistance, causing errors.",
+      "3-wire configuration: Cancels one lead resistance, reducing error significantly.",
+      "4-wire (Kelvin) configuration: Completely eliminates lead resistance error. Gold standard for precision."
+    ],
+    "procedure": [
+      "Open the RTD Simulator in the Simulation tab.",
+      "Set the temperature slider to 0°C and note the resistance (should be 100 Ω).",
+      "Increase temperature in steps of 100°C up to 600°C and record R(T).",
+      "Set lead resistance to 2 Ω and compare 2-wire vs 3-wire vs 4-wire readings.",
+      "Observe and record the temperature error due to lead resistance in 2-wire mode.",
+      "Plot R vs T graph and verify the non-linear (quadratic) relationship."
+    ],
+    "references": [
+      "IEC 60751 - Industrial Platinum Resistance Thermometers",
+      "Helfrick & Cooper - Modern Electronic Instrumentation"
+    ],
+    "pretest": [
+      {
+        "q": "PT100 means the RTD has a resistance of 100 Ω at:",
+        "options": ["100°C", "0°C", "-100°C", "25°C"],
+        "answer": 1
+      },
+      {
+        "q": "The main advantage of 4-wire RTD measurement over 2-wire is:",
+        "options": ["Faster response", "Elimination of lead resistance error", "Higher temperature range", "Cheaper cost"],
+        "answer": 1
+      }
+    ],
+    "posttest": [
+      {
+        "q": "The Callendar-Van Dusen equation gives R(T) for PT100. The R at 100°C is approximately:",
+        "options": ["100 Ω", "138.5 Ω", "200 Ω", "50 Ω"],
+        "answer": 1
+      },
+      {
+        "q": "In 2-wire RTD measurement with 1 Ω lead resistance per wire, the error is:",
+        "options": ["0 Ω", "1 Ω", "2 Ω", "4 Ω"],
+        "answer": 2
+      }
+    ],
+    "viva": [
+      {
+        "id": "rtd_q1",
+        "question": "Why is platinum preferred for RTDs over copper or nickel?",
+        "options": [
+          "It is the cheapest metal available.",
+          "It has a highly linear, stable, and repeatable resistance-temperature relationship over a wide range.",
+          "It has the highest Seebeck coefficient.",
+          "It changes resistance only above 500°C."
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "rtd_q2",
+        "question": "What is the key advantage of a 4-wire RTD connection over a 2-wire connection?",
+        "options": [
+          "It can measure temperatures up to 2000°C.",
+          "It completely eliminates lead wire resistance errors from the measurement.",
+          "It requires less expensive cables.",
+          "It responds faster to temperature changes."
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "rtd_q3",
+        "question": "The Callendar-Van Dusen equation is used for PT100 because the resistance-temperature relationship is:",
+        "options": [
+          "Perfectly linear over the full range.",
+          "Slightly non-linear and the equation accounts for this non-linearity accurately.",
+          "Completely random below 0°C.",
+          "Only valid above 850°C."
+        ],
+        "correctIndex": 1
+      }
+    ]
+  },
+  {
+    "id": "photodiode-ldr",
+    "tag": "OE-01",
+    "title": "Photodiode & LDR Characteristics",
+    "aim": "To study the characteristics of a photodiode (in photoconductive mode) and an LDR (light dependent resistor) as a function of light intensity.",
+    "objectives": [
+      "Understand the principle of photoelectric effect in semiconductor devices.",
+      "Measure photocurrent vs illuminance for a photodiode.",
+      "Measure resistance vs illuminance for an LDR.",
+      "Design a voltage divider circuit using an LDR."
+    ],
+    "theory": [
+      "A Photodiode is a semiconductor p-n junction device that generates a photocurrent proportional to incident light intensity when reverse-biased.",
+      "In photoconductive mode (reverse bias), the photocurrent Iph = Kph × E, where Kph is the responsivity (mA/lux) and E is the illuminance in lux.",
+      "An LDR (Light Dependent Resistor) or photoresistor uses the photoconductive effect in materials like CdS. Its resistance decreases as light intensity increases.",
+      "LDR resistance follows an empirical power law: R = K / E^γ, where K≈500,000, γ≈0.7. At 1 lux, R≈500 kΩ (dark); at 1000 lux, R≈1 kΩ (bright).",
+      "LDRs are widely used in light-activated switches. A voltage divider with an LDR produces an output voltage Vout = Vcc × Rload / (RLDR + Rload).",
+      "Response time of LDR is slow (10-100ms) compared to photodiodes (nanoseconds), making LDRs unsuitable for high-speed applications."
+    ],
+    "procedure": [
+      "Open the Photodiode/LDR Simulator in the Simulation tab.",
+      "PHOTODIODE MODE: Set light intensity from 0 to 1000 lux and record photocurrent (mA) at each step.",
+      "Observe the linear relationship between photocurrent and illuminance.",
+      "LDR MODE: Set light intensity from 1 to 1000 lux and record LDR resistance (kΩ).",
+      "Set Rload to 10 kΩ and observe Vout change with light intensity.",
+      "Compare the response characteristics of both devices."
+    ],
+    "references": [
+      "Sedra & Smith - Microelectronic Circuits",
+      "Razavi - Fundamentals of Microelectronics"
+    ],
+    "pretest": [
+      {
+        "q": "A photodiode is typically operated in:",
+        "options": ["Forward bias", "Reverse bias (photoconductive mode)", "Zero bias only", "AC mode"],
+        "answer": 1
+      },
+      {
+        "q": "As light intensity increases, the resistance of an LDR:",
+        "options": ["Increases", "Decreases", "Remains constant", "Becomes zero"],
+        "answer": 1
+      }
+    ],
+    "posttest": [
+      {
+        "q": "The photocurrent in a photodiode is proportional to:",
+        "options": ["Voltage squared", "Light intensity (illuminance)", "Temperature", "Frequency only"],
+        "answer": 1
+      },
+      {
+        "q": "In a voltage divider with LDR and fixed Rload, Vout increases when:",
+        "options": ["Light intensity decreases (LDR resistance increases)", "Light intensity increases (LDR resistance decreases)", "Vcc decreases", "Rload increases"],
+        "answer": 0
+      }
+    ],
+    "viva": [
+      {
+        "id": "ldr_q1",
+        "question": "What is the main difference between a photodiode and an LDR in terms of response speed?",
+        "options": [
+          "LDRs respond in nanoseconds while photodiodes take milliseconds.",
+          "Photodiodes respond in nanoseconds while LDRs respond in 10-100 milliseconds.",
+          "Both respond at the same speed.",
+          "Response speed depends only on the circuit resistance, not the device type."
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "ldr_q2",
+        "question": "In photoconductive mode, why is a reverse bias voltage applied to the photodiode?",
+        "options": [
+          "To increase the junction capacitance for better sensitivity.",
+          "To widen the depletion region, reducing junction capacitance and improving response speed and linearity.",
+          "To forward-bias the diode and increase current flow.",
+          "To protect the diode from high light intensity."
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "ldr_q3",
+        "question": "An LDR has a resistance of approximately 500 kΩ in darkness and 1 kΩ in bright light. This property makes it ideal for:",
+        "options": [
+          "High-frequency optical communication.",
+          "Light-activated switches, automatic street lights, and alarm systems.",
+          "Measuring very high temperatures.",
+          "Replacing thermocouples in temperature measurement."
+        ],
+        "correctIndex": 1
+      }
+    ]
   }
 ];
