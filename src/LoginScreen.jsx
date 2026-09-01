@@ -286,16 +286,6 @@ export default function LoginScreen() {
           
           <div className="animate-fade-up-3" style={{ marginTop: 40, paddingTop: 24, borderTop: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column', gap: 12 }}>
             <button 
-              type="button" 
-              onClick={() => navigate('/pricing')}
-              style={{ width: '100%', background: 'transparent', border: '1px solid #e2e8f0', color: '#475569', fontWeight: 600, borderRadius: 8, padding: '10px', cursor: 'pointer', fontSize: 13, transition: 'all 0.2s' }}
-              onMouseEnter={e => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = '#e2e8f0'; }}
-            >
-              Are you an Institution? View Pricing
-            </button>
-            
-            <button 
               type="button"
               onClick={() => navigate('/about')}
               style={{ width: '100%', background: 'transparent', border: 'none', color: '#94a3b8', fontWeight: 500, cursor: 'pointer', fontSize: 13, transition: 'color 0.2s' }}

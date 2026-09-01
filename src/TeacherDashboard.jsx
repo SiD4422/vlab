@@ -256,27 +256,6 @@ export default function TeacherDashboard({ user, onLogout, onUpdate }) {
             </div>
             
             {/* ─── Plan Upgrade Widget ─── */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#fff', borderRadius: 999, padding: '4px 6px 4px 16px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: subscriptionTier === 'pilot' ? '#f59e0b' : subscriptionTier === 'department' ? '#0d9488' : '#8b5cf6' }}>
-                <span style={{ color: '#94a3b8', fontWeight: 600, marginRight: 4 }}>Plan:</span>
-                {subscriptionTier.charAt(0).toUpperCase() + subscriptionTier.slice(1)}
-              </div>
-              {subscriptionTier === 'pilot' && (
-                <button
-                  onClick={() => navigate('/pricing')}
-                  style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'linear-gradient(135deg, #0d9488, #0891b2)', color: '#fff', border: 'none', padding: '6px 14px', borderRadius: 999, fontSize: 12, fontWeight: 800, cursor: 'pointer', boxShadow: '0 2px 6px rgba(13,148,136,0.3)', transition: 'transform 0.2s' }}
-                  onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
-                  onMouseLeave={e => e.currentTarget.style.transform = 'none'}
-                >
-                  <Sparkles size={14} /> Upgrade
-                </button>
-              )}
-            </div>
-            
-            {activeNav==='classes' && (
-              <button onClick={()=>setShowCreateForm(v=>!v)} style={{ display:'flex',alignItems:'center',gap:8,background:'linear-gradient(135deg,#6366f1 0%,#4f46e5 100%)',color:'#fff',border:'none',padding:'10px 24px',borderRadius:999,fontWeight:800,fontSize:14,cursor:'pointer',boxShadow:'0 4px 14px rgba(79,70,229,0.4), inset 0 1px 0 rgba(255,255,255,0.2)',transition:'transform 0.2s, box-shadow 0.2s',textShadow:'0 1px 2px rgba(0,0,0,0.1)' }} onMouseEnter={e=>{e.target.style.transform='translateY(-2px)'; e.target.style.boxShadow='0 6px 20px rgba(79,70,229,0.5), inset 0 1px 0 rgba(255,255,255,0.2)';}} onMouseLeave={e=>{e.target.style.transform='none'; e.target.style.boxShadow='0 4px 14px rgba(79,70,229,0.4), inset 0 1px 0 rgba(255,255,255,0.2)';}}>
-                <Plus size={18} strokeWidth={3} /> Create Class
-              </button>
             )}
             <div style={{ width:44,height:44,borderRadius:'50%',overflow:'hidden',border:'2px solid #fff',boxShadow:'0 4px 12px rgba(0,0,0,0.1)',background:'#f1f5f9',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',transition:'transform 0.2s' }} onClick={()=>setActiveNav('profile')} onMouseEnter={e=>e.target.style.transform='scale(1.08)'} onMouseLeave={e=>e.target.style.transform='none'}>
               {user.avatar?<img src={user.avatar} alt="me" style={{ width:'100%',height:'100%',objectFit:'cover' }}/>:<User size={22} color="#94a3b8" />}

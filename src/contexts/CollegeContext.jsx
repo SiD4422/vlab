@@ -14,7 +14,7 @@ import { db } from '../services/firebase';
 
 const DEFAULTS = {
   orgId: 'srm_univ',
-  orgName: 'SRM University',
+  orgName: 'SRM Institute of Science and Technology',
   deptName: 'Dept. of Electrical Engineering',
   logoUrl: '/srm-logo-final.webp',
   subscriptionTier: 'campus',

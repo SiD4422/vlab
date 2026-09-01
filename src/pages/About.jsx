@@ -336,10 +336,6 @@ export default function About() {
 
         {/* Nav links */}
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <button className="nav-link" onClick={() => navigate("/pricing")}>
-            Pricing
-          </button>
-          <div style={{ width: 1, height: 16, background: "rgba(255,255,255,0.1)", margin: "0 4px" }} />
           <button
             onClick={() => navigate("/")}
             style={{
@@ -485,10 +481,7 @@ export default function About() {
             className="vlab-fadeup vlab-fadeup-4"
             style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}
           >
-            <button className="cta-btn-primary" onClick={() => navigate("/pricing")}>
-              View Pricing
-            </button>
-            <button className="cta-btn-outline" onClick={() => navigate("/")}>
+            <button className="cta-btn-primary" onClick={() => navigate("/")}>
               Sign in to V-Lab
             </button>
           </div>
@@ -572,7 +565,7 @@ export default function About() {
               </span>
             </h2>
             <p style={{ color: B.muted, fontSize: 16, maxWidth: 520, margin: "0 auto" }}>
-              Designed from the ground up for EEE, ECE, and CSE departments across India.
+              Designed from the ground up for engineering departments across India.
             </p>
           </div>
 
@@ -740,13 +733,6 @@ export default function About() {
                 >
                   <button
                     className="cta-btn-primary"
-                    onClick={() => navigate("/pricing")}
-                    style={{ padding: "15px 36px", fontSize: 15 }}
-                  >
-                    View Pricing
-                  </button>
-                  <button
-                    className="cta-btn-outline"
                     onClick={() => navigate("/")}
                     style={{ padding: "15px 36px", fontSize: 15 }}
                   >
@@ -809,9 +795,6 @@ export default function About() {
 
         {/* Footer nav */}
         <div style={{ display: "flex", gap: 24, alignItems: "center" }}>
-          <button className="nav-link" onClick={() => navigate("/pricing")}>
-            Pricing
-          </button>
           <button className="nav-link" onClick={() => navigate("/about")}>
             About
           </button>
