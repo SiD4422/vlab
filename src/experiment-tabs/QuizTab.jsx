@@ -1,18 +1,46 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { CheckCircle2, XCircle } from 'lucide-react';
 import { C } from '../App';
 
-/**
- * QuizTab — Pre-test and Post-test multiple choice quiz.
- * Props:
- *   questions   — array of { q, options, answer } objects
- *   onComplete  — optional callback fired when the quiz is submitted
- */
+function shuffleArray(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
 export default function QuizTab({ questions, onComplete }) {
   const [picked, setPicked] = useState({});
   const [checked, setChecked] = useState(false);
 
-  if (!questions || questions.length === 0) {
+  const shuffledQuestions = useMemo(() => {
+    if (!questions) return [];
+    
+    // First, shuffle the options and update the answer index for each question
+    const processed = questions.map(q => {
+      // Create objects to track the original correct option
+      const optsWithTruth = q.options.map((opt, i) => ({
+        text: opt,
+        isCorrect: i === q.answer
+      }));
+      
+      const shuffledOpts = shuffleArray(optsWithTruth);
+      const newAnswerIndex = shuffledOpts.findIndex(o => o.isCorrect);
+      
+      return {
+        q: q.q,
+        options: shuffledOpts.map(o => o.text),
+        answer: newAnswerIndex
+      };
+    });
+    
+    // Then, shuffle the order of the questions themselves
+    return shuffleArray(processed);
+  }, [questions]);
+
+  if (!shuffledQuestions || shuffledQuestions.length === 0) {
     return (
       <div style={{ color: C.muted, fontSize: 14, padding: '24px 0' }}>
         Quiz for this experiment is being added — check back soon.
@@ -20,14 +48,14 @@ export default function QuizTab({ questions, onComplete }) {
     );
   }
 
-  const score = questions.reduce(
+  const score = shuffledQuestions.reduce(
     (s, q, i) => s + (picked[i] === q.answer ? 1 : 0),
     0
   );
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      {questions.map((q, i) => (
+      {shuffledQuestions.map((q, i) => (
         <div
           key={i}
           style={{
@@ -72,19 +100,19 @@ export default function QuizTab({ questions, onComplete }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
         <button
           onClick={() => { setChecked(true); if (onComplete) onComplete(); }}
-          disabled={Object.keys(picked).length < questions.length}
+          disabled={Object.keys(picked).length < shuffledQuestions.length}
           style={{
             background: C.copper, color: '#fff', border: 'none',
             borderRadius: 8, padding: '10px 20px',
             fontWeight: 600, fontSize: 14, cursor: 'pointer',
-            opacity: Object.keys(picked).length < questions.length ? 0.5 : 1,
+            opacity: Object.keys(picked).length < shuffledQuestions.length ? 0.5 : 1,
           }}
         >
           Check answers
         </button>
         {checked && (
           <span style={{ fontSize: 14, color: C.muted }}>
-            Score: <b style={{ color: C.ink }}>{score}/{questions.length}</b>
+            Score: <b style={{ color: C.ink }}>{score}/{shuffledQuestions.length}</b>
           </span>
         )}
         {checked && (
