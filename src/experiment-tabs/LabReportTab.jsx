@@ -231,14 +231,12 @@ export default function LabReportTab({ exp, bridgeState, setBridgeSims, onReport
         </div>
       )}
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingBottom: 24, marginBottom: 32 }}>
-        <div style={{ minWidth: 120 }}></div>
-        <div style={{ textAlign: 'center', flex: 1, padding: '0 20px' }}>
-          <h1 style={{ margin: '0 0 4px 0', fontSize: 28, fontWeight: 800, color: C.ink }}>{exp.title}</h1>
-          <h2 style={{ margin: '0 0 8px 0', fontSize: 13, fontWeight: 700, letterSpacing: '0.1em', color: '#059669' }}>LABORATORY RECORD</h2>
-          <div style={{ fontSize: 15, color: C.muted }}>Experiment: {exp.title}</div>
+      <div style={{ position: 'relative', paddingBottom: 24, marginBottom: 32, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <h1 style={{ margin: '0 0 8px 0', fontSize: 32, fontWeight: 800, color: C.ink, letterSpacing: '-0.02em' }}>{exp.title}</h1>
+          <h2 style={{ margin: 0, fontSize: 14, fontWeight: 700, letterSpacing: '0.15em', color: '#059669', textTransform: 'uppercase' }}>Laboratory Record</h2>
         </div>
-        <div className="no-print" style={{ display: 'flex', gap: 12 }}>
+        <div className="no-print" style={{ position: 'absolute', right: 0, top: 0, display: 'flex', gap: 12 }}>
           <button onClick={() => window.print()} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px', border: `1px solid ${C.border}`, borderRadius: 8, background: 'transparent', color: C.ink, fontWeight: 600, cursor: 'pointer' }}>
             <Printer size={16} /> Print
           </button>
