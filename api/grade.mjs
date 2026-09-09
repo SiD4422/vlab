@@ -194,6 +194,7 @@ export default async function handler(req, res) {
     // 5. Save back to Firestore via Admin SDK
     await submissionRef.update({
       teacherScore,
+      gradingVersion: 1,
       gradingBreakdown,
       integrityFlags,
       integrityScore,
