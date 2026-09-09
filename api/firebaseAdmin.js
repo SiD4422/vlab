@@ -1,21 +1,26 @@
-import admin from 'firebase-admin';
+import { initializeApp, cert, getApps } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
+import fs from 'fs';
+import path from 'path';
 
 // Protect against multiple initializations in serverless environments
-if (!admin.apps.length) {
+if (!getApps().length) {
   try {
     let credential;
     
     if (process.env.FIREBASE_SERVICE_ACCOUNT) {
       // Vercel Prod: Parse the JSON string from the environment variable
       const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-      credential = admin.credential.cert(serviceAccount);
+      credential = cert(serviceAccount);
     } else {
       // Local Dev Fallback: Try loading the local json file
-      const serviceAccount = require('../vlab-4946a-59fe76ca16b4.json');
-      credential = admin.credential.cert(serviceAccount);
+      const filePath = path.resolve(process.cwd(), 'vlab-4946a-firebase-adminsdk-fbsvc-bbb9c3e6a4.json');
+      const serviceAccount = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+      credential = cert(serviceAccount);
     }
 
-    admin.initializeApp({
+    initializeApp({
       credential,
     });
   } catch (error) {
@@ -23,5 +28,5 @@ if (!admin.apps.length) {
   }
 }
 
-export const db = admin.firestore();
-export const auth = admin.auth();
+export const db = getFirestore();
+export const auth = getAuth();
