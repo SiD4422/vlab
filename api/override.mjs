@@ -7,7 +7,7 @@ export default async function handler(req, res) {
 
   let db, auth;
   try {
-    const admin = getAdmin();
+    const admin = await getAdmin();
     db = admin.db;
     auth = admin.auth;
   } catch (err) {

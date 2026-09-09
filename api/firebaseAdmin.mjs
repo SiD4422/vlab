@@ -1,12 +1,14 @@
-import { initializeApp, cert, getApps } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
-import { getAuth } from 'firebase-admin/auth';
 import fs from 'fs';
 import path from 'path';
 
 let appInitialized = false;
 
-export function getAdmin() {
+export async function getAdmin() {
+  // Use dynamic imports to completely bypass Vercel's CJS transpiler bugs
+  const { initializeApp, cert, getApps } = await import('firebase-admin/app');
+  const { getFirestore } = await import('firebase-admin/firestore');
+  const { getAuth } = await import('firebase-admin/auth');
+
   if (!appInitialized && !getApps().length) {
     let credential;
     
