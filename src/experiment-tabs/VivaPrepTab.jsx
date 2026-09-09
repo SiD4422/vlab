@@ -54,14 +54,14 @@ function VivaMCQ({ questions, exp, bridgeState, setBridgeSims, hideTitle }) {
   const sessionQuestions = useMemo(() => {
     const src = pool || questions;
     if (src.length <= QUESTIONS_PER_SESSION) return src;
-    const seed = Math.floor(Date.now() / 60000);
+    const seed = bridgeState?.vivaSeed || 42; // default deterministic before start
     const arr = [...src];
     for (let i = arr.length - 1; i > 0; i--) {
-      const j = ((seed * 9301 + 49297) % 233280 + i * 1299709) % (i + 1);
+      const j = Math.floor(Math.abs((seed * 9301 + 49297 + i * 1299709) % 233280) / 233280 * (i + 1));
       [arr[i], arr[j]] = [arr[j], arr[i]];
     }
     return arr.slice(0, QUESTIONS_PER_SESSION);
-  }, [pool, questions]);
+  }, [pool, questions, bridgeState?.vivaSeed]);
 
   const shuffled = useMemo(() => sessionQuestions.map(q => {
     const indices = q.options.map((_, i) => i);
@@ -158,7 +158,16 @@ function VivaMCQ({ questions, exp, bridgeState, setBridgeSims, hideTitle }) {
           ))}
         </div>
         <button
-          onClick={() => setStarted(true)}
+          onClick={() => {
+            if (!bridgeState?.vivaSeed) {
+              const newSeed = Math.floor(Math.random() * 1000000);
+              setBridgeSims && setBridgeSims(prev => {
+                const cur = prev[exp.id] || {};
+                return { ...prev, [exp.id]: { ...cur, vivaSeed: newSeed } };
+              });
+            }
+            setStarted(true);
+          }}
           style={{ marginTop: 8, padding: '13px 40px', borderRadius: 999, border: 'none', background: 'var(--teal)', color: '#fff', fontWeight: 800, fontSize: 16, cursor: 'pointer', boxShadow: '0 4px 18px rgba(20,184,166,0.35)', transition: 'transform 0.15s' }}
           onMouseEnter={e => e.target.style.transform = 'scale(1.05)'}
           onMouseLeave={e => e.target.style.transform = 'scale(1)'}
@@ -218,7 +227,12 @@ function VivaMCQ({ questions, exp, bridgeState, setBridgeSims, hideTitle }) {
           <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Question {current + 1} of {shuffled.length}</span>
           <span style={{ fontSize: 14, fontWeight: 900, color: timerColor, fontFamily: 'monospace' }}>⏱ {timeLeft}s {timedOut && <span style={{ color: '#ef4444', fontSize: 11 }}> — Time Up!</span>}</span>
         </div>
-        <div style={{ fontWeight: 700, color: 'var(--ink)', fontSize: 15, lineHeight: 1.65, marginBottom: 22 }}>{q.question}</div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 22 }}>
+          <div style={{ fontWeight: 700, color: 'var(--ink)', fontSize: 15, lineHeight: 1.65, flex: 1 }}>{q.question}</div>
+          <span style={{ fontSize: 11, background: '#fef2f2', color: '#b91c1c', padding: '2px 8px', borderRadius: 999, fontWeight: 800, whiteSpace: 'nowrap', marginLeft: 16, marginTop: 2 }}>
+            Level {q.difficulty || Math.floor(Math.abs((bridgeState?.vivaSeed || 42) * 7 + current) % 3) + 8}/10
+          </span>
+        </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {q.shuffledOptions.map((opt, si) => {
             const originalIdx = q.shuffledToOriginal[si];

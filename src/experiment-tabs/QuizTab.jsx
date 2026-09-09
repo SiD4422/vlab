@@ -32,12 +32,17 @@ export default function QuizTab({ questions, onComplete }) {
       return {
         q: q.q,
         options: shuffledOpts.map(o => o.text),
-        answer: newAnswerIndex
+        answer: newAnswerIndex,
+        difficulty: q.difficulty || Math.floor(Math.random() * 3) + 8 // fallback 8-10
       };
     });
     
     // Then, shuffle the order of the questions themselves
-    return shuffleArray(processed);
+    const fullyShuffled = shuffleArray(processed);
+    
+    // Pick a subset of questions (e.g. 5) so students get different sets
+    const subsetSize = Math.min(5, fullyShuffled.length);
+    return fullyShuffled.slice(0, subsetSize);
   }, [questions]);
 
   if (!shuffledQuestions || shuffledQuestions.length === 0) {
@@ -64,8 +69,11 @@ export default function QuizTab({ questions, onComplete }) {
             background: C.card,
           }}
         >
-          <div style={{ fontWeight: 600, marginBottom: 10, color: C.ink }}>
-            {i + 1}. {q.q}
+          <div style={{ fontWeight: 600, marginBottom: 10, color: C.ink, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>{i + 1}. {q.q}</span>
+            <span style={{ fontSize: 11, background: '#fef2f2', color: '#b91c1c', padding: '2px 8px', borderRadius: 999, fontWeight: 800, whiteSpace: 'nowrap', marginLeft: 12 }}>
+              Level {q.difficulty}/10
+            </span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {q.options.map((opt, oi) => {
