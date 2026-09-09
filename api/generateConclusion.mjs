@@ -9,11 +9,11 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing experimentTitle or readings in request body' });
   }
 
-  // The API key is injected securely by Vercel (or our local Vite mock) from environment variables
-  const apiKey = process.env.GEMINI_API_KEY;
+  // Use OpenRouter to reuse the existing configured API key
+  const apiKey = process.env.OPENROUTER_API_KEY;
 
   if (!apiKey) {
-    return res.status(500).json({ error: 'Gemini API key is not configured on the server' });
+    return res.status(500).json({ error: 'OpenRouter API key is not configured on the server' });
   }
 
   const prompt = `You are a strict Engineering Professor grading a lab record.
@@ -27,26 +27,32 @@ Task: Write a highly specific, scientific "Conclusion" section for the student's
 Do NOT use conversational filler like "Here is the conclusion". Return ONLY the raw, professional text of the conclusion in 1-2 paragraphs.`;
 
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.4, maxOutputTokens: 2000 }
-        })
-      }
-    );
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: "openrouter/free",
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
 
-    const data = await response.json();
     if (!response.ok) {
-      throw new Error(data.error?.message || 'Failed to communicate with Gemini API');
+      const errText = await response.text();
+      console.error('OpenRouter Error:', errText);
+      return res.status(response.status).json({ error: 'AI generation failed.' });
     }
 
-    return res.status(200).json({
-      conclusion: data.candidates[0].content.parts[0].text
-    });
+    const data = await response.json();
+    const conclusion = data.choices?.[0]?.message?.content;
+    
+    if (!conclusion) {
+      return res.status(500).json({ error: 'AI returned an empty response.' });
+    }
+
+    return res.status(200).json({ conclusion });
   } catch (error) {
     console.error("Server Error:", error);
     return res.status(500).json({ error: 'Internal Server Error: ' + error.message });
