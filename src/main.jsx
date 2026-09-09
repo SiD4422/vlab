@@ -5,6 +5,7 @@ import { AuthProvider } from './contexts/AuthContext'
 import { CollegeProvider } from './contexts/CollegeContext'
 import { useAuth } from './contexts/AuthContext'
 import './index.css'
+import './premium.css'
 import App from './App.jsx'
 
 // Inner wrapper so CollegeProvider can read the authenticated user from AuthContext

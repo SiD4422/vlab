@@ -288,7 +288,7 @@ export default function Home({ onOpen, collapsedCategories, toggleCategory, sear
                         const progressPct = computeProgress(bridgeSims[exp.id] || {});
                         return (
                           <button key={exp.id} onClick={() => { if (!isLocked) onOpen(exp.id); }} className="class-card"
-                            style={{ textAlign: "left", cursor: isLocked ? "not-allowed" : "pointer", display: "flex", flexDirection: "column", gap: 12, opacity: isLocked ? 0.7 : 1, border: isCompleted ? '1.5px solid var(--teal)' : 'none', background: 'var(--card)', position: 'relative', overflow: 'hidden' }}
+                            style={{ textAlign: "left", cursor: isLocked ? "not-allowed" : "pointer", display: "flex", flexDirection: "column", gap: 12, opacity: isLocked ? 0.7 : 1, border: isCompleted ? '1.5px solid var(--teal)' : undefined, background: 'var(--card)', position: 'relative', overflow: 'hidden' }}
                           >
                             {isCompleted && (
                               <div style={{ position: 'absolute', top: 12, right: 12, width: 28, height: 28, borderRadius: '50%', background: 'var(--teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, boxShadow: '0 4px 12px rgba(31,122,114,0.4)' }}>
