@@ -84,6 +84,7 @@ export default function LabReportTab({ exp, bridgeState, setBridgeSims, onReport
       // 2. Trigger Server-Authoritative Grading with retry
       let res = null;
       let attempt = 0;
+      let errText = '';
       
       while (attempt < 2) {
         attempt++;
@@ -99,10 +100,14 @@ export default function LabReportTab({ exp, bridgeState, setBridgeSims, onReport
             body: JSON.stringify({ submissionId })
           });
           
-          if (res.ok) break; // Success, exit retry loop
+          if (res.ok) {
+            break;
+          }
           
-          console.warn(`API grading attempt ${attempt} failed:`, await res.text());
+          errText = await res.text();
+          console.warn(`API grading attempt ${attempt} failed:`, errText);
         } catch (fetchErr) {
+          errText = fetchErr.message;
           console.warn(`API grading attempt ${attempt} network error:`, fetchErr);
         }
       }
@@ -110,7 +115,7 @@ export default function LabReportTab({ exp, bridgeState, setBridgeSims, onReport
       if (!res || !res.ok) {
         // Fallback: Both attempts failed. Mark as grading_failed so it doesn't get stuck in pending.
         await updateDoc(doc(db, 'submissions', submissionId), { status: 'grading_failed' });
-        showMsg('error', 'Report submitted, but auto-grading failed. Your teacher will grade it manually.');
+        showMsg('error', 'Auto-grading error: ' + (errText || 'Unknown backend failure.'));
         setSubmitted(true);
         if (onReportSubmitted) onReportSubmitted();
         return;
