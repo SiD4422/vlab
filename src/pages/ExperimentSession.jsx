@@ -244,10 +244,7 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
 
         {/* Main content panel */}
         <div className="premium-panel" style={{ flex: 1, minWidth: 0, padding: '56px 64px' }}>
-          <div className="no-print" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-            <span className="status-badge pending" style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', padding: '4px 10px', borderRadius: 6 }}>{exp.tag}</span>
-            <span className="text-muted" style={{ fontSize: 13, fontWeight: 600 }}>Required Module</span>
-          </div>
+
           <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', margin: '0 0 32px' }}>
             <h2 style={{ fontSize: 36, fontWeight: 800, color: 'var(--ink)', margin: 0, letterSpacing: -0.5 }}>{exp.title}</h2>
             {tab === 'simulation' && !['strain-gauge','thermocouple','rtd','photodiode-ldr'].includes(exp.id) && (

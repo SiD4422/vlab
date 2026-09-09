@@ -232,10 +232,7 @@ export default function LabReportTab({ exp, bridgeState, setBridgeSims, onReport
       )}
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingBottom: 24, marginBottom: 32 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#dcfce7', color: '#166534', padding: '12px 20px', borderRadius: 12, minWidth: 120 }}>
-          <div style={{ fontSize: 18, fontWeight: 700 }}>{exp.tag || 'DC-01'}</div>
-          <div style={{ fontSize: 12, opacity: 0.8, marginTop: 4 }}>Required Module</div>
-        </div>
+        <div style={{ minWidth: 120 }}></div>
         <div style={{ textAlign: 'center', flex: 1, padding: '0 20px' }}>
           <h1 style={{ margin: '0 0 4px 0', fontSize: 28, fontWeight: 800, color: C.ink }}>{exp.title}</h1>
           <h2 style={{ margin: '0 0 8px 0', fontSize: 13, fontWeight: 700, letterSpacing: '0.1em', color: '#059669' }}>LABORATORY RECORD</h2>
