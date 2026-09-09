@@ -1,8 +1,18 @@
-import { db, auth } from './firebaseAdmin.mjs';
+import { getAdmin } from './firebaseAdmin.mjs';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  let db, auth;
+  try {
+    const admin = getAdmin();
+    db = admin.db;
+    auth = admin.auth;
+  } catch (err) {
+    console.error("Initialization Crash:", err);
+    return res.status(500).json({ error: 'Admin Init Failed: ' + err.message });
   }
 
   try {
