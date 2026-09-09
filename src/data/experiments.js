@@ -46,6 +46,36 @@ export const EXPERIMENTS = [
           "Source voltage fluctuations"
         ],
         "answer": 2
+      },
+      {
+        "q": "If the battery voltage in a Wheatstone bridge is increased by 50%, the balance point will:",
+        "options": [
+          "Shift to the right",
+          "Shift to the left",
+          "Remain unaffected",
+          "Fluctuate continuously"
+        ],
+        "answer": 2
+      },
+      {
+        "q": "Why is a Wheatstone bridge unsuitable for measuring resistances in the mega-ohm range?",
+        "options": [
+          "The battery cannot provide enough voltage",
+          "Leakage currents through insulation become comparable to the measured current",
+          "The galvanometer becomes too sensitive",
+          "Thermoelectric EMFs dominate the reading"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "The sensitivity of a Wheatstone bridge is maximum when:",
+        "options": [
+          "The ratio arms P and Q are very large",
+          "The unknown resistance Rx is very small",
+          "All four arms have equal resistance",
+          "The galvanometer resistance is zero"
+        ],
+        "answer": 2
       }
     ],
     "posttest": [
@@ -68,6 +98,36 @@ export const EXPERIMENTS = [
           "Oscillates"
         ],
         "answer": 2
+      },
+      {
+        "q": "A Wheatstone bridge is slightly unbalanced. The Thevenin equivalent resistance looking into the galvanometer terminals is:",
+        "options": [
+          "The sum of all four bridge resistors",
+          "The parallel combination of the adjacent arms",
+          "Dependent on the battery's internal resistance",
+          "The series-parallel equivalent of the four bridge arms"
+        ],
+        "answer": 3
+      },
+      {
+        "q": "If a 100Ω resistor in the ratio arm has a temperature coefficient of 50 ppm/°C, and its temperature rises by 10°C, the percentage error introduced in the measurement is:",
+        "options": [
+          "0.05%",
+          "0.5%",
+          "0.005%",
+          "5%"
+        ],
+        "answer": 0
+      },
+      {
+        "q": "Which of the following modifications converts a Wheatstone bridge into a Carey Foster bridge?",
+        "options": [
+          "Adding capacitors in parallel",
+          "Including a slide wire to measure the difference between two nearly equal resistances",
+          "Replacing the DC source with an AC oscillator",
+          "Using two galvanometers"
+        ],
+        "answer": 1
       }
     ],
     "viva": [
@@ -231,6 +291,36 @@ export const EXPERIMENTS = [
           "p = q"
         ],
         "answer": 1
+      },
+      {
+        "q": "In low resistance measurement, contact resistance is typically in the order of:",
+        "options": [
+          "Micro-ohms",
+          "Milli-ohms",
+          "Ohms",
+          "Kilo-ohms"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "Which type of galvanometer is best suited for detecting the null point in a DC Kelvin Bridge?",
+        "options": [
+          "Ballistic galvanometer",
+          "D'Arsonval galvanometer",
+          "Vibration galvanometer",
+          "Electrodynamometer"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "The current rating of the standard resistor used in a Kelvin bridge must be high because:",
+        "options": [
+          "Low resistance measurements require high test currents to generate a measurable voltage drop",
+          "High currents eliminate thermoelectric EMFs",
+          "It reduces the contact resistance",
+          "It balances the bridge faster"
+        ],
+        "answer": 0
       }
     ],
     "posttest": [
@@ -251,6 +341,36 @@ export const EXPERIMENTS = [
           "The yoke resistance",
           "The standard resistance",
           "The galvanometer resistance"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "During a Kelvin bridge measurement, a parasitic thermoelectric EMF of 10µV is generated at the junctions. To eliminate this error, one should:",
+        "options": [
+          "Increase the galvanometer resistance",
+          "Take two readings with reversed battery polarity and average them",
+          "Cool the bridge with a fan",
+          "Use a higher AC frequency"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "If the test current in a Kelvin bridge is 10A, and the unknown resistance is 0.001Ω, the power dissipated in the unknown resistor is:",
+        "options": [
+          "0.01 W",
+          "0.1 W",
+          "1.0 W",
+          "10 W"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "Why are thick copper busbars often used to connect the standard and unknown resistors in a Kelvin bridge?",
+        "options": [
+          "To prevent them from moving",
+          "To minimize the yoke resistance, reducing the error term",
+          "To dissipate heat",
+          "To act as a magnetic shield"
         ],
         "answer": 1
       }
@@ -415,6 +535,36 @@ export const EXPERIMENTS = [
           "Zero capacitance"
         ],
         "answer": 1
+      },
+      {
+        "q": "To achieve exact proportionality (P/Q = p/q) in a Kelvin Double Bridge, the ratio arms are typically:",
+        "options": [
+          "Adjusted independently",
+          "Mechanically ganged together to vary simultaneously",
+          "Fixed at 1 Ohm",
+          "Made of different materials"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "A 'four-terminal' resistor has two current terminals and two potential terminals. The resistance measured is strictly between:",
+        "options": [
+          "The two current terminals",
+          "The two potential terminals",
+          "One current and one potential terminal",
+          "The battery and the galvanometer"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "If the yoke resistance 'r' becomes infinite (i.e., the link breaks), the Kelvin Double Bridge degenerates into:",
+        "options": [
+          "A Wheatstone bridge",
+          "A Maxwell bridge",
+          "An open circuit (no current flows to the galvanometer)",
+          "A short circuit"
+        ],
+        "answer": 0
       }
     ],
     "posttest": [
@@ -437,6 +587,36 @@ export const EXPERIMENTS = [
           "One"
         ],
         "answer": 1
+      },
+      {
+        "q": "In a precision measurement, if P/Q = 100 and p/q = 99, the error term [qr/(p+q+r)](P/Q - p/q) evaluates to a non-zero value. If r=0.01Ω, q=10Ω, p=990Ω, the error added to the standard reading is:",
+        "options": [
+          "0.0001 Ω",
+          "0.001 Ω",
+          "0.01 Ω",
+          "0.1 Ω"
+        ],
+        "answer": 0
+      },
+      {
+        "q": "The standard resistor in a Kelvin Double Bridge is usually a variable low-resistance standard. It is typically constructed as:",
+        "options": [
+          "A carbon composition pot",
+          "A Manganin slide wire or decade shunt",
+          "A ceramic thermistor",
+          "A wire-wound inductor"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "What limits the ultimate resolution of a Kelvin Double Bridge at the micro-ohm level?",
+        "options": [
+          "Galvanometer thermal noise and Johnson-Nyquist noise",
+          "The speed of light",
+          "The mass of the electrons",
+          "The dielectric constant of air"
+        ],
+        "answer": 0
       }
     ],
     "viva": [
@@ -600,6 +780,36 @@ export const EXPERIMENTS = [
           "Phase angle of the oscillator"
         ],
         "answer": 2
+      },
+      {
+        "q": "If the unknown capacitor has significant leakage (parallel resistance), a simple capacitance comparison bridge will:",
+        "options": [
+          "Balance instantly",
+          "Never achieve a perfect null",
+          "Read a negative capacitance",
+          "Burn out the detector"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "In AC bridges, Wagner Earth devices are sometimes used to:",
+        "options": [
+          "Provide a physical ground for safety",
+          "Eliminate errors due to stray capacitances between bridge nodes and ground",
+          "Cool the oscillator",
+          "Measure the earth's magnetic field"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "The balance condition for an AC bridge requires that:",
+        "options": [
+          "Only the real parts of the impedances balance",
+          "Only the imaginary parts balance",
+          "Both magnitude and phase angle of the arms must balance simultaneously",
+          "The frequency must be exactly 50 Hz"
+        ],
+        "answer": 2
       }
     ],
     "posttest": [
@@ -622,6 +832,36 @@ export const EXPERIMENTS = [
           "Increase the supply voltage"
         ],
         "answer": 1
+      },
+      {
+        "q": "A capacitance comparison bridge uses a standard C=1µF with an ESR of 0.01Ω. The unknown C has an ESR of 5Ω. To balance both magnitude and phase, the bridge must incorporate:",
+        "options": [
+          "A series variable resistor in the standard arm",
+          "An inductor in parallel with the unknown",
+          "A larger battery",
+          "A DC galvanometer"
+        ],
+        "answer": 0
+      },
+      {
+        "q": "If the AC source frequency is 1 kHz, what is the capacitive reactance of a 1µF standard capacitor? (Xc = 1/2πfC)",
+        "options": [
+          "~159 Ω",
+          "~318 Ω",
+          "~1.59 kΩ",
+          "~15.9 Ω"
+        ],
+        "answer": 0
+      },
+      {
+        "q": "When using headphones as a null detector in an audio-frequency AC bridge, the operator listens for:",
+        "options": [
+          "Maximum volume",
+          "A change in pitch",
+          "Absolute silence or minimum tone",
+          "A clicking sound"
+        ],
+        "answer": 2
       }
     ],
     "viva": [
@@ -784,6 +1024,36 @@ export const EXPERIMENTS = [
           "L1 = L2/(R3*R4)"
         ],
         "answer": 0
+      },
+      {
+        "q": "Maxwell's Inductance Bridge compares an unknown inductor with a standard inductor. Standard inductors are generally avoided in precision work because:",
+        "options": [
+          "They are too cheap",
+          "They have significant stray magnetic fields and inherent resistance",
+          "They cannot carry any current",
+          "They break easily"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "If the unknown coil has a very low resistance (high Q), the resistive balance control will need to be:",
+        "options": [
+          "Very large",
+          "Very precise and small",
+          "Removed from the circuit",
+          "Replaced with a capacitor"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "The condition for balance in any four-arm AC bridge (Z1, Z2, Z3, Z4) is:",
+        "options": [
+          "Z1+Z4 = Z2+Z3",
+          "Z1/Z2 = Z3/Z4",
+          "Z1*Z4 = Z2*Z3",
+          "Z1-Z4 = Z2-Z3"
+        ],
+        "answer": 2
       }
     ],
     "posttest": [
@@ -806,6 +1076,36 @@ export const EXPERIMENTS = [
           "Cause the detector to overload"
         ],
         "answer": 1
+      },
+      {
+        "q": "In a Maxwell Inductance Bridge, if the standard inductor Ls has a known series resistance Rs, the total resistance of that arm is Rs + Rv (variable resistor). The unknown resistance Rx is calculated as:",
+        "options": [
+          "Rx = (R2/R3) * (Rs + Rv)",
+          "Rx = R2 * R3 * (Rs + Rv)",
+          "Rx = (Rs + Rv) / (R2*R3)",
+          "Rx = R2/R3"
+        ],
+        "answer": 0
+      },
+      {
+        "q": "Two interacting balance controls (e.g., both affecting the real and imaginary balance equations) lead to:",
+        "options": [
+          "Instant balance",
+          "A 'sliding null' where multiple adjustments are needed",
+          "Bridge destruction",
+          "Infinite Q factor"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "To minimize mutual inductance between the standard and unknown coils in the bridge setup, one should:",
+        "options": [
+          "Place them physically far apart or orient them at 90 degrees",
+          "Wrap them around the same core",
+          "Connect them with thick wires",
+          "Submerge them in oil"
+        ],
+        "answer": 0
       }
     ],
     "viva": [
@@ -966,6 +1266,36 @@ export const EXPERIMENTS = [
           "Q > 100"
         ],
         "answer": 1
+      },
+      {
+        "q": "Maxwell's LC bridge (Maxwell-Wien bridge) is ideal for measuring:",
+        "options": [
+          "High-Q coils (Q > 10)",
+          "Medium-Q coils (1 < Q < 10)",
+          "Low-Q coils (Q < 1)",
+          "Pure resistors"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "In the standard arm of the Maxwell LC bridge, the capacitor and resistor are connected in:",
+        "options": [
+          "Series",
+          "Parallel",
+          "Star",
+          "Delta"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "Why does the Maxwell LC bridge struggle with high-Q coils?",
+        "options": [
+          "The capacitor required becomes too small",
+          "The parallel resistor R4 required to achieve phase balance becomes impractically large",
+          "The inductor overheats",
+          "The frequency must be zero"
+        ],
+        "answer": 1
       }
     ],
     "posttest": [
@@ -986,6 +1316,36 @@ export const EXPERIMENTS = [
           "R4 becomes impractically large",
           "C4 must be very large",
           "The bridge oscillates"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "Given the balance equations Lx = R2*R3*C4 and Rx = R2*R3/R4, what is the Q-factor of the unknown coil in terms of the bridge components?",
+        "options": [
+          "Q = ω*C4*R4",
+          "Q = ω*Lx/Rx",
+          "Q = 1 / (ω*C4*R4)",
+          "Both A and B are correct"
+        ],
+        "answer": 3
+      },
+      {
+        "q": "If the supply frequency is exactly 1000 Hz, R4 is 10 kΩ, and C4 is 0.1 µF, what is the Q-factor of the coil at balance?",
+        "options": [
+          "~0.628",
+          "~6.28",
+          "~62.8",
+          "~628"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "A major advantage of the Maxwell LC bridge is that the balance equations for Lx and Rx are:",
+        "options": [
+          "Dependent on frequency",
+          "Independent of frequency",
+          "Dependent on the supply voltage",
+          "Non-linear"
         ],
         "answer": 1
       }
@@ -1148,6 +1508,36 @@ export const EXPERIMENTS = [
           "Lx ≈ R2/R3"
         ],
         "answer": 1
+      },
+      {
+        "q": "Hay's bridge is preferred over Maxwell's LC bridge for:",
+        "options": [
+          "Low-Q coils",
+          "Medium-Q coils",
+          "High-Q coils (Q > 10)",
+          "Capacitors"
+        ],
+        "answer": 2
+      },
+      {
+        "q": "In the standard arm of Hay's bridge, the resistor and capacitor are connected in:",
+        "options": [
+          "Parallel",
+          "Series",
+          "Anti-parallel",
+          "Bridge format"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "Because the standard arm uses a series RC circuit, Hay's bridge is better suited for measuring:",
+        "options": [
+          "Inductors with high series resistance",
+          "Inductors with very low series resistance",
+          "Lossless capacitors",
+          "Semiconductors"
+        ],
+        "answer": 1
       }
     ],
     "posttest": [
@@ -1170,6 +1560,36 @@ export const EXPERIMENTS = [
           "Frequency must be zero"
         ],
         "answer": 1
+      },
+      {
+        "q": "The exact expression for Lx in Hay's bridge is Lx = (R2*R3*C4) / (1 + (ω*C4*R4)²). For a high-Q coil where Q = 1/(ω*C4*R4) > 10, the term (ω*C4*R4)² is:",
+        "options": [
+          "Very large",
+          "Exactly 1",
+          "Less than 0.01 (can be neglected)",
+          "Negative"
+        ],
+        "answer": 2
+      },
+      {
+        "q": "If Hay's bridge is used to measure a medium-Q coil (Q = 2), neglecting the frequency-dependent term will cause an error of approximately:",
+        "options": [
+          "1%",
+          "5%",
+          "20%",
+          "50%"
+        ],
+        "answer": 2
+      },
+      {
+        "q": "Which component in Hay's bridge determines the resistive balance (Rx)?",
+        "options": [
+          "It depends solely on R4 and is directly proportional to it",
+          "It depends on C4 only",
+          "It requires adjusting the frequency",
+          "It depends on the battery voltage"
+        ],
+        "answer": 0
       }
     ],
     "viva": [
@@ -1330,6 +1750,36 @@ export const EXPERIMENTS = [
           "Maxwell's Equations"
         ],
         "answer": 1
+      },
+      {
+        "q": "Anderson's bridge is widely used for precise measurement of self-inductance because:",
+        "options": [
+          "It uses a variable capacitor",
+          "It achieves balance using only variable resistors, keeping the standard capacitor fixed",
+          "It has no resistive arms",
+          "It uses two galvanometers"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "The circuit topology of Anderson's bridge contains how many nodes (junctions)?",
+        "options": [
+          "3",
+          "4",
+          "5",
+          "6"
+        ],
+        "answer": 2
+      },
+      {
+        "q": "In the derivation of Anderson's bridge balance, the delta formed by the capacitor and two resistors is transformed into a:",
+        "options": [
+          "Star (Wye)",
+          "Pi network",
+          "Square",
+          "Hexagon"
+        ],
+        "answer": 0
       }
     ],
     "posttest": [
@@ -1352,6 +1802,36 @@ export const EXPERIMENTS = [
           "It cannot be balanced at 1 kHz"
         ],
         "answer": 2
+      },
+      {
+        "q": "If the standard capacitor in an Anderson bridge has a leakage resistance, it will primarily affect:",
+        "options": [
+          "The inductance calculation",
+          "The resistance (Q-factor) calculation of the unknown coil",
+          "The frequency of the source",
+          "The physical temperature of the bridge"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "The balance equation for Anderson's bridge is Lx = C*R3*[r*(1 + R2/R4) + R2]. If r=0, the equation reduces exactly to:",
+        "options": [
+          "Hay's bridge",
+          "Wien's bridge",
+          "Maxwell's LC bridge (Lx = C*R2*R3)",
+          "Schering bridge"
+        ],
+        "answer": 2
+      },
+      {
+        "q": "The 'sliding null' effect in Anderson's bridge is minimized because:",
+        "options": [
+          "The independent adjustment of 'r' affects only the imaginary balance without disturbing the real balance",
+          "The frequency is fixed",
+          "The capacitor is variable",
+          "The detector is a DC voltmeter"
+        ],
+        "answer": 0
       }
     ],
     "viva": [
@@ -1513,6 +1993,36 @@ export const EXPERIMENTS = [
           "The supply voltage"
         ],
         "answer": 2
+      },
+      {
+        "q": "A Schering bridge uses a standard capacitor C2 which is usually:",
+        "options": [
+          "An electrolytic capacitor",
+          "A loss-free high-voltage compressed gas capacitor",
+          "A ceramic disk capacitor",
+          "A supercapacitor"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "When testing high-voltage cables using a Schering bridge, the bridge arms must be protected because:",
+        "options": [
+          "High voltages are applied across the test object and standard capacitor, requiring safety spark gaps across the lower arms",
+          "The cables are heavy",
+          "The frequency is in the GHz range",
+          "The galvanometer requires 1000V to operate"
+        ],
+        "answer": 0
+      },
+      {
+        "q": "The dissipation factor of a dielectric represents:",
+        "options": [
+          "The energy stored per cycle",
+          "The ratio of energy dissipated as heat to the energy stored per cycle",
+          "The physical thickness of the dielectric",
+          "The voltage breakdown limit"
+        ],
+        "answer": 1
       }
     ],
     "posttest": [
@@ -1535,6 +2045,36 @@ export const EXPERIMENTS = [
           "0.00314"
         ],
         "answer": 0
+      },
+      {
+        "q": "The dissipation factor (tan δ) in a Schering bridge is calculated as ω*C4*R4. If R4 is fixed, the dial of variable capacitor C4 can be directly calibrated to read:",
+        "options": [
+          "Inductance",
+          "Quality factor Q",
+          "Dissipation factor (Dielectric loss)",
+          "Frequency"
+        ],
+        "answer": 2
+      },
+      {
+        "q": "A high-voltage Schering bridge is balanced with C2 = 50 pF, R3 = 1000/π Ω, C4 = 0.5 µF, R4 = 300 Ω. The source frequency is 50 Hz. What is the dissipation factor?",
+        "options": [
+          "0.015",
+          "0.047",
+          "0.15",
+          "0.47"
+        ],
+        "answer": 0
+      },
+      {
+        "q": "In a high-voltage Schering bridge, the detector and the lower arms (R3, C4-R4) are kept at:",
+        "options": [
+          "Extremely high potential",
+          "Earth potential (grounded) to ensure operator safety",
+          "Floating potential",
+          "Negative potential"
+        ],
+        "answer": 1
       }
     ],
     "viva": [
@@ -1695,6 +2235,36 @@ export const EXPERIMENTS = [
           "√(R1*C1)"
         ],
         "answer": 1
+      },
+      {
+        "q": "Wien's bridge is fundamentally a:",
+        "options": [
+          "Notch filter (band-reject) at the balance frequency",
+          "Low-pass filter",
+          "High-pass filter",
+          "All-pass filter"
+        ],
+        "answer": 0
+      },
+      {
+        "q": "To use Wien's bridge as an audio frequency oscillator, it must be placed in the feedback loop of an amplifier with:",
+        "options": [
+          "Negative feedback only",
+          "Positive feedback to sustain oscillations",
+          "No feedback",
+          "Infinite gain"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "If the series RC arm is R1, C1 and the parallel RC arm is R2, C2, the phase shift at the balance frequency is exactly:",
+        "options": [
+          "180°",
+          "90°",
+          "0°",
+          "-90°"
+        ],
+        "answer": 2
       }
     ],
     "posttest": [
@@ -1715,6 +2285,36 @@ export const EXPERIMENTS = [
           "2",
           "3",
           "0.5"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "In a Wien Bridge Oscillator, an incandescent lamp or thermistor is often used in the purely resistive arm. Why?",
+        "options": [
+          "To provide light for the operator",
+          "To provide automatic amplitude stabilization via non-linear resistance",
+          "To increase the frequency",
+          "To filter out harmonics"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "If R1=10kΩ, C1=10nF, R2=20kΩ, C2=5nF. Calculate the balance frequency f = 1 / (2π√(R1*R2*C1*C2)).",
+        "options": [
+          "~1.59 kHz",
+          "~3.18 kHz",
+          "~7.95 kHz",
+          "~15.9 kHz"
+        ],
+        "answer": 0
+      },
+      {
+        "q": "At the balance frequency of a Wien bridge with identical RC components (R1=R2, C1=C2), the voltage at the junction of the RC arms is what fraction of the input voltage?",
+        "options": [
+          "1/2",
+          "1/3",
+          "1/4",
+          "1/√2"
         ],
         "answer": 1
       }
@@ -1876,6 +2476,36 @@ export const EXPERIMENTS = [
           "Zx = Zs * √(N1/N2)"
         ],
         "answer": 0
+      },
+      {
+        "q": "A Transformer Ratio Arm Bridge utilizes tightly coupled transformer windings. This provides:",
+        "options": [
+          "A highly accurate and stable voltage ratio unaffected by age or temperature",
+          "A variable frequency output",
+          "A DC measurement capability",
+          "A high resistance ratio"
+        ],
+        "answer": 0
+      },
+      {
+        "q": "In a three-terminal measurement setup using a transformer ratio bridge, stray capacitance from the unknown component's terminals to the grounded shield:",
+        "options": [
+          "Causes massive errors",
+          "Is completely eliminated from the balance condition",
+          "Requires a Wagner earth",
+          "Burns the transformer"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "The accuracy of a transformer ratio bridge is primarily determined by:",
+        "options": [
+          "The quality of the resistors used",
+          "The turns ratio of the transformer core",
+          "The battery voltage",
+          "The ambient temperature"
+        ],
+        "answer": 1
       }
     ],
     "posttest": [
@@ -1898,6 +2528,36 @@ export const EXPERIMENTS = [
           "Because DC current blocks capacitance"
         ],
         "answer": 1
+      },
+      {
+        "q": "If the transformer core is made of a high-permeability material like Supermalloy, the leakage flux is very small. What happens to the balance ratio if a heavy load draws current from one tap?",
+        "options": [
+          "The ratio changes drastically",
+          "The ratio remains virtually unchanged due to the tight magnetic coupling",
+          "The core saturates immediately",
+          "The frequency shifts"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "A standard capacitor Cs is fixed at 1nF. The transformer has 1000 equal turns. The unknown Cx balances when connected to turn 745, while Cs is on turn 1000. What is Cx?",
+        "options": [
+          "745 nF",
+          "1.34 nF",
+          "0.745 nF",
+          "7.45 nF"
+        ],
+        "answer": 2
+      },
+      {
+        "q": "Which of the following is a direct consequence of using an ideal transformer in a bridge?",
+        "options": [
+          "The bridge arms have zero output impedance",
+          "The bridge requires infinite power",
+          "The bridge cannot measure capacitance",
+          "The bridge only works at 1 MHz"
+        ],
+        "answer": 0
       }
     ],
     "viva": [
@@ -2065,6 +2725,36 @@ export const EXPERIMENTS = [
           "Left floating in open air"
         ],
         "answer": 1
+      },
+      {
+        "q": "The Seebeck EMF generated by a thermocouple is a non-linear function of temperature. It is typically modeled using:",
+        "options": [
+          "A linear equation (y = mx + c)",
+          "A polynomial equation (E = aT + bT² + ...)",
+          "An exponential decay",
+          "A logarithmic function"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "Cold Junction Compensation (CJC) in modern digital thermometers is usually achieved by:",
+        "options": [
+          "An ice bath",
+          "Measuring the terminal block temperature with a thermistor or RTD and calculating the offset",
+          "Ignoring the cold junction",
+          "Short-circuiting the cold junction"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "Which thermocouple type is made of Platinum/Rhodium and used for extremely high temperatures?",
+        "options": [
+          "Type K",
+          "Type J",
+          "Type T",
+          "Type B, R, or S"
+        ],
+        "answer": 3
       }
     ],
     "posttest": [
@@ -2085,6 +2775,36 @@ export const EXPERIMENTS = [
           "Law of Intermediate Metals",
           "Law of Intermediate Temperatures",
           "Ohm's Law"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "A Type K thermocouple outputs 4.096 mV at 100°C (with 0°C reference). If the reference junction is actually at 25°C (which outputs 1.000 mV vs 0°C), what voltage will the voltmeter actually read when the hot junction is at 100°C?",
+        "options": [
+          "5.096 mV",
+          "4.096 mV",
+          "3.096 mV",
+          "0.000 mV"
+        ],
+        "answer": 2
+      },
+      {
+        "q": "Using extension wires made of standard copper instead of thermocouple alloy wires will cause:",
+        "options": [
+          "No error",
+          "An error if there is a temperature gradient along the copper wires",
+          "The thermocouple to melt",
+          "A short circuit"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "The Peltier effect is the reverse of the Seebeck effect. In a thermocouple measurement circuit, the Peltier effect:",
+        "options": [
+          "Causes massive measurement errors",
+          "Is negligible because the measuring voltmeter draws almost zero current",
+          "Provides the primary measurement EMF",
+          "Heats the cold junction to 100°C"
         ],
         "answer": 1
       }
@@ -2254,6 +2974,36 @@ export const EXPERIMENTS = [
           "Platinum sensor handling 100 Amps"
         ],
         "answer": 1
+      },
+      {
+        "q": "The resistance of a metal increases with temperature due to:",
+        "options": [
+          "Increased electron density",
+          "Decreased electron density",
+          "Increased scattering of electrons by lattice vibrations (phonons)",
+          "Creation of electron-hole pairs"
+        ],
+        "answer": 2
+      },
+      {
+        "q": "Which of the following defines the 'Alpha' (α) of a PT100 RTD?",
+        "options": [
+          "The resistance at 0°C",
+          "The average fractional change in resistance per °C between 0°C and 100°C",
+          "The maximum operating temperature",
+          "The minimum current required"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "A 4-wire RTD configuration uses two wires to supply current and two wires to measure voltage. This is an application of:",
+        "options": [
+          "A Wheatstone bridge",
+          "A Kelvin sensing (4-terminal sensing) method",
+          "A Maxwell bridge",
+          "A current transformer"
+        ],
+        "answer": 1
       }
     ],
     "posttest": [
@@ -2274,6 +3024,36 @@ export const EXPERIMENTS = [
           "To eliminate the error caused by lead wire resistance",
           "To double the sensitivity",
           "To prevent the RTD from overheating"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "An RTD has R0 = 100Ω and α = 0.00385. If it is placed in a Wheatstone bridge with equal 100Ω arms, and the temperature rises to 10°C, the RTD resistance becomes 103.85Ω. If the bridge is powered by 5V, the approximate unbalanced voltage is:",
+        "options": [
+          "~47 mV",
+          "~4.7 V",
+          "~0.47 mV",
+          "~470 mV"
+        ],
+        "answer": 0
+      },
+      {
+        "q": "If a 1mA excitation current is passed through a PT100 RTD at 0°C (100Ω), the power dissipated is 0.1mW. If the RTD has a self-heating factor of 0.2°C/mW in still air, the temperature error introduced by the measurement current is:",
+        "options": [
+          "0.02 °C",
+          "0.2 °C",
+          "2.0 °C",
+          "20 °C"
+        ],
+        "answer": 0
+      },
+      {
+        "q": "To achieve a highly linear voltage output from an RTD over a wide temperature range without a bridge, one should drive the RTD with:",
+        "options": [
+          "A constant voltage source",
+          "A constant current source",
+          "An AC voltage source",
+          "A noisy power supply"
         ],
         "answer": 1
       }
@@ -2442,6 +3222,36 @@ export const EXPERIMENTS = [
           "Platinum"
         ],
         "answer": 1
+      },
+      {
+        "q": "The energy bandgap of Cadmium Sulfide (CdS) used in LDRs closely matches:",
+        "options": [
+          "The infrared spectrum",
+          "The visible light spectrum (human eye response)",
+          "The ultraviolet spectrum",
+          "X-rays"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "In a photodiode, the depletion region is intentionally made wide (as in a PIN photodiode) to:",
+        "options": [
+          "Increase the capacitance",
+          "Increase the volume for photon absorption and electron-hole pair generation",
+          "Decrease the breakdown voltage",
+          "Emit more light"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "Why is a photodiode inherently faster than an LDR?",
+        "options": [
+          "Because it is smaller",
+          "Because LDR relies on bulk recombination of carriers which takes milliseconds, while a photodiode sweeps carriers across a junction in nanoseconds",
+          "Because LDRs have higher resistance",
+          "Because photodiodes use higher voltages"
+        ],
+        "answer": 1
       }
     ],
     "posttest": [
@@ -2464,6 +3274,36 @@ export const EXPERIMENTS = [
           "Doubles (highly linear relationship)"
         ],
         "answer": 3
+      },
+      {
+        "q": "A photodiode has a responsivity of 0.5 A/W at 850 nm. If 2 mW of optical power is incident on the active area, the generated photocurrent is:",
+        "options": [
+          "0.25 mA",
+          "0.5 mA",
+          "1.0 mA",
+          "2.5 mA"
+        ],
+        "answer": 2
+      },
+      {
+        "q": "If the load resistor (RL) in a photodiode circuit is made very large to increase the voltage output (V = I * RL), the bandwidth (speed) of the circuit will:",
+        "options": [
+          "Increase",
+          "Decrease due to the RC time constant of the junction capacitance and RL",
+          "Remain unchanged",
+          "Become infinite"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "An LDR shows a memory effect (light history effect). This means:",
+        "options": [
+          "It stores data like a flash drive",
+          "Its resistance at a specific light level depends slightly on the light levels it was exposed to previously",
+          "It remembers the time of day",
+          "It generates power in the dark"
+        ],
+        "answer": 1
       }
     ],
     "viva": [
