@@ -48,6 +48,14 @@ export default function LabReportTab({ exp, bridgeState, setBridgeSims, onReport
     });
   };
 
+  const updateConclusion = (val) => {
+    if (!setBridgeSims) return;
+    setBridgeSims(prev => {
+      const current = prev[exp.id] || {};
+      return { ...prev, [exp.id]: { ...current, studentConclusion: val } };
+    });
+  };
+
   const doSubmit = async () => {
     setShowOverwriteConfirm(false);
     setSubmitting(true);
@@ -367,26 +375,32 @@ export default function LabReportTab({ exp, bridgeState, setBridgeSims, onReport
               The calculated values have been recorded. Averages can be derived from the table above.
             </div>
             
-            <div className="no-print" style={{ padding: 20, border: '1px solid var(--border)', borderRadius: 8, background: '#fff' }}>
+            <div style={{ padding: 20, border: '1px solid var(--border)', borderRadius: 8, background: '#fff' }}>
               <h4 style={{ margin: '0 0 12px 0', color: 'var(--ink)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Sparkles size={18} color="#8b5cf6" />
-                AI Lab Conclusion
+                Conclusion
               </h4>
-              
-              {aiConclusion ? (
-                <div style={{ fontSize: 15, lineHeight: 1.6, color: 'var(--ink)', whiteSpace: 'pre-wrap' }}>
-                  {aiConclusion}
-                </div>
-              ) : (
-                <button 
-                  onClick={generateAIConclusion} 
-                  disabled={generatingConclusion}
-                  style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#8b5cf6', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: 8, fontWeight: 600, cursor: generatingConclusion ? 'not-allowed' : 'pointer', opacity: generatingConclusion ? 0.7 : 1 }}
-                >
-                  {generatingConclusion ? <Loader2 size={16} className="spin" /> : <Sparkles size={16} />}
-                  {generatingConclusion ? 'Analyzing physics engine data...' : 'Generate AI Conclusion'}
-                </button>
-              )}
+              <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 12 }}>
+                Based on the readings in your observation table, write a brief conclusion. Did your measured values match the theoretical expectations?
+              </p>
+              <textarea
+                value={bridgeState?.studentConclusion || ''}
+                onChange={e => updateConclusion(e.target.value)}
+                placeholder="Write your conclusion here..."
+                style={{
+                  width: '100%',
+                  minHeight: '120px',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--border)',
+                  fontFamily: 'inherit',
+                  fontSize: '14px',
+                  color: 'var(--ink)',
+                  resize: 'vertical',
+                  outline: 'none'
+                }}
+                onFocus={e => e.target.style.borderColor = '#8b5cf6'}
+                onBlur={e => e.target.style.borderColor = 'var(--border)'}
+              />
             </div>
           </div>
         ) : (
