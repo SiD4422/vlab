@@ -28,47 +28,157 @@ export const EXPERIMENTS = [
     ],
     "pretest": [
       {
-        "q": "The Wheatstone bridge is best used for measuring:",
-        "options": ["Very low resistance", "Medium resistance (1Ω to 1MΩ)", "Very high resistance", "Capacitance"],
+        "q": "Info: The Wheatstone Bridge measures unknown electrical resistance by balancing two legs of a bridge circuit. Prerequisite: Ohm's law, Kirchhoff's laws, and galvanometer operation. What is the fundamental principle used to derive the balance equation?",
+        "options": [
+          "Kirchhoff's Current Law at the source",
+          "Kirchhoff's Voltage Law around the loops",
+          "Faraday's Law of Induction",
+          "Ampere's Circuital Law"
+        ],
         "answer": 1
       },
       {
-        "q": "At balance condition, the current through the galvanometer is:",
-        "options": ["Maximum", "Minimum", "Zero", "Infinity"],
+        "q": "In a precision Wheatstone bridge, which factor most severely limits the accuracy when measuring resistances below 1Ω?",
+        "options": [
+          "Thermoelectric EMFs",
+          "Galvanometer sensitivity",
+          "Contact and lead wire resistances",
+          "Source voltage fluctuations"
+        ],
         "answer": 2
       }
     ],
     "posttest": [
       {
-        "q": "If the battery and galvanometer are interchanged at balance, the balance condition:",
-        "options": ["Remains unchanged", "Changes", "Bridge burns", "Current becomes maximum"],
+        "q": "A Wheatstone bridge has ratio arms P=1000Ω, Q=10Ω. The bridge is balanced when standard arm S=24.5Ω. What is the value of Rx?",
+        "options": [
+          "0.245 Ω",
+          "2.45 Ω",
+          "2450 Ω",
+          "24.5 kΩ"
+        ],
         "answer": 0
       },
       {
-        "q": "Which of the following is a practical application of a Wheatstone bridge?",
-        "options": ["Measuring voltage", "Measuring current", "Strain gauge measurement", "Measuring frequency"],
+        "q": "If the galvanometer and battery are swapped in a balanced Wheatstone bridge, the bridge:",
+        "options": [
+          "Becomes unbalanced",
+          "Burns out",
+          "Remains balanced",
+          "Oscillates"
+        ],
         "answer": 2
       }
     ],
     "viva": [
-      {"id":"wb_q3","question":"What is the condition for a Wheatstone bridge to be balanced?","options":["Galvanometer shows maximum deflection","Current through the galvanometer is zero","All resistors have equal value","Voltage across all resistors is zero"],"correctIndex":1},
-      {"id":"wb_q4","question":"Which component is typically used to detect the null point in a Wheatstone bridge?","options":["Ammeter","Voltmeter","Galvanometer","Oscilloscope"],"correctIndex":2},
-      {"id":"wb_q5","question":"Wheatstone bridge is most suitable for measuring:","options":["Very high resistances","Medium resistances","Very low resistances","Insulation resistances"],"correctIndex":1},
-      {"id":"wb_q6","question":"If the battery and galvanometer are interchanged in a balanced Wheatstone bridge, the bridge:","options":["Remains balanced","Becomes unbalanced","Shows maximum deflection","Burns out"],"correctIndex":0},
-      {"id":"wb_q7","question":"What causes errors in Wheatstone bridge measurements?","options":["Lead resistance","Thermoelectric EMFs","Contact resistance","All of the above"],"correctIndex":3},
-      {"id":"wb_q8","question":"The sensitivity of a Wheatstone bridge depends on:","options":["Voltage of the battery","Resistance of the galvanometer","Values of the ratio arms","All of the above"],"correctIndex":3},
-      {"id":"wb_q9","question":"In a Wheatstone bridge, if P/Q = R/S, which arm is the unknown resistance usually connected to?","options":["P","Q","R","S"],"correctIndex":3},
-      {"id":"wb_q10","question":"A Wheatstone bridge cannot be used for precision measurement of low resistances because of:","options":["Thermoelectric EMF","Contact and lead resistances","High sensitivity of galvanometer","Battery voltage fluctuations"],"correctIndex":1},
+      {
+        "id": "wb_q3",
+        "question": "What is the condition for a Wheatstone bridge to be balanced?",
+        "options": [
+          "Galvanometer shows maximum deflection",
+          "Current through the galvanometer is zero",
+          "All resistors have equal value",
+          "Voltage across all resistors is zero"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "wb_q4",
+        "question": "Which component is typically used to detect the null point in a Wheatstone bridge?",
+        "options": [
+          "Ammeter",
+          "Voltmeter",
+          "Galvanometer",
+          "Oscilloscope"
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": "wb_q5",
+        "question": "Wheatstone bridge is most suitable for measuring:",
+        "options": [
+          "Very high resistances",
+          "Medium resistances",
+          "Very low resistances",
+          "Insulation resistances"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "wb_q6",
+        "question": "If the battery and galvanometer are interchanged in a balanced Wheatstone bridge, the bridge:",
+        "options": [
+          "Remains balanced",
+          "Becomes unbalanced",
+          "Shows maximum deflection",
+          "Burns out"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": "wb_q7",
+        "question": "What causes errors in Wheatstone bridge measurements?",
+        "options": [
+          "Lead resistance",
+          "Thermoelectric EMFs",
+          "Contact resistance",
+          "All of the above"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": "wb_q8",
+        "question": "The sensitivity of a Wheatstone bridge depends on:",
+        "options": [
+          "Voltage of the battery",
+          "Resistance of the galvanometer",
+          "Values of the ratio arms",
+          "All of the above"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": "wb_q9",
+        "question": "In a Wheatstone bridge, if P/Q = R/S, which arm is the unknown resistance usually connected to?",
+        "options": [
+          "P",
+          "Q",
+          "R",
+          "S"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": "wb_q10",
+        "question": "A Wheatstone bridge cannot be used for precision measurement of low resistances because of:",
+        "options": [
+          "Thermoelectric EMF",
+          "Contact and lead resistances",
+          "High sensitivity of galvanometer",
+          "Battery voltage fluctuations"
+        ],
+        "correctIndex": 1
+      },
       {
         "id": "wb_q1",
         "question": "Why is a standard Wheatstone bridge not suitable for measuring very low resistances (below 1 ohm)?",
-        "options": ["It is too sensitive for low values.", "Contact and lead resistances cause significant measurement errors.", "It requires an AC supply for low resistance.", "The galvanometer will draw too much current and burn."],
+        "options": [
+          "It is too sensitive for low values.",
+          "Contact and lead resistances cause significant measurement errors.",
+          "It requires an AC supply for low resistance.",
+          "The galvanometer will draw too much current and burn."
+        ],
         "correctIndex": 1
       },
       {
         "id": "wb_q2",
         "question": "What happens to the balance point if the voltage of the battery driving the bridge is doubled?",
-        "options": ["The balance point shifts.", "The bridge cannot be balanced.", "The balance condition remains completely unaffected.", "The sensitivity decreases."],
+        "options": [
+          "The balance point shifts.",
+          "The bridge cannot be balanced.",
+          "The balance condition remains completely unaffected.",
+          "The sensitivity decreases."
+        ],
         "correctIndex": 2
       }
     ]
@@ -103,170 +213,160 @@ export const EXPERIMENTS = [
     ],
     "pretest": [
       {
-        "q": "Kelvin bridge is primarily used for measuring:",
+        "q": "Info: The Kelvin Bridge measures sub-ohm resistances (down to micro-ohms) by eliminating lead and contact resistances using an extra set of ratio arms. Prerequisite: Wheatstone bridge principles. Why are four-terminal connections used in low-resistance components?",
         "options": [
-          "High resistance",
-          "Medium resistance",
-          "Low resistance",
-          "Capacitance"
-        ],
-        "answer": 2
-      },
-      {
-        "q": "The main advantage of Kelvin bridge over Wheatstone bridge is:",
-        "options": [
-          "Measures higher voltage",
-          "Eliminates lead and contact resistance errors",
-          "Uses AC supply",
-          "Is cheaper to build"
+          "To increase current capacity",
+          "To separate current injection from voltage sensing",
+          "To provide mechanical stability",
+          "To double the resistance value"
         ],
         "answer": 1
       },
       {
-        "q": "Kelvin bridge is a modification of:",
+        "q": "What is the condition for eliminating the yoke resistance (r) effect in a Kelvin Double Bridge?",
         "options": [
-          "Maxwell bridge",
-          "Schering bridge",
-          "Wheatstone bridge",
-          "Wien bridge"
-        ],
-        "answer": 2
-      },
-      {
-        "q": "The value of low resistance measured is typically below:",
-        "options": [
-          "1 ohm",
-          "10 ohms",
-          "100 ohms",
-          "1000 ohms"
-        ],
-        "answer": 0
-      },
-      {
-        "q": "The accuracy of Kelvin bridge depends on:",
-        "options": [
-          "Voltage source",
-          "Ratio arms matching",
-          "Capacitors",
-          "Inductors"
+          "P/p = Q/q",
+          "P/Q = p/q",
+          "P = Q",
+          "p = q"
         ],
         "answer": 1
       }
     ],
     "posttest": [
       {
-        "q": "At balance in a Kelvin double bridge, the current through the galvanometer is:",
+        "q": "In a Kelvin Double Bridge, P=100Ω, Q=10Ω, p=100Ω, q=10Ω. The standard resistance S is 0.01Ω. Calculate the unknown resistance Rx.",
         "options": [
-          "Maximum",
-          "Minimum",
-          "Zero",
-          "Infinite"
-        ],
-        "answer": 2
-      },
-      {
-        "q": "For accurate measurement, the ratio of outer arms (R1/R2) must be equal to:",
-        "options": [
-          "Inner arms (a/b)",
-          "Standard resistance (S)",
-          "Unknown resistance (R)",
-          "Galvanometer resistance"
+          "0.001 Ω",
+          "0.01 Ω",
+          "0.1 Ω",
+          "1.0 Ω"
         ],
         "answer": 0
       },
       {
-        "q": "Which is used as a null detector in a DC Kelvin bridge?",
+        "q": "If the inner ratio arms (p,q) are not exactly proportional to the outer ratio arms (P,Q), the resulting error is proportional to:",
         "options": [
-          "Oscilloscope",
-          "Galvanometer",
-          "Headphones",
-          "Vibration Galvanometer"
+          "The battery voltage",
+          "The yoke resistance",
+          "The standard resistance",
+          "The galvanometer resistance"
         ],
         "answer": 1
-      },
-      {
-        "q": "The bridge has how many sets of ratio arms?",
-        "options": [
-          "One",
-          "Two",
-          "Three",
-          "Four"
-        ],
-        "answer": 1
-      },
-      {
-        "q": "What happens if the contact resistance is too high?",
-        "options": [
-          "The bridge burns",
-          "Balance is impossible",
-          "No effect on balance condition if inner and outer ratios are perfectly matched",
-          "Current increases"
-        ],
-        "answer": 2
       }
     ],
     "viva": [
-      {"id":"kb_q6","question":"A Kelvin bridge is a modification of:","options":["Maxwell bridge","Schering bridge","Wheatstone bridge","Wien bridge"],"correctIndex":2},
-      {"id":"kb_q7","question":"The main purpose of the Kelvin bridge is to eliminate the effect of:","options":["Contact and lead resistances","Thermoelectric EMF","Stray capacitance","Inductive coupling"],"correctIndex":0},
-      {"id":"kb_q8","question":"In a Kelvin double bridge, how many ratio arms are used?","options":["One set","Two sets","Three sets","Four sets"],"correctIndex":1},
-      {"id":"kb_q9","question":"The unknown resistance in a Kelvin bridge is usually a:","options":["Four-terminal resistor","Two-terminal resistor","Capacitor","Inductor"],"correctIndex":0},
-      {"id":"kb_q10","question":"The ratio of the outer arms in a balanced Kelvin bridge must be equal to:","options":["The sum of the inner arms","The ratio of the inner arms","The product of the inner arms","Zero"],"correctIndex":1},
       {
-            "id": "kb_q1",
-            "question": "Why is the Kelvin Bridge preferred over the Wheatstone Bridge for measuring very low resistances (below 1 Ω)?",
-            "options": [
-                  "It uses a higher voltage source to push more current.",
-                  "It eliminates the effect of lead and contact resistances.",
-                  "It does not require a galvanometer to find the balance point.",
-                  "It amplifies the small resistance values electronically."
-            ],
-            "correctIndex": 1
+        "id": "kb_q6",
+        "question": "A Kelvin bridge is a modification of:",
+        "options": [
+          "Maxwell bridge",
+          "Schering bridge",
+          "Wheatstone bridge",
+          "Wien bridge"
+        ],
+        "correctIndex": 2
       },
       {
-            "id": "kb_q2",
-            "question": "How does doubling the DC excitation voltage affect the balance condition of the bridge?",
-            "options": [
-                  "The balance point shifts exactly to the middle of the slide wire.",
-                  "The bridge becomes unbalanced and requires recalibration.",
-                  "The balance condition remains completely unaffected.",
-                  "The measured unknown resistance value is halved."
-            ],
-            "correctIndex": 2
+        "id": "kb_q7",
+        "question": "The main purpose of the Kelvin bridge is to eliminate the effect of:",
+        "options": [
+          "Contact and lead resistances",
+          "Thermoelectric EMF",
+          "Stray capacitance",
+          "Inductive coupling"
+        ],
+        "correctIndex": 0
       },
       {
-            "id": "kb_q3",
-            "question": "What is the primary purpose of the slide wire in a practical Kelvin Bridge setup?",
-            "options": [
-                  "To act as a variable voltage divider for the power supply.",
-                  "To balance the bridge and precisely read the fractional resistance ratio.",
-                  "To limit the current flowing through the sensitive galvanometer.",
-                  "To cancel out external magnetic fields."
-            ],
-            "correctIndex": 1
+        "id": "kb_q8",
+        "question": "In a Kelvin double bridge, how many ratio arms are used?",
+        "options": [
+          "One set",
+          "Two sets",
+          "Three sets",
+          "Four sets"
+        ],
+        "correctIndex": 1
       },
       {
-            "id": "kb_q4",
-            "question": "What defines a low resistance measurement typically suited for this bridge?",
-            "options": [
-                  "Resistances between 1 kΩ and 100 kΩ.",
-                  "Resistances between 10 Ω and 100 Ω.",
-                  "Resistances below 1 Ω.",
-                  "Purely inductive components."
-            ],
-            "correctIndex": 2
+        "id": "kb_q9",
+        "question": "The unknown resistance in a Kelvin bridge is usually a:",
+        "options": [
+          "Four-terminal resistor",
+          "Two-terminal resistor",
+          "Capacitor",
+          "Inductor"
+        ],
+        "correctIndex": 0
       },
       {
-            "id": "kb_q5",
-            "question": "What error occurs if thermoelectric EMFs are present in the bridge circuit, and how is it mitigated?",
-            "options": [
-                  "It causes false balance points; eliminated by taking the average of readings with reversed battery polarity.",
-                  "It melts the slide wire; eliminated by using AC instead of DC.",
-                  "It causes the galvanometer to freeze; mitigated by adding a series capacitor.",
-                  "It increases the lead resistance; mitigated by using thicker wires."
-            ],
-            "correctIndex": 0
+        "id": "kb_q10",
+        "question": "The ratio of the outer arms in a balanced Kelvin bridge must be equal to:",
+        "options": [
+          "The sum of the inner arms",
+          "The ratio of the inner arms",
+          "The product of the inner arms",
+          "Zero"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "kb_q1",
+        "question": "Why is the Kelvin Bridge preferred over the Wheatstone Bridge for measuring very low resistances (below 1 Ω)?",
+        "options": [
+          "It uses a higher voltage source to push more current.",
+          "It eliminates the effect of lead and contact resistances.",
+          "It does not require a galvanometer to find the balance point.",
+          "It amplifies the small resistance values electronically."
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "kb_q2",
+        "question": "How does doubling the DC excitation voltage affect the balance condition of the bridge?",
+        "options": [
+          "The balance point shifts exactly to the middle of the slide wire.",
+          "The bridge becomes unbalanced and requires recalibration.",
+          "The balance condition remains completely unaffected.",
+          "The measured unknown resistance value is halved."
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": "kb_q3",
+        "question": "What is the primary purpose of the slide wire in a practical Kelvin Bridge setup?",
+        "options": [
+          "To act as a variable voltage divider for the power supply.",
+          "To balance the bridge and precisely read the fractional resistance ratio.",
+          "To limit the current flowing through the sensitive galvanometer.",
+          "To cancel out external magnetic fields."
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "kb_q4",
+        "question": "What defines a low resistance measurement typically suited for this bridge?",
+        "options": [
+          "Resistances between 1 kΩ and 100 kΩ.",
+          "Resistances between 10 Ω and 100 Ω.",
+          "Resistances below 1 Ω.",
+          "Purely inductive components."
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": "kb_q5",
+        "question": "What error occurs if thermoelectric EMFs are present in the bridge circuit, and how is it mitigated?",
+        "options": [
+          "It causes false balance points; eliminated by taking the average of readings with reversed battery polarity.",
+          "It melts the slide wire; eliminated by using AC instead of DC.",
+          "It causes the galvanometer to freeze; mitigated by adding a series capacitor.",
+          "It increases the lead resistance; mitigated by using thicker wires."
+        ],
+        "correctIndex": 0
       }
-]
+    ]
   },
   {
     "id": "kelvin-double-bridge",
@@ -297,170 +397,160 @@ export const EXPERIMENTS = [
     ],
     "pretest": [
       {
-        "q": "A Kelvin Double bridge requires the unknown resistor to have:",
+        "q": "Info: The Kelvin Double Bridge is an enhancement of the Kelvin Bridge, achieving extreme precision in sub-ohm ranges by strictly enforcing P/Q = p/q. Prerequisite: Four-terminal measurement theory. The 'double' in Kelvin Double Bridge refers to:",
         "options": [
-          "2 terminals",
-          "3 terminals",
-          "4 terminals",
-          "No terminals"
-        ],
-        "answer": 2
-      },
-      {
-        "q": "The term \"double\" refers to:",
-        "options": [
-          "Double voltage",
-          "Double current",
+          "Two batteries used",
+          "Two galvanometers used",
           "Two sets of ratio arms",
-          "Two galvanometers"
+          "Two unknown resistors"
         ],
         "answer": 2
       },
       {
-        "q": "What is the main purpose of the Kelvin Double Bridge?",
+        "q": "The yoke (heavy copper link) connecting the standard and unknown resistors must have:",
         "options": [
-          "Measure capacitance",
-          "Measure inductance",
-          "Measure very low resistance",
-          "Measure frequency"
-        ],
-        "answer": 2
-      },
-      {
-        "q": "The connecting link between the standard and unknown resistor is called:",
-        "options": [
-          "Yoke",
-          "Arm",
-          "Ratio",
-          "Galvanometer"
-        ],
-        "answer": 0
-      },
-      {
-        "q": "Is the Kelvin Double Bridge an AC or DC bridge?",
-        "options": [
-          "AC",
-          "DC",
-          "Both",
-          "Neither"
+          "Very high resistance",
+          "Very low resistance",
+          "Infinite resistance",
+          "Zero capacitance"
         ],
         "answer": 1
       }
     ],
     "posttest": [
       {
-        "q": "Reversing the battery polarity in a Kelvin double bridge helps eliminate errors due to:",
+        "q": "A Kelvin Double Bridge has P=1000Ω, Q=100Ω, p=1000Ω, q=100Ω. The standard S is set to 0.05Ω. The yoke resistance is 0.02Ω. What is Rx?",
         "options": [
-          "Lead resistance",
-          "Stray capacitance",
-          "Thermoelectric EMFs",
-          "Galvanometer friction"
+          "0.005 Ω",
+          "0.05 Ω",
+          "0.5 Ω",
+          "5.0 Ω"
         ],
-        "answer": 2
+        "answer": 0
       },
       {
-        "q": "The four-terminal connection eliminates the effect of:",
+        "q": "In the balance equation Rx = (P/Q)S + [qr/(p+q+r)](P/Q - p/q), if P/Q is exactly equal to p/q, the second term becomes:",
         "options": [
-          "Temperature",
-          "Voltage drop in current leads",
-          "Frequency",
-          "Inductance"
+          "Infinite",
+          "Zero",
+          "Negative",
+          "One"
         ],
         "answer": 1
-      },
-      {
-        "q": "If the inner and outer ratio arms are not exactly equal, the error depends on:",
-        "options": [
-          "Voltage",
-          "Yoke resistance",
-          "Current",
-          "Galvanometer"
-        ],
-        "answer": 1
-      },
-      {
-        "q": "Standard shunts are calibrated using:",
-        "options": [
-          "Wheatstone bridge",
-          "Kelvin Double Bridge",
-          "Maxwell bridge",
-          "Schering bridge"
-        ],
-        "answer": 1
-      },
-      {
-        "q": "The minimum resistance accurately measurable is around:",
-        "options": [
-          "1 ohm",
-          "1 milli-ohm",
-          "1 micro-ohm",
-          "1 nano-ohm"
-        ],
-        "answer": 2
       }
     ],
     "viva": [
-      {"id":"kdb_q6","question":"Why is it called a \"double\" bridge?","options":["It uses two power supplies","It incorporates a second set of ratio arms","It measures two resistances at once","It uses two galvanometers"],"correctIndex":1},
-      {"id":"kdb_q7","question":"Which errors are minimized by a Kelvin Double Bridge?","options":["High frequency errors","Lead and contact resistance errors","Capacitive coupling errors","Hysteresis errors"],"correctIndex":1},
-      {"id":"kdb_q8","question":"A Kelvin Double Bridge is typically used to measure resistance in the range of:","options":["1 ohm to 1 micro-ohm","1 kilo-ohm to 1 mega-ohm","1 mega-ohm to 1 giga-ohm","100 ohms to 1 kilo-ohm"],"correctIndex":0},
-      {"id":"kdb_q9","question":"At balance, the current through the galvanometer in a Kelvin Double Bridge is:","options":["Maximum","Minimum","Zero","Equal to source current"],"correctIndex":2},
-      {"id":"kdb_q10","question":"The connecting link between the standard and unknown resistance is called:","options":["The yoke","The ratio arm","The multiplier","The shunt"],"correctIndex":0},
       {
-            "id": "kdb_q1",
-            "question": "In a Kelvin Double Bridge, why is a second set of ratio arms (inner arms p and q) used?",
-            "options": [
-                  "To increase the maximum resistance limit that can be measured.",
-                  "To provide a backup measurement path if the main arms fail.",
-                  "To cancel out the effect of the connecting lead (yoke) resistance between the standard and unknown resistors.",
-                  "To double the sensitivity of the galvanometer."
-            ],
-            "correctIndex": 2
+        "id": "kdb_q6",
+        "question": "Why is it called a \"double\" bridge?",
+        "options": [
+          "It uses two power supplies",
+          "It incorporates a second set of ratio arms",
+          "It measures two resistances at once",
+          "It uses two galvanometers"
+        ],
+        "correctIndex": 1
       },
       {
-            "id": "kdb_q2",
-            "question": "What must be true about the ratio of the inner arms (p/q) and outer arms (P/Q) for the exact balance equation to hold true?",
-            "options": [
-                  "They must be exactly inverse (p/q = Q/P).",
-                  "They must be completely unequal.",
-                  "They must be kept exactly equal (p/q = P/Q).",
-                  "The inner arms must be ten times the outer arms."
-            ],
-            "correctIndex": 2
+        "id": "kdb_q7",
+        "question": "Which errors are minimized by a Kelvin Double Bridge?",
+        "options": [
+          "High frequency errors",
+          "Lead and contact resistance errors",
+          "Capacitive coupling errors",
+          "Hysteresis errors"
+        ],
+        "correctIndex": 1
       },
       {
-            "id": "kdb_q3",
-            "question": "If the heavy copper yoke connecting the standard and unknown resistor breaks, what happens?",
-            "options": [
-                  "The measurement becomes twice as accurate.",
-                  "The current stops flowing through the main circuit and the bridge cannot be balanced.",
-                  "The galvanometer deflection reverses direction.",
-                  "The bridge automatically acts like a Wheatstone bridge."
-            ],
-            "correctIndex": 1
+        "id": "kdb_q8",
+        "question": "A Kelvin Double Bridge is typically used to measure resistance in the range of:",
+        "options": [
+          "1 ohm to 1 micro-ohm",
+          "1 kilo-ohm to 1 mega-ohm",
+          "1 mega-ohm to 1 giga-ohm",
+          "100 ohms to 1 kilo-ohm"
+        ],
+        "correctIndex": 0
       },
       {
-            "id": "kdb_q4",
-            "question": "What type of detector is most suitable for finding the null point in this highly precise DC bridge?",
-            "options": [
-                  "A cathode ray oscilloscope (CRO).",
-                  "A high-frequency vibration galvanometer.",
-                  "A highly sensitive DC DArsonval galvanometer.",
-                  "A digital multimeter set to AC voltage."
-            ],
-            "correctIndex": 2
+        "id": "kdb_q9",
+        "question": "At balance, the current through the galvanometer in a Kelvin Double Bridge is:",
+        "options": [
+          "Maximum",
+          "Minimum",
+          "Zero",
+          "Equal to source current"
+        ],
+        "correctIndex": 2
       },
       {
-            "id": "kdb_q5",
-            "question": "Why is a heavy current usually passed through the standard and unknown resistors?",
-            "options": [
-                  "To ensure the resistors reach their maximum operating temperature.",
-                  "To produce a measurable voltage drop across the very low resistances.",
-                  "To burn off any oxidation on the contact terminals.",
-                  "To generate a strong magnetic field for the galvanometer."
-            ],
-            "correctIndex": 1
+        "id": "kdb_q10",
+        "question": "The connecting link between the standard and unknown resistance is called:",
+        "options": [
+          "The yoke",
+          "The ratio arm",
+          "The multiplier",
+          "The shunt"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": "kdb_q1",
+        "question": "In a Kelvin Double Bridge, why is a second set of ratio arms (inner arms p and q) used?",
+        "options": [
+          "To increase the maximum resistance limit that can be measured.",
+          "To provide a backup measurement path if the main arms fail.",
+          "To cancel out the effect of the connecting lead (yoke) resistance between the standard and unknown resistors.",
+          "To double the sensitivity of the galvanometer."
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": "kdb_q2",
+        "question": "What must be true about the ratio of the inner arms (p/q) and outer arms (P/Q) for the exact balance equation to hold true?",
+        "options": [
+          "They must be exactly inverse (p/q = Q/P).",
+          "They must be completely unequal.",
+          "They must be kept exactly equal (p/q = P/Q).",
+          "The inner arms must be ten times the outer arms."
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": "kdb_q3",
+        "question": "If the heavy copper yoke connecting the standard and unknown resistor breaks, what happens?",
+        "options": [
+          "The measurement becomes twice as accurate.",
+          "The current stops flowing through the main circuit and the bridge cannot be balanced.",
+          "The galvanometer deflection reverses direction.",
+          "The bridge automatically acts like a Wheatstone bridge."
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "kdb_q4",
+        "question": "What type of detector is most suitable for finding the null point in this highly precise DC bridge?",
+        "options": [
+          "A cathode ray oscilloscope (CRO).",
+          "A high-frequency vibration galvanometer.",
+          "A highly sensitive DC DArsonval galvanometer.",
+          "A digital multimeter set to AC voltage."
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": "kdb_q5",
+        "question": "Why is a heavy current usually passed through the standard and unknown resistors?",
+        "options": [
+          "To ensure the resistors reach their maximum operating temperature.",
+          "To produce a measurable voltage drop across the very low resistances.",
+          "To burn off any oxidation on the contact terminals.",
+          "To generate a strong magnetic field for the galvanometer."
+        ],
+        "correctIndex": 1
       }
-]
+    ]
   },
   {
     "id": "capacitance-comparison-bridge",
@@ -492,170 +582,160 @@ export const EXPERIMENTS = [
     ],
     "pretest": [
       {
-        "q": "A capacitance comparison bridge uses:",
+        "q": "Info: This AC bridge determines unknown capacitance by comparing it against a known standard capacitor. Prerequisite: AC circuit theory, impedance (Z = 1/jωC). The detector used in AC bridges at 1 kHz is typically a:",
         "options": [
-          "DC supply",
-          "AC supply",
-          "Both",
-          "None"
+          "D'Arsonval Galvanometer",
+          "Ballistic Galvanometer",
+          "Headphones / Tuned Null Detector",
+          "DC Voltmeter"
         ],
-        "answer": 1
+        "answer": 2
       },
       {
-        "q": "What kind of detector is typically used for audio frequency AC bridges?",
+        "q": "In a pure capacitance comparison bridge at balance (Cx/C2 = R4/R3), the balance condition depends on:",
         "options": [
-          "D'Arsonval galvanometer",
-          "Headphones",
-          "DC Voltmeter",
-          "Ammeter"
-        ],
-        "answer": 1
-      },
-      {
-        "q": "The bridge measures:",
-        "options": [
-          "Only capacitance magnitude",
-          "Capacitance and equivalent series resistance",
-          "Inductance",
-          "Frequency"
-        ],
-        "answer": 1
-      },
-      {
-        "q": "Standard capacitors are usually:",
-        "options": [
-          "Lossy",
-          "Loss-free (high quality)",
-          "Variable inductors",
-          "Electrolytic"
-        ],
-        "answer": 1
-      },
-      {
-        "q": "The balance conditions require adjusting:",
-        "options": [
-          "One component",
-          "Two components",
-          "Three components",
-          "Four components"
-        ],
-        "answer": 1
-      }
-    ],
-    "posttest": [
-      {
-        "q": "At balance, the unknown capacitance Cx is proportional to:",
-        "options": [
-          "Standard Inductance",
-          "Standard Capacitance",
-          "Standard Voltage",
-          "Standard Frequency"
-        ],
-        "answer": 1
-      },
-      {
-        "q": "If the standard capacitor is assumed completely loss-free (r_std = 0), then rx is:",
-        "options": [
-          "Infinity",
-          "Zero",
-          "Negative",
-          "Unchanged"
-        ],
-        "answer": 1
-      },
-      {
-        "q": "The balance condition implies that:",
-        "options": [
-          "Voltages across detectors are in phase",
-          "Voltage across detector is zero",
-          "Current is maximum",
-          "Impedance is zero"
-        ],
-        "answer": 1
-      },
-      {
-        "q": "Which component represents dielectric losses?",
-        "options": [
-          "Equivalent series resistance",
-          "Inductance",
-          "Voltage",
-          "Frequency"
-        ],
-        "answer": 0
-      },
-      {
-        "q": "What frequency is commonly used for audio bridges?",
-        "options": [
-          "1 Hz",
-          "50 Hz",
-          "1 kHz",
-          "1 MHz"
+          "Frequency of the AC source",
+          "Voltage of the AC source",
+          "Ratio of the resistance arms",
+          "Phase angle of the oscillator"
         ],
         "answer": 2
       }
     ],
-    "viva": [
-      {"id":"ccb_q6","question":"A capacitance comparison bridge uses which type of source?","options":["DC Battery","AC Oscillator","Pulse Generator","Current source"],"correctIndex":1},
-      {"id":"ccb_q7","question":"What is typically used as a null detector in AC bridges at audio frequencies?","options":["D'Arsonval galvanometer","Headphones or tuned AC detector","DC Voltmeter","Electrometer"],"correctIndex":1},
-      {"id":"ccb_q8","question":"In a simple capacitance bridge, the condition for balance involves:","options":["Only magnitudes of impedances","Magnitudes and phase angles of impedances","Only purely resistive components","Only inductances"],"correctIndex":1},
-      {"id":"ccb_q9","question":"What causes the dissipation factor in a real capacitor?","options":["Dielectric losses and equivalent series resistance","Lead inductance","Plate area","Distance between plates"],"correctIndex":0},
-      {"id":"ccb_q10","question":"The balance condition equation for an AC bridge is:","options":["Z1*Z4 = Z2*Z3","Z1/Z2 = Z3/Z4","Z1+Z4 = Z2+Z3","Z1-Z4 = Z2-Z3"],"correctIndex":0},
+    "posttest": [
       {
-            "id": "ccb_q1",
-            "question": "What is the main purpose of the Capacitance Comparison Bridge?",
-            "options": [
-                  "To measure the self-inductance of a coil.",
-                  "To determine the exact frequency of an AC source.",
-                  "To determine an unknown capacitance by comparing it with a known standard capacitor.",
-                  "To measure the DC resistance of an insulator."
-            ],
-            "correctIndex": 2
+        "q": "An AC bridge is balanced with R3=1000Ω, R4=2000Ω, and C2=0.1µF. What is the value of the unknown capacitor Cx?",
+        "options": [
+          "0.05 µF",
+          "0.1 µF",
+          "0.2 µF",
+          "0.4 µF"
+        ],
+        "answer": 2
       },
       {
-            "id": "ccb_q2",
-            "question": "What happens if the dielectric of the unknown capacitor is very lossy (has high equivalent series resistance)?",
-            "options": [
-                  "A perfect null cannot be achieved unless a variable resistive arm is added to balance the real power loss.",
-                  "The bridge balances much faster than with a perfect capacitor.",
-                  "The standard capacitor will overheat and get damaged.",
-                  "The excitation frequency automatically drops to zero."
-            ],
-            "correctIndex": 0
-      },
-      {
-            "id": "ccb_q3",
-            "question": "Which detector is commonly used for an audio-frequency AC capacitance bridge?",
-            "options": [
-                  "A standard moving-coil DC galvanometer.",
-                  "A compass needle.",
-                  "Headphones or an AC tuned detector.",
-                  "An ammeter."
-            ],
-            "correctIndex": 2
-      },
-      {
-            "id": "ccb_q4",
-            "question": "In an ideal lossless capacitance comparison bridge, the balance condition depends on:",
-            "options": [
-                  "The absolute voltage of the AC supply.",
-                  "The ratio of the adjacent resistive arms.",
-                  "The phase angle of the detector.",
-                  "The ambient temperature of the room."
-            ],
-            "correctIndex": 1
-      },
-      {
-            "id": "ccb_q5",
-            "question": "How are stray electrostatic capacitances between bridge arms and ground mitigated in high-precision AC bridges?",
-            "options": [
-                  "By submerging the bridge in distilled water.",
-                  "By using a Wagner earth connection and electrostatic shielding.",
-                  "By increasing the supply voltage to overpower the stray signals.",
-                  "By replacing all capacitors with inductors."
-            ],
-            "correctIndex": 1
+        "q": "If the standard capacitor has a small dielectric loss (series resistance), how must the bridge be modified to achieve a perfect null?",
+        "options": [
+          "Add an inductor in series",
+          "Add a variable resistor in series with Cx",
+          "Change the AC frequency",
+          "Increase the supply voltage"
+        ],
+        "answer": 1
       }
-]
+    ],
+    "viva": [
+      {
+        "id": "ccb_q6",
+        "question": "A capacitance comparison bridge uses which type of source?",
+        "options": [
+          "DC Battery",
+          "AC Oscillator",
+          "Pulse Generator",
+          "Current source"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "ccb_q7",
+        "question": "What is typically used as a null detector in AC bridges at audio frequencies?",
+        "options": [
+          "D'Arsonval galvanometer",
+          "Headphones or tuned AC detector",
+          "DC Voltmeter",
+          "Electrometer"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "ccb_q8",
+        "question": "In a simple capacitance bridge, the condition for balance involves:",
+        "options": [
+          "Only magnitudes of impedances",
+          "Magnitudes and phase angles of impedances",
+          "Only purely resistive components",
+          "Only inductances"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "ccb_q9",
+        "question": "What causes the dissipation factor in a real capacitor?",
+        "options": [
+          "Dielectric losses and equivalent series resistance",
+          "Lead inductance",
+          "Plate area",
+          "Distance between plates"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": "ccb_q10",
+        "question": "The balance condition equation for an AC bridge is:",
+        "options": [
+          "Z1*Z4 = Z2*Z3",
+          "Z1/Z2 = Z3/Z4",
+          "Z1+Z4 = Z2+Z3",
+          "Z1-Z4 = Z2-Z3"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": "ccb_q1",
+        "question": "What is the main purpose of the Capacitance Comparison Bridge?",
+        "options": [
+          "To measure the self-inductance of a coil.",
+          "To determine the exact frequency of an AC source.",
+          "To determine an unknown capacitance by comparing it with a known standard capacitor.",
+          "To measure the DC resistance of an insulator."
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": "ccb_q2",
+        "question": "What happens if the dielectric of the unknown capacitor is very lossy (has high equivalent series resistance)?",
+        "options": [
+          "A perfect null cannot be achieved unless a variable resistive arm is added to balance the real power loss.",
+          "The bridge balances much faster than with a perfect capacitor.",
+          "The standard capacitor will overheat and get damaged.",
+          "The excitation frequency automatically drops to zero."
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": "ccb_q3",
+        "question": "Which detector is commonly used for an audio-frequency AC capacitance bridge?",
+        "options": [
+          "A standard moving-coil DC galvanometer.",
+          "A compass needle.",
+          "Headphones or an AC tuned detector.",
+          "An ammeter."
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": "ccb_q4",
+        "question": "In an ideal lossless capacitance comparison bridge, the balance condition depends on:",
+        "options": [
+          "The absolute voltage of the AC supply.",
+          "The ratio of the adjacent resistive arms.",
+          "The phase angle of the detector.",
+          "The ambient temperature of the room."
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "ccb_q5",
+        "question": "How are stray electrostatic capacitances between bridge arms and ground mitigated in high-precision AC bridges?",
+        "options": [
+          "By submerging the bridge in distilled water.",
+          "By using a Wagner earth connection and electrostatic shielding.",
+          "By increasing the supply voltage to overpower the stray signals.",
+          "By replacing all capacitors with inductors."
+        ],
+        "correctIndex": 1
+      }
+    ]
   },
   {
     "id": "maxwell-inductance-bridge",
@@ -686,170 +766,160 @@ export const EXPERIMENTS = [
     ],
     "pretest": [
       {
-        "q": "Maxwell inductance bridge compares unknown L against:",
+        "q": "Info: Maxwell's Inductance Bridge determines unknown inductance by comparing it with a standard self-inductance. Prerequisite: Phasor diagrams and AC impedances. Why is this bridge rarely used for high-Q coils?",
         "options": [
-          "Standard C",
-          "Standard L",
-          "Standard R",
-          "Standard V"
-        ],
-        "answer": 1
-      },
-      {
-        "q": "The bridge measures:",
-        "options": [
-          "Only L",
-          "Only R",
-          "Both L and its internal resistance R",
-          "Capacitance"
+          "It requires a massive standard inductor",
+          "Balance equations are dependent on frequency",
+          "Sliding balance occurs due to interacting resistive and inductive controls",
+          "It is only suitable for DC"
         ],
         "answer": 2
       },
       {
-        "q": "A standard variable inductor is called a:",
+        "q": "For a Maxwell Inductance Bridge, the unknown inductance L1 is given by:",
         "options": [
-          "Variac",
-          "Variometer",
-          "Varactor",
-          "Varistor"
-        ],
-        "answer": 1
-      },
-      {
-        "q": "Maxwell inductance bridge requires a standard inductor which is:",
-        "options": [
-          "Cheap and small",
-          "Bulky and expensive",
-          "Always fixed",
-          "Loss-free"
-        ],
-        "answer": 1
-      },
-      {
-        "q": "The balance equations are independent of:",
-        "options": [
-          "Frequency",
-          "Resistance",
-          "Inductance",
-          "Voltage source amplitude"
+          "L1 = (R3/R4)*L2",
+          "L1 = (R4/R3)*L2",
+          "L1 = R2*R3*L2",
+          "L1 = L2/(R3*R4)"
         ],
         "answer": 0
       }
     ],
     "posttest": [
       {
-        "q": "Why is standard L rarely used?",
+        "q": "Given R3=100Ω, R4=1000Ω, and a standard inductor L2=10mH with internal resistance r2=15Ω. If R2=85Ω, what are L1 and R1?",
         "options": [
-          "Too small",
-          "Bulky and prone to magnetic errors",
-          "Too cheap",
-          "Does not work with AC"
-        ],
-        "answer": 1
-      },
-      {
-        "q": "To achieve balance, one must usually adjust:",
-        "options": [
-          "Only one arm",
-          "Two components alternately",
-          "The frequency",
-          "The voltage"
-        ],
-        "answer": 1
-      },
-      {
-        "q": "The internal resistance of the coil is calculated using:",
-        "options": [
-          "Rx = R_std * (R2/R3)",
-          "Rx = R_std / (R2/R3)",
-          "Rx = R_std * (R3/R2)",
-          "Rx = L_std * (R2/R3)"
+          "L1=1mH, R1=10Ω",
+          "L1=100mH, R1=10Ω",
+          "L1=1mH, R1=100Ω",
+          "L1=10mH, R1=85Ω"
         ],
         "answer": 0
       },
       {
-        "q": "What is the phase difference between the arms at balance?",
+        "q": "If the frequency of the AC source is doubled, the balance point of a perfect Maxwell Inductance Bridge will:",
         "options": [
-          "90 degrees",
-          "180 degrees",
-          "They have equal phase angles in opposite arms",
-          "Zero"
+          "Shift drastically",
+          "Remain unchanged",
+          "Become impossible to find",
+          "Cause the detector to overload"
         ],
-        "answer": 2
-      },
-      {
-        "q": "The sensitivity of the bridge is maximum when:",
-        "options": [
-          "Ratio arms are equal",
-          "Ratio arms are zero",
-          "Frequency is infinite",
-          "Voltage is zero"
-        ],
-        "answer": 0
+        "answer": 1
       }
     ],
     "viva": [
-      {"id":"mib_q6","question":"The Maxwell Inductance Bridge compares an unknown inductance with:","options":["A known standard capacitance","A known standard inductance","A known standard resistance","A frequency source"],"correctIndex":1},
-      {"id":"mib_q7","question":"Why is the Maxwell Inductance bridge rarely used for high Q coils?","options":["It requires an impractically large resistance for balance","It is unstable","The equations become non-linear","It requires high voltages"],"correctIndex":0},
-      {"id":"mib_q8","question":"Which detector is suitable for a Maxwell bridge operating at 1 kHz?","options":["Vibration galvanometer","Headphones","DC galvanometer","Electrometer"],"correctIndex":1},
-      {"id":"mib_q9","question":"The quality factor (Q) of a coil is defined as:","options":["wL / R","R / wL","w / RC","1 / wLC"],"correctIndex":0},
-      {"id":"mib_q10","question":"In the balance equations, the unknown resistance Rx is dependent on:","options":["Frequency","Only the bridge arm resistances","The source voltage","The detector sensitivity"],"correctIndex":1},
       {
-            "id": "mib_q1",
-            "question": "What does Maxwells Inductance Bridge primarily compare the unknown inductance against?",
-            "options": [
-                  "A standard variable capacitor.",
-                  "A standard variable inductor.",
-                  "A highly stable DC voltage source.",
-                  "A precision frequency oscillator."
-            ],
-            "correctIndex": 1
+        "id": "mib_q6",
+        "question": "The Maxwell Inductance Bridge compares an unknown inductance with:",
+        "options": [
+          "A known standard capacitance",
+          "A known standard inductance",
+          "A known standard resistance",
+          "A frequency source"
+        ],
+        "correctIndex": 1
       },
       {
-            "id": "mib_q2",
-            "question": "Why is the Maxwell Inductance Bridge rarely used for highly precise laboratory measurements compared to the Maxwell-Wien bridge?",
-            "options": [
-                  "It requires a DC supply which is hard to stabilize.",
-                  "Standard variable inductors are bulky, expensive, and prone to external magnetic field errors.",
-                  "It can only measure inductances above 100 Henrys.",
-                  "It requires a perfectly lossless standard inductor, which does not exist."
-            ],
-            "correctIndex": 1
+        "id": "mib_q7",
+        "question": "Why is the Maxwell Inductance bridge rarely used for high Q coils?",
+        "options": [
+          "It requires an impractically large resistance for balance",
+          "It is unstable",
+          "The equations become non-linear",
+          "It requires high voltages"
+        ],
+        "correctIndex": 0
       },
       {
-            "id": "mib_q3",
-            "question": "To achieve balance in a Maxwell Inductance Bridge, which components are typically adjusted?",
-            "options": [
-                  "A variable capacitor and a fixed resistor.",
-                  "The AC source frequency and amplitude.",
-                  "A variable standard inductor and a variable resistor in series with it.",
-                  "Two variable capacitors."
-            ],
-            "correctIndex": 2
+        "id": "mib_q8",
+        "question": "Which detector is suitable for a Maxwell bridge operating at 1 kHz?",
+        "options": [
+          "Vibration galvanometer",
+          "Headphones",
+          "DC galvanometer",
+          "Electrometer"
+        ],
+        "correctIndex": 1
       },
       {
-            "id": "mib_q4",
-            "question": "What is the effect of mutual inductance between the standard reference coil and the unknown coil?",
-            "options": [
-                  "It speeds up the balancing process.",
-                  "It causes significant measurement errors; hence coils must be magnetically shielded or placed far apart.",
-                  "It cancels out the resistive losses in both coils.",
-                  "It doubles the sensitivity of the detector."
-            ],
-            "correctIndex": 1
+        "id": "mib_q9",
+        "question": "The quality factor (Q) of a coil is defined as:",
+        "options": [
+          "wL / R",
+          "R / wL",
+          "w / RC",
+          "1 / wLC"
+        ],
+        "correctIndex": 0
       },
       {
-            "id": "mib_q5",
-            "question": "If the unknown inductor has a very high internal resistance, what happens to the balance?",
-            "options": [
-                  "The bridge becomes a Wheatstone bridge.",
-                  "The standard variable resistor must be adjusted to a high value to achieve real balance.",
-                  "The inductance measurement becomes perfectly accurate.",
-                  "The AC supply will short circuit."
-            ],
-            "correctIndex": 1
+        "id": "mib_q10",
+        "question": "In the balance equations, the unknown resistance Rx is dependent on:",
+        "options": [
+          "Frequency",
+          "Only the bridge arm resistances",
+          "The source voltage",
+          "The detector sensitivity"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "mib_q1",
+        "question": "What does Maxwells Inductance Bridge primarily compare the unknown inductance against?",
+        "options": [
+          "A standard variable capacitor.",
+          "A standard variable inductor.",
+          "A highly stable DC voltage source.",
+          "A precision frequency oscillator."
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "mib_q2",
+        "question": "Why is the Maxwell Inductance Bridge rarely used for highly precise laboratory measurements compared to the Maxwell-Wien bridge?",
+        "options": [
+          "It requires a DC supply which is hard to stabilize.",
+          "Standard variable inductors are bulky, expensive, and prone to external magnetic field errors.",
+          "It can only measure inductances above 100 Henrys.",
+          "It requires a perfectly lossless standard inductor, which does not exist."
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "mib_q3",
+        "question": "To achieve balance in a Maxwell Inductance Bridge, which components are typically adjusted?",
+        "options": [
+          "A variable capacitor and a fixed resistor.",
+          "The AC source frequency and amplitude.",
+          "A variable standard inductor and a variable resistor in series with it.",
+          "Two variable capacitors."
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": "mib_q4",
+        "question": "What is the effect of mutual inductance between the standard reference coil and the unknown coil?",
+        "options": [
+          "It speeds up the balancing process.",
+          "It causes significant measurement errors; hence coils must be magnetically shielded or placed far apart.",
+          "It cancels out the resistive losses in both coils.",
+          "It doubles the sensitivity of the detector."
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "mib_q5",
+        "question": "If the unknown inductor has a very high internal resistance, what happens to the balance?",
+        "options": [
+          "The bridge becomes a Wheatstone bridge.",
+          "The standard variable resistor must be adjusted to a high value to achieve real balance.",
+          "The inductance measurement becomes perfectly accurate.",
+          "The AC supply will short circuit."
+        ],
+        "correctIndex": 1
       }
-]
+    ]
   },
   {
     "id": "maxwell-lc-bridge",
@@ -878,170 +948,160 @@ export const EXPERIMENTS = [
     ],
     "pretest": [
       {
-        "q": "Maxwell LC bridge is suited for:",
-        "options": [
-          "Low Q coils",
-          "Medium Q coils",
-          "High Q coils",
-          "Capacitors"
-        ],
-        "answer": 1
-      },
-      {
-        "q": "The bridge measures inductance in terms of:",
-        "options": [
-          "Standard inductance",
-          "Standard capacitance",
-          "Standard frequency",
-          "Standard voltage"
-        ],
-        "answer": 1
-      },
-      {
-        "q": "What is a \"medium Q\" coil?",
-        "options": [
-          "1 < Q < 10",
-          "Q < 1",
-          "Q > 10",
-          "Q = 0"
-        ],
-        "answer": 0
-      },
-      {
-        "q": "Using a capacitor instead of an inductor is better because:",
+        "q": "Info: Maxwell's L-C bridge measures unknown inductance using a standard variable capacitance. Prerequisite: Resonance and Q-factor. Why is a standard capacitor preferred over a standard inductor?",
         "options": [
           "Capacitors are heavier",
-          "Capacitors have magnetic fields",
-          "Capacitors are more compact and have less loss",
-          "Capacitors change with frequency more"
+          "Standard capacitors are less lossy and more compact than standard inductors",
+          "Capacitors generate magnetic fields",
+          "Inductors are cheaper"
         ],
-        "answer": 2
+        "answer": 1
       },
       {
-        "q": "The balance equations are:",
+        "q": "Maxwell's L-C bridge is most suitable for measuring coils with a Q-factor of:",
         "options": [
-          "Dependent on frequency",
-          "Independent of frequency",
-          "Dependent on voltage",
-          "Dependent on time"
+          "Q < 1",
+          "1 < Q < 10",
+          "Q > 10",
+          "Q > 100"
         ],
         "answer": 1
       }
     ],
     "posttest": [
       {
-        "q": "The balance equation for Lx is independent of:",
+        "q": "At balance, R2=100Ω, R3=1000Ω, C4=1µF, R4=500Ω. Calculate the unknown inductance Lx and its resistance Rx.",
         "options": [
-          "Frequency",
-          "R2",
-          "R3",
-          "C4"
+          "Lx=100mH, Rx=200Ω",
+          "Lx=10mH, Rx=50Ω",
+          "Lx=0.1H, Rx=200Ω",
+          "Lx=1H, Rx=500Ω"
         ],
         "answer": 0
       },
       {
-        "q": "In Maxwell LC bridge, the standard capacitor is in:",
+        "q": "If a very high-Q coil (Q > 100) is measured using a Maxwell L-C bridge, what practical difficulty arises?",
         "options": [
-          "Series with a resistor",
-          "Parallel with a resistor",
-          "Isolated arm",
-          "Short circuited"
+          "R4 becomes impractically small",
+          "R4 becomes impractically large",
+          "C4 must be very large",
+          "The bridge oscillates"
         ],
         "answer": 1
-      },
-      {
-        "q": "Why is it unsuitable for high Q coils?",
-        "options": [
-          "Requires very large resistance R4",
-          "Requires very small capacitance",
-          "Frequency dependence",
-          "Burns the coil"
-        ],
-        "answer": 0
-      },
-      {
-        "q": "Why is it unsuitable for low Q coils (Q < 1)?",
-        "options": [
-          "Sliding balance problem",
-          "Burns the capacitor",
-          "Resistance becomes negative",
-          "Frequency becomes zero"
-        ],
-        "answer": 0
-      },
-      {
-        "q": "If R2 and R3 are fixed, Lx is directly proportional to:",
-        "options": [
-          "C4",
-          "1/C4",
-          "R4",
-          "1/R4"
-        ],
-        "answer": 0
       }
     ],
     "viva": [
-      {"id":"mlcb_q6","question":"The Maxwell LC bridge (Maxwell-Wien bridge) measures an unknown inductance in terms of:","options":["A standard inductance","A standard capacitance","A standard frequency","A standard voltage"],"correctIndex":1},
-      {"id":"mlcb_q7","question":"A major advantage of the Maxwell-Wien bridge is that its balance equations are:","options":["Dependent on frequency","Independent of frequency","Highly non-linear","Only valid for DC"],"correctIndex":1},
-      {"id":"mlcb_q8","question":"The Maxwell LC bridge is best suited for measuring coils with:","options":["Very low Q (Q < 1)","Medium Q (1 < Q < 10)","High Q (Q > 10)","Infinite Q"],"correctIndex":1},
-      {"id":"mlcb_q9","question":"For high Q coils, which bridge is preferred over the Maxwell bridge?","options":["Schering bridge","Kelvin bridge","Hay bridge","Wien bridge"],"correctIndex":2},
-      {"id":"mlcb_q10","question":"In a Maxwell LC bridge, the capacitor is placed in:","options":["Series with a resistor","Parallel with a resistor","Series with an inductor","Parallel with the unknown coil"],"correctIndex":1},
       {
-            "id": "mlcb_q1",
-            "question": "Maxwells Inductance-Capacitance (Maxwell-Wien) Bridge is best suited for measuring coils with which range of Q (Quality) factor?",
-            "options": [
-                  "High Q coils (Q > 10)",
-                  "Medium Q coils (1 < Q < 10)",
-                  "Low Q coils (Q < 1)",
-                  "It measures pure inductance irrespective of Q factor."
-            ],
-            "correctIndex": 1
+        "id": "mlcb_q6",
+        "question": "The Maxwell LC bridge (Maxwell-Wien bridge) measures an unknown inductance in terms of:",
+        "options": [
+          "A standard inductance",
+          "A standard capacitance",
+          "A standard frequency",
+          "A standard voltage"
+        ],
+        "correctIndex": 1
       },
       {
-            "id": "mlcb_q2",
-            "question": "Which component is used as the standard reference to measure the unknown inductance in a Maxwell-Wien Bridge?",
-            "options": [
-                  "A standard variable inductor.",
-                  "A standard variable capacitor.",
-                  "A standard high-wattage resistor.",
-                  "A standard step-down transformer."
-            ],
-            "correctIndex": 1
+        "id": "mlcb_q7",
+        "question": "A major advantage of the Maxwell-Wien bridge is that its balance equations are:",
+        "options": [
+          "Dependent on frequency",
+          "Independent of frequency",
+          "Highly non-linear",
+          "Only valid for DC"
+        ],
+        "correctIndex": 1
       },
       {
-            "id": "mlcb_q3",
-            "question": "What practical difficulty arises if a Maxwells bridge is used to measure a very low-Q coil (Q < 1)?",
-            "options": [
-                  "The standard capacitor value required would be impractically small.",
-                  "The required balancing resistance becomes impractically large.",
-                  "Balancing becomes a slow, iterative process because adjusting for resistive balance disturbs the inductive balance, causing a sliding balance.",
-                  "The bridge excitation frequency must be drastically increased to achieve balance."
-            ],
-            "correctIndex": 2
+        "id": "mlcb_q8",
+        "question": "The Maxwell LC bridge is best suited for measuring coils with:",
+        "options": [
+          "Very low Q (Q < 1)",
+          "Medium Q (1 < Q < 10)",
+          "High Q (Q > 10)",
+          "Infinite Q"
+        ],
+        "correctIndex": 1
       },
       {
-            "id": "mlcb_q4",
-            "question": "In an AC bridge like Maxwells, what two conditions must be satisfied simultaneously to achieve a true null balance?",
-            "options": [
-                  "Voltage and Current must balance independently.",
-                  "Real (resistive) and Imaginary (reactive) components must balance independently.",
-                  "Frequency and Phase must balance independently.",
-                  "Inductive and Capacitive reactances must completely cancel each other out."
-            ],
-            "correctIndex": 1
+        "id": "mlcb_q9",
+        "question": "For high Q coils, which bridge is preferred over the Maxwell bridge?",
+        "options": [
+          "Schering bridge",
+          "Kelvin bridge",
+          "Hay bridge",
+          "Wien bridge"
+        ],
+        "correctIndex": 2
       },
       {
-            "id": "mlcb_q5",
-            "question": "Why are headphones, vibration galvanometers, or CROs used instead of a standard moving-coil galvanometer in Maxwells Bridge?",
-            "options": [
-                  "Because the bridge operates on an AC supply and a standard DC galvanometer cannot detect alternating current.",
-                  "Because headphones amplify the weak signals better than a galvanometer.",
-                  "Because they can measure the exact RMS voltage value across the bridge arms.",
-                  "Because AC bridges require audio-frequency tuning to establish resonance."
-            ],
-            "correctIndex": 0
+        "id": "mlcb_q10",
+        "question": "In a Maxwell LC bridge, the capacitor is placed in:",
+        "options": [
+          "Series with a resistor",
+          "Parallel with a resistor",
+          "Series with an inductor",
+          "Parallel with the unknown coil"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "mlcb_q1",
+        "question": "Maxwells Inductance-Capacitance (Maxwell-Wien) Bridge is best suited for measuring coils with which range of Q (Quality) factor?",
+        "options": [
+          "High Q coils (Q > 10)",
+          "Medium Q coils (1 < Q < 10)",
+          "Low Q coils (Q < 1)",
+          "It measures pure inductance irrespective of Q factor."
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "mlcb_q2",
+        "question": "Which component is used as the standard reference to measure the unknown inductance in a Maxwell-Wien Bridge?",
+        "options": [
+          "A standard variable inductor.",
+          "A standard variable capacitor.",
+          "A standard high-wattage resistor.",
+          "A standard step-down transformer."
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "mlcb_q3",
+        "question": "What practical difficulty arises if a Maxwells bridge is used to measure a very low-Q coil (Q < 1)?",
+        "options": [
+          "The standard capacitor value required would be impractically small.",
+          "The required balancing resistance becomes impractically large.",
+          "Balancing becomes a slow, iterative process because adjusting for resistive balance disturbs the inductive balance, causing a sliding balance.",
+          "The bridge excitation frequency must be drastically increased to achieve balance."
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": "mlcb_q4",
+        "question": "In an AC bridge like Maxwells, what two conditions must be satisfied simultaneously to achieve a true null balance?",
+        "options": [
+          "Voltage and Current must balance independently.",
+          "Real (resistive) and Imaginary (reactive) components must balance independently.",
+          "Frequency and Phase must balance independently.",
+          "Inductive and Capacitive reactances must completely cancel each other out."
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "mlcb_q5",
+        "question": "Why are headphones, vibration galvanometers, or CROs used instead of a standard moving-coil galvanometer in Maxwells Bridge?",
+        "options": [
+          "Because the bridge operates on an AC supply and a standard DC galvanometer cannot detect alternating current.",
+          "Because headphones amplify the weak signals better than a galvanometer.",
+          "Because they can measure the exact RMS voltage value across the bridge arms.",
+          "Because AC bridges require audio-frequency tuning to establish resonance."
+        ],
+        "correctIndex": 0
       }
-]
+    ]
   },
   {
     "id": "hays-bridge",
@@ -1070,170 +1130,160 @@ export const EXPERIMENTS = [
     ],
     "pretest": [
       {
-        "q": "Hay bridge is preferred over Maxwell bridge for measuring:",
+        "q": "Info: Hay's Bridge is a modification of Maxwell's bridge designed specifically for high-Q coils. Prerequisite: Quality factor (Q = ωL/R). How does Hay's bridge differ from Maxwell's bridge?",
         "options": [
-          "High Q coils",
-          "Low Q coils",
-          "Capacitors",
-          "Resistors"
-        ],
-        "answer": 0
-      },
-      {
-        "q": "In Hay bridge, the standard capacitor is connected in:",
-        "options": [
-          "Parallel with R",
-          "Series with R",
-          "Separate arm",
-          "Short circuit"
+          "Capacitor is in parallel with the resistor",
+          "Capacitor is in series with the resistor in the standard arm",
+          "It uses two inductors",
+          "It requires DC supply"
         ],
         "answer": 1
       },
       {
-        "q": "High Q coils typically have Q greater than:",
+        "q": "For a high-Q coil (Q > 10), the balance equation for inductance Lx in Hay's bridge approximates to:",
         "options": [
-          "1",
-          "5",
-          "10",
-          "100"
+          "Lx ≈ R2*R3/C4",
+          "Lx ≈ R2*R3*C4",
+          "Lx ≈ C4/(R2*R3)",
+          "Lx ≈ R2/R3"
         ],
-        "answer": 2
-      },
-      {
-        "q": "The modification from Maxwell to Hay involves changing the capacitor from:",
-        "options": [
-          "Parallel to Series",
-          "Series to Parallel",
-          "Fixed to Variable",
-          "AC to DC"
-        ],
-        "answer": 0
-      },
-      {
-        "q": "Does the true Hay bridge balance equation depend on frequency?",
-        "options": [
-          "Yes",
-          "No",
-          "Only for low frequencies",
-          "Only for DC"
-        ],
-        "answer": 0
+        "answer": 1
       }
     ],
     "posttest": [
       {
-        "q": "For very high Q coils, the frequency term in the equation:",
+        "q": "In a Hay's Bridge, R2=1000Ω, R3=1000Ω, C4=0.1µF, and f=1000Hz. If the coil has very high Q, the approximate inductance Lx is:",
         "options": [
-          "Dominates",
-          "Becomes negligible",
-          "Causes oscillation",
-          "Burns the bridge"
+          "10 mH",
+          "100 mH",
+          "1 H",
+          "10 H"
         ],
         "answer": 1
       },
       {
-        "q": "If Hay bridge is used for low Q coils, what happens?",
+        "q": "Unlike Maxwell's bridge, the exact balance equations for Hay's bridge contain the term ω (frequency). This means:",
         "options": [
-          "Accurate results",
-          "Equations become strongly dependent on frequency",
-          "Detector explodes",
-          "No balance possible"
-        ],
-        "answer": 1
-      },
-      {
-        "q": "Which is the balance equation for Lx for very high Q?",
-        "options": [
-          "Lx = R2*R3*C4",
-          "Lx = R2*R3/C4",
-          "Lx = C4/(R2*R3)",
-          "Lx = R2/(R3*C4)"
-        ],
-        "answer": 0
-      },
-      {
-        "q": "The series resistor in the capacitive arm of a Hay bridge usually takes a:",
-        "options": [
-          "High value",
-          "Low value",
-          "Zero value",
-          "Infinite value"
-        ],
-        "answer": 1
-      },
-      {
-        "q": "Hay bridge avoids the requirement of what component found in Maxwell bridge for high Q coils?",
-        "options": [
-          "Small capacitor",
-          "Large parallel resistor",
-          "High voltage source",
-          "Inductor"
+          "It cannot be balanced",
+          "The balance is highly frequency-dependent, requiring a pure sine wave source",
+          "It works best with square waves",
+          "Frequency must be zero"
         ],
         "answer": 1
       }
     ],
     "viva": [
-      {"id":"hb_q6","question":"Hay's bridge is a modification of which bridge?","options":["Schering bridge","Maxwell-Wien bridge","Anderson bridge","Kelvin bridge"],"correctIndex":1},
-      {"id":"hb_q7","question":"Hay's bridge is preferred for measuring inductances with:","options":["Low Q (Q < 1)","Medium Q (1 < Q < 10)","High Q (Q > 10)","Negative Q"],"correctIndex":2},
-      {"id":"hb_q8","question":"In Hay's bridge, the standard capacitor is connected in:","options":["Parallel with a resistor","Series with a resistor","Parallel with the unknown inductor","Series with the source"],"correctIndex":1},
-      {"id":"hb_q9","question":"The balance equations for Hay's bridge are:","options":["Independent of frequency for high Q coils","Independent of frequency for all coils","Dependent on frequency","Only applicable at DC"],"correctIndex":2},
-      {"id":"hb_q10","question":"For a very high Q coil, the term (1/Q)^2 in Hay's bridge equations can be:","options":["Approximated to 1","Neglected","Multiplied by infinity","Replaced by Q"],"correctIndex":1},
       {
-            "id": "hb_q1",
-            "question": "Hays Bridge is a modification of Maxwells Bridge specifically designed to measure what?",
-            "options": [
-                  "Extremely low resistances.",
-                  "Low Q coils (Q < 1).",
-                  "High Q coils (Q > 10).",
-                  "Unknown frequencies."
-            ],
-            "correctIndex": 2
+        "id": "hb_q6",
+        "question": "Hay's bridge is a modification of which bridge?",
+        "options": [
+          "Schering bridge",
+          "Maxwell-Wien bridge",
+          "Anderson bridge",
+          "Kelvin bridge"
+        ],
+        "correctIndex": 1
       },
       {
-            "id": "hb_q2",
-            "question": "In Hays Bridge, how is the standard capacitor connected in the reference arm?",
-            "options": [
-                  "In parallel with a standard resistor (like Maxwells).",
-                  "In series with a standard resistor.",
-                  "Directly across the AC supply.",
-                  "In parallel with the unknown inductor."
-            ],
-            "correctIndex": 1
+        "id": "hb_q7",
+        "question": "Hay's bridge is preferred for measuring inductances with:",
+        "options": [
+          "Low Q (Q < 1)",
+          "Medium Q (1 < Q < 10)",
+          "High Q (Q > 10)",
+          "Negative Q"
+        ],
+        "correctIndex": 2
       },
       {
-            "id": "hb_q3",
-            "question": "What is a major mathematical disadvantage of Hays Bridge when calculating the exact inductance?",
-            "options": [
-                  "The balance equation for inductance contains the AC source frequency, making it frequency-dependent.",
-                  "The equation requires complex integration.",
-                  "It produces a negative inductance value.",
-                  "It requires knowing the exact phase angle of the detector."
-            ],
-            "correctIndex": 0
+        "id": "hb_q8",
+        "question": "In Hay's bridge, the standard capacitor is connected in:",
+        "options": [
+          "Parallel with a resistor",
+          "Series with a resistor",
+          "Parallel with the unknown inductor",
+          "Series with the source"
+        ],
+        "correctIndex": 1
       },
       {
-            "id": "hb_q4",
-            "question": "Why is the series R-C arrangement in Hays bridge better for high-Q coils than Maxwells parallel R-C?",
-            "options": [
-                  "Because high-Q coils require a larger current to balance.",
-                  "For high-Q, Maxwells bridge requires an impractically large parallel resistance, whereas Hays requires a manageable small series resistance.",
-                  "Because series circuits do not suffer from stray capacitance.",
-                  "Because series capacitors are cheaper than parallel capacitors."
-            ],
-            "correctIndex": 1
+        "id": "hb_q9",
+        "question": "The balance equations for Hay's bridge are:",
+        "options": [
+          "Independent of frequency for high Q coils",
+          "Independent of frequency for all coils",
+          "Dependent on frequency",
+          "Only applicable at DC"
+        ],
+        "correctIndex": 2
       },
       {
-            "id": "hb_q5",
-            "question": "If Hays bridge is incorrectly used to measure a very low-Q coil, what problem occurs?",
-            "options": [
-                  "The calculated inductance becomes highly sensitive to frequency variations and small errors.",
-                  "The standard capacitor will explode due to high current.",
-                  "The bridge balances instantly but gives a zero reading.",
-                  "The detector will indicate a perfect null regardless of the component values."
-            ],
-            "correctIndex": 0
+        "id": "hb_q10",
+        "question": "For a very high Q coil, the term (1/Q)^2 in Hay's bridge equations can be:",
+        "options": [
+          "Approximated to 1",
+          "Neglected",
+          "Multiplied by infinity",
+          "Replaced by Q"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "hb_q1",
+        "question": "Hays Bridge is a modification of Maxwells Bridge specifically designed to measure what?",
+        "options": [
+          "Extremely low resistances.",
+          "Low Q coils (Q < 1).",
+          "High Q coils (Q > 10).",
+          "Unknown frequencies."
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": "hb_q2",
+        "question": "In Hays Bridge, how is the standard capacitor connected in the reference arm?",
+        "options": [
+          "In parallel with a standard resistor (like Maxwells).",
+          "In series with a standard resistor.",
+          "Directly across the AC supply.",
+          "In parallel with the unknown inductor."
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "hb_q3",
+        "question": "What is a major mathematical disadvantage of Hays Bridge when calculating the exact inductance?",
+        "options": [
+          "The balance equation for inductance contains the AC source frequency, making it frequency-dependent.",
+          "The equation requires complex integration.",
+          "It produces a negative inductance value.",
+          "It requires knowing the exact phase angle of the detector."
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": "hb_q4",
+        "question": "Why is the series R-C arrangement in Hays bridge better for high-Q coils than Maxwells parallel R-C?",
+        "options": [
+          "Because high-Q coils require a larger current to balance.",
+          "For high-Q, Maxwells bridge requires an impractically large parallel resistance, whereas Hays requires a manageable small series resistance.",
+          "Because series circuits do not suffer from stray capacitance.",
+          "Because series capacitors are cheaper than parallel capacitors."
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "hb_q5",
+        "question": "If Hays bridge is incorrectly used to measure a very low-Q coil, what problem occurs?",
+        "options": [
+          "The calculated inductance becomes highly sensitive to frequency variations and small errors.",
+          "The standard capacitor will explode due to high current.",
+          "The bridge balances instantly but gives a zero reading.",
+          "The detector will indicate a perfect null regardless of the component values."
+        ],
+        "correctIndex": 0
       }
-]
+    ]
   },
   {
     "id": "anderson-bridge",
@@ -1262,170 +1312,160 @@ export const EXPERIMENTS = [
     ],
     "pretest": [
       {
-        "q": "Anderson bridge is a modification of:",
+        "q": "Info: Anderson's Bridge is a 5-node AC bridge used for precise measurement of self-inductance over a wide range. Prerequisite: Star-delta transformation. What is the main advantage of Anderson's bridge?",
         "options": [
-          "Schering bridge",
-          "Maxwell-Wien bridge",
-          "Wien bridge",
-          "Hay bridge"
-        ],
-        "answer": 1
-      },
-      {
-        "q": "The main advantage of Anderson bridge is that it uses a:",
-        "options": [
-          "Fixed capacitor",
-          "Variable capacitor",
-          "Fixed inductor",
-          "Variable inductor"
+          "It requires only one variable resistor to achieve balance",
+          "It uses no capacitors",
+          "It is independent of frequency",
+          "It has only 3 arms"
         ],
         "answer": 0
       },
       {
-        "q": "Anderson bridge is best suited for:",
+        "q": "Because of the additional node, deriving the balance equations typically requires:",
         "options": [
-          "High Q coils",
-          "Low Q coils",
-          "Capacitors",
-          "Frequencies"
-        ],
-        "answer": 1
-      },
-      {
-        "q": "How many nodes does a typical Anderson bridge have compared to a standard 4-node bridge?",
-        "options": [
-          "3",
-          "4",
-          "5 or 6",
-          "10"
-        ],
-        "answer": 2
-      },
-      {
-        "q": "To achieve balance, which component is usually varied?",
-        "options": [
-          "Capacitor",
-          "Variable resistor in series with C",
-          "Voltage source",
-          "Inductor"
+          "Norton's Theorem",
+          "Star-Delta (Wye-Delta) transformation",
+          "Coulomb's Law",
+          "Maxwell's Equations"
         ],
         "answer": 1
       }
     ],
     "posttest": [
       {
-        "q": "The balance equations for Anderson bridge are:",
+        "q": "A perfectly balanced Anderson bridge has C=1µF, R3=1000Ω, R2=1000Ω, R4=1000Ω, and variable resistor r=500Ω. Calculate Lx using Lx = C*R3*[r*(R4+R2)/R4 + R2].",
         "options": [
-          "Simple",
-          "Complex",
-          "Independent of R",
-          "Dependent on voltage"
+          "1 H",
+          "1.5 H",
+          "2 H",
+          "0.5 H"
         ],
         "answer": 1
       },
       {
-        "q": "Because it uses a fixed capacitor, it is:",
+        "q": "What is a major disadvantage of the Anderson Bridge compared to Maxwell's bridge?",
         "options": [
-          "Cheaper and more accurate",
-          "More expensive",
-          "Less accurate",
-          "Bulkier"
+          "It requires a standard inductor",
+          "It is only for low-Q coils",
+          "The circuit is more complex and shielding is difficult",
+          "It cannot be balanced at 1 kHz"
         ],
-        "answer": 0
-      },
-      {
-        "q": "Can Anderson bridge be used to measure capacitance?",
-        "options": [
-          "Yes, theoretically",
-          "No, only inductance",
-          "Only for electrolytic",
-          "Only at DC"
-        ],
-        "answer": 0
-      },
-      {
-        "q": "What is the main disadvantage of Anderson bridge?",
-        "options": [
-          "Inaccurate",
-          "Requires shielding and has complex equations",
-          "Requires DC",
-          "Requires high voltage"
-        ],
-        "answer": 1
-      },
-      {
-        "q": "Sliding balance in Anderson bridge is:",
-        "options": [
-          "Difficult to achieve",
-          "Easier to achieve than Maxwell for low Q",
-          "Impossible",
-          "Dependent on frequency"
-        ],
-        "answer": 1
+        "answer": 2
       }
     ],
     "viva": [
-      {"id":"ab_q6","question":"Anderson bridge is a modification of which bridge?","options":["Maxwell-Wien bridge","Maxwell Inductance bridge","Hay bridge","Schering bridge"],"correctIndex":1},
-      {"id":"ab_q7","question":"What is the main advantage of the Anderson bridge?","options":["It requires no variable capacitor","It can measure very high Q coils","It uses only three arms","It operates on DC"],"correctIndex":0},
-      {"id":"ab_q8","question":"How many nodes (junctions) are present in the Anderson bridge circuit?","options":["Three","Four","Five","Six"],"correctIndex":2},
-      {"id":"ab_q9","question":"The balance condition of the Anderson bridge requires adjusting:","options":["A variable capacitor","A variable resistor","The source frequency","The source voltage"],"correctIndex":1},
-      {"id":"ab_q10","question":"Compared to Maxwell's bridge, the balance equations of Anderson's bridge are:","options":["Much simpler","More complex","Exactly the same","Independent of resistance"],"correctIndex":1},
       {
-            "id": "ab_q1",
-            "question": "Anderson Bridge is a modification of Maxwells Bridge primarily used to measure what?",
-            "options": [
-                  "Very high Q coils.",
-                  "The inductance of low Q coils precisely.",
-                  "Extremely small capacitances.",
-                  "High voltage dielectric loss."
-            ],
-            "correctIndex": 1
+        "id": "ab_q6",
+        "question": "Anderson bridge is a modification of which bridge?",
+        "options": [
+          "Maxwell-Wien bridge",
+          "Maxwell Inductance bridge",
+          "Hay bridge",
+          "Schering bridge"
+        ],
+        "correctIndex": 1
       },
       {
-            "id": "ab_q2",
-            "question": "How does the topology of Andersons Bridge differ from standard four-arm bridges like Maxwells L-C bridge?",
-            "options": [
-                  "It operates on DC instead of AC.",
-                  "It uses two standard inductors instead of one.",
-                  "It is a 5-point network (effectively a 6-arm bridge) with an extra variable resistor node.",
-                  "It places the detector in series with the AC supply."
-            ],
-            "correctIndex": 2
+        "id": "ab_q7",
+        "question": "What is the main advantage of the Anderson bridge?",
+        "options": [
+          "It requires no variable capacitor",
+          "It can measure very high Q coils",
+          "It uses only three arms",
+          "It operates on DC"
+        ],
+        "correctIndex": 0
       },
       {
-            "id": "ab_q3",
-            "question": "What is the main practical advantage of Andersons Bridge over Maxwells Bridge?",
-            "options": [
-                  "It balances instantly without any manual adjustment.",
-                  "It achieves balance using only fixed capacitors and variable resistors, avoiding expensive precision variable capacitors.",
-                  "It requires no detector to find the null point.",
-                  "It operates independently of the real resistive balance."
-            ],
-            "correctIndex": 1
+        "id": "ab_q8",
+        "question": "How many nodes (junctions) are present in the Anderson bridge circuit?",
+        "options": [
+          "Three",
+          "Four",
+          "Five",
+          "Six"
+        ],
+        "correctIndex": 2
       },
       {
-            "id": "ab_q4",
-            "question": "What is a significant drawback of using the Anderson Bridge?",
-            "options": [
-                  "The balance equations are extremely complex and balancing is tedious due to multiple interacting resistive adjustments.",
-                  "It can only be used at frequencies above 1 MHz.",
-                  "It requires a massive standard inductor.",
-                  "It is highly dangerous due to high voltage requirements."
-            ],
-            "correctIndex": 0
+        "id": "ab_q9",
+        "question": "The balance condition of the Anderson bridge requires adjusting:",
+        "options": [
+          "A variable capacitor",
+          "A variable resistor",
+          "The source frequency",
+          "The source voltage"
+        ],
+        "correctIndex": 1
       },
       {
-            "id": "ab_q5",
-            "question": "In Andersons bridge, the balance condition for the unknown inductance depends on:",
-            "options": [
-                  "Only the fixed capacitor and one resistor.",
-                  "The fixed capacitor and multiple resistive arms in the network.",
-                  "The frequency of the AC source.",
-                  "The internal resistance of the detector."
-            ],
-            "correctIndex": 1
+        "id": "ab_q10",
+        "question": "Compared to Maxwell's bridge, the balance equations of Anderson's bridge are:",
+        "options": [
+          "Much simpler",
+          "More complex",
+          "Exactly the same",
+          "Independent of resistance"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "ab_q1",
+        "question": "Anderson Bridge is a modification of Maxwells Bridge primarily used to measure what?",
+        "options": [
+          "Very high Q coils.",
+          "The inductance of low Q coils precisely.",
+          "Extremely small capacitances.",
+          "High voltage dielectric loss."
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "ab_q2",
+        "question": "How does the topology of Andersons Bridge differ from standard four-arm bridges like Maxwells L-C bridge?",
+        "options": [
+          "It operates on DC instead of AC.",
+          "It uses two standard inductors instead of one.",
+          "It is a 5-point network (effectively a 6-arm bridge) with an extra variable resistor node.",
+          "It places the detector in series with the AC supply."
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": "ab_q3",
+        "question": "What is the main practical advantage of Andersons Bridge over Maxwells Bridge?",
+        "options": [
+          "It balances instantly without any manual adjustment.",
+          "It achieves balance using only fixed capacitors and variable resistors, avoiding expensive precision variable capacitors.",
+          "It requires no detector to find the null point.",
+          "It operates independently of the real resistive balance."
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "ab_q4",
+        "question": "What is a significant drawback of using the Anderson Bridge?",
+        "options": [
+          "The balance equations are extremely complex and balancing is tedious due to multiple interacting resistive adjustments.",
+          "It can only be used at frequencies above 1 MHz.",
+          "It requires a massive standard inductor.",
+          "It is highly dangerous due to high voltage requirements."
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": "ab_q5",
+        "question": "In Andersons bridge, the balance condition for the unknown inductance depends on:",
+        "options": [
+          "Only the fixed capacitor and one resistor.",
+          "The fixed capacitor and multiple resistive arms in the network.",
+          "The frequency of the AC source.",
+          "The internal resistance of the detector."
+        ],
+        "correctIndex": 1
       }
-]
+    ]
   },
   {
     "id": "schering-bridge",
@@ -1455,170 +1495,160 @@ export const EXPERIMENTS = [
     ],
     "pretest": [
       {
-        "q": "Schering bridge is used to measure:",
+        "q": "Info: Schering Bridge is universally used for precision measurement of capacitance and dielectric loss. Prerequisite: Dissipation factor (D = tan δ). What is the primary industrial application of the Schering bridge?",
         "options": [
-          "Inductance",
-          "Capacitance and Dissipation Factor",
-          "Frequency",
-          "Resistance"
+          "Measuring motor speed",
+          "Testing high-voltage cables and insulators for dielectric breakdown",
+          "Measuring antenna impedance",
+          "Calibrating ammeters"
         ],
         "answer": 1
       },
       {
-        "q": "High voltage Schering bridges are used to test:",
+        "q": "The dissipation factor (D) of a capacitor measured by a Schering bridge is proportional to:",
         "options": [
-          "Resistors",
-          "Inductors",
-          "Insulating cables and high voltage capacitors",
-          "Batteries"
+          "The frequency of the source",
+          "The standard capacitance",
+          "The parallel capacitance C4 in the ratio arm",
+          "The supply voltage"
         ],
         "answer": 2
-      },
-      {
-        "q": "What is dissipation factor (D)?",
-        "options": [
-          "Ratio of resistive to reactive current",
-          "Ratio of reactive to resistive current",
-          "Voltage drop",
-          "Frequency"
-        ],
-        "answer": 0
-      },
-      {
-        "q": "The standard capacitor in a high voltage Schering bridge is usually:",
-        "options": [
-          "Electrolytic",
-          "Air or gas-filled (loss-free)",
-          "Ceramic",
-          "Tantalum"
-        ],
-        "answer": 1
-      },
-      {
-        "q": "For safety, the controls of a high-voltage Schering bridge are placed:",
-        "options": [
-          "At high voltage",
-          "Near ground potential",
-          "In series with the supply",
-          "Disconnected"
-        ],
-        "answer": 1
       }
     ],
     "posttest": [
       {
-        "q": "Dissipation factor in Schering bridge is calculated as:",
+        "q": "In a Schering bridge, R4=1000Ω, C2=100pF (loss-free standard), R3=2000Ω. Calculate the unknown capacitance Cx.",
         "options": [
-          "w*C4*R4",
-          "1/(w*C4*R4)",
-          "w*L/R",
-          "R/(w*L)"
+          "50 pF",
+          "100 pF",
+          "200 pF",
+          "500 pF"
         ],
         "answer": 0
       },
       {
-        "q": "The balance equation for Cx is:",
+        "q": "At 50 Hz, the parallel capacitor C4 required to balance the bridge is 0.1µF, and R4 is 1000Ω. What is the dissipation factor (tan δ) of the unknown dielectric? (D = ω*C4*R4)",
         "options": [
-          "Dependent on frequency",
-          "Independent of frequency",
-          "Dependent on voltage",
-          "Dependent on D"
+          "0.0314",
+          "0.314",
+          "3.14",
+          "0.00314"
         ],
-        "answer": 1
-      },
-      {
-        "q": "If a capacitor is perfect (loss-less), its dissipation factor is:",
-        "options": [
-          "Infinity",
-          "Zero",
-          "1",
-          "100"
-        ],
-        "answer": 1
-      },
-      {
-        "q": "Schering bridge uses how many capacitors?",
-        "options": [
-          "One",
-          "Two (Standard and Unknown)",
-          "Three",
-          "Four"
-        ],
-        "answer": 1
-      },
-      {
-        "q": "A Wagner earth device is sometimes used with Schering bridge to:",
-        "options": [
-          "Increase voltage",
-          "Eliminate stray capacitance errors",
-          "Provide AC power",
-          "Cool the resistors"
-        ],
-        "answer": 1
+        "answer": 0
       }
     ],
     "viva": [
-      {"id":"sb_q6","question":"The Schering bridge is primarily used for measuring:","options":["Unknown inductance","Unknown capacitance and dielectric loss","Unknown resistance","Unknown frequency"],"correctIndex":1},
-      {"id":"sb_q7","question":"At high voltages, the standard capacitor used in a Schering bridge is typically a:","options":["Electrolytic capacitor","Ceramic capacitor","Gas-filled standard capacitor","Tantalum capacitor"],"correctIndex":2},
-      {"id":"sb_q8","question":"The dissipation factor (D) measured by a Schering bridge is equivalent to:","options":["tan(delta)","cos(theta)","sin(delta)","Q factor"],"correctIndex":0},
-      {"id":"sb_q9","question":"In a high-voltage Schering bridge, the null detector is connected between:","options":["The high voltage arms","The low voltage arms","The source terminals","The standard capacitor and ground"],"correctIndex":1},
-      {"id":"sb_q10","question":"The Schering bridge balance is achieved by varying:","options":["The high voltage standard capacitor","The unknown capacitor","A low voltage resistor and capacitor","The supply frequency"],"correctIndex":2},
       {
-            "id": "sb_q1",
-            "question": "What is the primary industrial application of the Schering Bridge?",
-            "options": [
-                  "Measuring unknown inductance of high Q coils.",
-                  "Measuring extremely low DC contact resistances.",
-                  "Measuring unknown capacitance and the dielectric loss angle (dissipation factor) of insulators.",
-                  "Measuring the exact frequency of an unknown AC source."
-            ],
-            "correctIndex": 2
+        "id": "sb_q6",
+        "question": "The Schering bridge is primarily used for measuring:",
+        "options": [
+          "Unknown inductance",
+          "Unknown capacitance and dielectric loss",
+          "Unknown resistance",
+          "Unknown frequency"
+        ],
+        "correctIndex": 1
       },
       {
-            "id": "sb_q2",
-            "question": "In a high-voltage Schering Bridge, why is the standard reference capacitor typically a gas-filled or air capacitor?",
-            "options": [
-                  "It is cheaper to manufacture and maintain.",
-                  "It has virtually zero dielectric loss, serving as a perfect lossless reference.",
-                  "It can handle significantly higher steady-state DC currents.",
-                  "It automatically adjusts its capacitance based on ambient temperature."
-            ],
-            "correctIndex": 1
+        "id": "sb_q7",
+        "question": "At high voltages, the standard capacitor used in a Schering bridge is typically a:",
+        "options": [
+          "Electrolytic capacitor",
+          "Ceramic capacitor",
+          "Gas-filled standard capacitor",
+          "Tantalum capacitor"
+        ],
+        "correctIndex": 2
       },
       {
-            "id": "sb_q3",
-            "question": "What safety precaution is specifically utilized in the structural layout of a high-voltage Schering Bridge?",
-            "options": [
-                  "The detector and standard adjustable components are placed in the lower arms and grounded to protect the operator.",
-                  "The entire bridge circuit must be submerged in insulating transformer oil.",
-                  "It must be operated inside a Faraday cage to prevent RF interference.",
-                  "A high-voltage fuse is placed directly in series with the unknown test capacitor."
-            ],
-            "correctIndex": 0
+        "id": "sb_q8",
+        "question": "The dissipation factor (D) measured by a Schering bridge is equivalent to:",
+        "options": [
+          "tan(delta)",
+          "cos(theta)",
+          "sin(delta)",
+          "Q factor"
+        ],
+        "correctIndex": 0
       },
       {
-            "id": "sb_q4",
-            "question": "The dissipation factor (tan δ) measured by a Schering Bridge is an indicator of:",
-            "options": [
-                  "The maximum peak voltage the capacitor can withstand before breakdown.",
-                  "The quality of the dielectric material and the power lost as heat within it.",
-                  "The physical size and distance between the capacitor plates.",
-                  "The self-resonant frequency of the capacitor under test."
-            ],
-            "correctIndex": 1
+        "id": "sb_q9",
+        "question": "In a high-voltage Schering bridge, the null detector is connected between:",
+        "options": [
+          "The high voltage arms",
+          "The low voltage arms",
+          "The source terminals",
+          "The standard capacitor and ground"
+        ],
+        "correctIndex": 1
       },
       {
-            "id": "sb_q5",
-            "question": "How does the presence of stray capacitance affect Schering Bridge measurements at higher frequencies?",
-            "options": [
-                  "It artificially improves the accuracy of the dissipation factor measurement.",
-                  "It has absolutely no effect because the bridge naturally operates on AC.",
-                  "It causes significant errors in both capacitance and loss angle, often requiring a Wagner Earth connection to mitigate.",
-                  "It only affects the inductance measurements of the connecting leads."
-            ],
-            "correctIndex": 2
+        "id": "sb_q10",
+        "question": "The Schering bridge balance is achieved by varying:",
+        "options": [
+          "The high voltage standard capacitor",
+          "The unknown capacitor",
+          "A low voltage resistor and capacitor",
+          "The supply frequency"
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": "sb_q1",
+        "question": "What is the primary industrial application of the Schering Bridge?",
+        "options": [
+          "Measuring unknown inductance of high Q coils.",
+          "Measuring extremely low DC contact resistances.",
+          "Measuring unknown capacitance and the dielectric loss angle (dissipation factor) of insulators.",
+          "Measuring the exact frequency of an unknown AC source."
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": "sb_q2",
+        "question": "In a high-voltage Schering Bridge, why is the standard reference capacitor typically a gas-filled or air capacitor?",
+        "options": [
+          "It is cheaper to manufacture and maintain.",
+          "It has virtually zero dielectric loss, serving as a perfect lossless reference.",
+          "It can handle significantly higher steady-state DC currents.",
+          "It automatically adjusts its capacitance based on ambient temperature."
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "sb_q3",
+        "question": "What safety precaution is specifically utilized in the structural layout of a high-voltage Schering Bridge?",
+        "options": [
+          "The detector and standard adjustable components are placed in the lower arms and grounded to protect the operator.",
+          "The entire bridge circuit must be submerged in insulating transformer oil.",
+          "It must be operated inside a Faraday cage to prevent RF interference.",
+          "A high-voltage fuse is placed directly in series with the unknown test capacitor."
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": "sb_q4",
+        "question": "The dissipation factor (tan δ) measured by a Schering Bridge is an indicator of:",
+        "options": [
+          "The maximum peak voltage the capacitor can withstand before breakdown.",
+          "The quality of the dielectric material and the power lost as heat within it.",
+          "The physical size and distance between the capacitor plates.",
+          "The self-resonant frequency of the capacitor under test."
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "sb_q5",
+        "question": "How does the presence of stray capacitance affect Schering Bridge measurements at higher frequencies?",
+        "options": [
+          "It artificially improves the accuracy of the dissipation factor measurement.",
+          "It has absolutely no effect because the bridge naturally operates on AC.",
+          "It causes significant errors in both capacitance and loss angle, often requiring a Wagner Earth connection to mitigate.",
+          "It only affects the inductance measurements of the connecting leads."
+        ],
+        "correctIndex": 2
       }
-]
+    ]
   },
   {
     "id": "wiens-bridge",
@@ -1647,89 +1677,39 @@ export const EXPERIMENTS = [
     ],
     "pretest": [
       {
-        "q": "Wien bridge is primarily used to measure:",
-        "options": [
-          "Inductance",
-          "Capacitance",
-          "Frequency",
-          "Voltage"
-        ],
-        "answer": 2
-      },
-      {
-        "q": "Wien bridge has a series RC combination in one arm and:",
-        "options": [
-          "Series RC in another",
-          "Parallel RC in adjoining arm",
-          "Only R",
-          "Only L"
-        ],
-        "answer": 1
-      },
-      {
-        "q": "Wien bridge is commonly used in:",
-        "options": [
-          "Audio frequency oscillators",
-          "Radio frequency transmitters",
-          "DC power supplies",
-          "Transformers"
-        ],
-        "answer": 0
-      },
-      {
-        "q": "At balance, the phase shift across the RC arms is:",
+        "q": "Info: Wien's Bridge is an AC bridge used primarily for measuring frequency or acting as a frequency-selective filter. Prerequisite: RC phase shift networks. At the balance frequency, what is the phase shift across the RC arms?",
         "options": [
           "90 degrees",
           "180 degrees",
-          "0 degrees",
+          "Zero degrees",
           "45 degrees"
         ],
         "answer": 2
       },
       {
-        "q": "Is Wien bridge sensitive to harmonics?",
+        "q": "If the series RC arm has components R1, C1 and the parallel RC arm has R2, C2, the balance frequency f is given by:",
         "options": [
-          "Yes",
-          "No",
-          "Only at DC",
-          "Only above 1 MHz"
+          "1 / (2π * R1 * C1)",
+          "1 / (2π * √(R1*R2*C1*C2))",
+          "R1 / (2π * C1)",
+          "√(R1*C1)"
         ],
-        "answer": 0
+        "answer": 1
       }
     ],
     "posttest": [
       {
-        "q": "If R1=R2=R and C1=C2=C, the balance frequency is:",
+        "q": "A Wien bridge oscillator uses identical RC components (R1=R2=R, C1=C2=C). If R=15.9 kΩ and C=0.01 µF, what is the balance frequency?",
         "options": [
-          "1/(2πRC)",
-          "2πRC",
-          "1/(RC)",
-          "RC"
-        ],
-        "answer": 0
-      },
-      {
-        "q": "To maintain balance over a range of frequencies, we typically vary:",
-        "options": [
-          "L and C",
-          "R1 and R2 simultaneously (ganged)",
-          "Voltage",
-          "Detector sensitivity"
+          "100 Hz",
+          "1 kHz",
+          "10 kHz",
+          "50 Hz"
         ],
         "answer": 1
       },
       {
-        "q": "If a harmonic is present in the source, the Wien bridge will:",
-        "options": [
-          "Balance perfectly",
-          "Not balance for the harmonic",
-          "Destroy the detector",
-          "Double the reading"
-        ],
-        "answer": 1
-      },
-      {
-        "q": "The ratio of the resistive arms (R3/R4) for the simplified Wien bridge is:",
+        "q": "For a Wien bridge with identical RC components, what must be the ratio of the purely resistive arms (R3/R4) to maintain oscillation?",
         "options": [
           "1",
           "2",
@@ -1737,80 +1717,120 @@ export const EXPERIMENTS = [
           "0.5"
         ],
         "answer": 1
-      },
-      {
-        "q": "Wien bridge can also be used to measure capacitance if:",
-        "options": [
-          "Frequency is known",
-          "Voltage is known",
-          "Inductance is known",
-          "It cannot measure capacitance"
-        ],
-        "answer": 0
       }
     ],
     "viva": [
-      {"id":"wb2_q6","question":"Wien's bridge is most commonly used for measuring:","options":["Inductance","Frequency","High resistance","Mutual inductance"],"correctIndex":1},
-      {"id":"wb2_q7","question":"At balance, the frequency formula for a Wien bridge (when R1=R2=R and C1=C2=C) is:","options":["f = 1 / (2*pi*R*C)","f = 2*pi*R*C","f = 1 / (R*C)","f = R*C / (2*pi)"],"correctIndex":0},
-      {"id":"wb2_q8","question":"For the Wien bridge to be balanced with identical RC components in the reactive arms, the ratio of the resistive arms must be:","options":["1","2","3","4"],"correctIndex":1},
-      {"id":"wb2_q9","question":"Wien bridge can also be used as the feedback network in an oscillator. It requires an amplifier with a gain of:","options":["1","2","3","4"],"correctIndex":2},
-      {"id":"wb2_q10","question":"Harmonic distortion in a source can cause problems in a Wien bridge because:","options":["It breaks the resistors","The bridge balances at only one fundamental frequency","It creates DC offset","It burns out the detector"],"correctIndex":1},
       {
-            "id": "wb_q1",
-            "question": "What is the primary use of the Wien Bridge as a measurement device in AC circuits?",
-            "options": [
-                  "Measuring very high inductances.",
-                  "Measuring the exact frequency of the AC source.",
-                  "Measuring dielectric loss of insulators.",
-                  "Measuring low DC resistances."
-            ],
-            "correctIndex": 1
+        "id": "wb2_q6",
+        "question": "Wien's bridge is most commonly used for measuring:",
+        "options": [
+          "Inductance",
+          "Frequency",
+          "High resistance",
+          "Mutual inductance"
+        ],
+        "correctIndex": 1
       },
       {
-            "id": "wb_q2",
-            "question": "What is required for the Wien Bridge to achieve balance if the components in the reactive arms are exactly matched (R1=R2=R, C1=C2=C)?",
-            "options": [
-                  "The supply voltage must be exactly 10V.",
-                  "The ratio arms must be set to 2:1 (so the overall gain balances).",
-                  "The excitation frequency must exactly equal 1 / (2πRC).",
-                  "The detector must have zero internal resistance."
-            ],
-            "correctIndex": 2
+        "id": "wb2_q7",
+        "question": "At balance, the frequency formula for a Wien bridge (when R1=R2=R and C1=C2=C) is:",
+        "options": [
+          "f = 1 / (2*pi*R*C)",
+          "f = 2*pi*R*C",
+          "f = 1 / (R*C)",
+          "f = R*C / (2*pi)"
+        ],
+        "correctIndex": 0
       },
       {
-            "id": "wb_q3",
-            "question": "Apart from frequency measurement, what is a very common commercial application of the Wien Bridge network?",
-            "options": [
-                  "Used as the frequency-determining feedback network in audio-frequency oscillators (Wien-bridge oscillator).",
-                  "Used as a high-voltage step-up transformer.",
-                  "Used to measure the speed of DC motors.",
-                  "Used as a DC voltage regulator."
-            ],
-            "correctIndex": 0
+        "id": "wb2_q8",
+        "question": "For the Wien bridge to be balanced with identical RC components in the reactive arms, the ratio of the resistive arms must be:",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "correctIndex": 1
       },
       {
-            "id": "wb_q4",
-            "question": "Why is the Wien Bridge highly sensitive to harmonics present in the AC supply voltage?",
-            "options": [
-                  "Because harmonics cause the resistors to overheat.",
-                  "Because the balance condition is strictly frequency-dependent; harmonics will not balance and will produce a residual signal at the detector.",
-                  "Because harmonics damage the capacitors dielectric.",
-                  "Because harmonics reverse the phase of the galvanometer."
-            ],
-            "correctIndex": 1
+        "id": "wb2_q9",
+        "question": "Wien bridge can also be used as the feedback network in an oscillator. It requires an amplifier with a gain of:",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "correctIndex": 2
       },
       {
-            "id": "wb_q5",
-            "question": "What type of detector is most suitable for a Wien Bridge operating at an audio frequency of 1 kHz?",
-            "options": [
-                  "A DC moving-coil galvanometer.",
-                  "A vibration galvanometer tuned to 50 Hz.",
-                  "Headphones or a tuned audio-frequency detector.",
-                  "A digital logic probe."
-            ],
-            "correctIndex": 2
+        "id": "wb2_q10",
+        "question": "Harmonic distortion in a source can cause problems in a Wien bridge because:",
+        "options": [
+          "It breaks the resistors",
+          "The bridge balances at only one fundamental frequency",
+          "It creates DC offset",
+          "It burns out the detector"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "wb_q1",
+        "question": "What is the primary use of the Wien Bridge as a measurement device in AC circuits?",
+        "options": [
+          "Measuring very high inductances.",
+          "Measuring the exact frequency of the AC source.",
+          "Measuring dielectric loss of insulators.",
+          "Measuring low DC resistances."
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "wb_q2",
+        "question": "What is required for the Wien Bridge to achieve balance if the components in the reactive arms are exactly matched (R1=R2=R, C1=C2=C)?",
+        "options": [
+          "The supply voltage must be exactly 10V.",
+          "The ratio arms must be set to 2:1 (so the overall gain balances).",
+          "The excitation frequency must exactly equal 1 / (2πRC).",
+          "The detector must have zero internal resistance."
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": "wb_q3",
+        "question": "Apart from frequency measurement, what is a very common commercial application of the Wien Bridge network?",
+        "options": [
+          "Used as the frequency-determining feedback network in audio-frequency oscillators (Wien-bridge oscillator).",
+          "Used as a high-voltage step-up transformer.",
+          "Used to measure the speed of DC motors.",
+          "Used as a DC voltage regulator."
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": "wb_q4",
+        "question": "Why is the Wien Bridge highly sensitive to harmonics present in the AC supply voltage?",
+        "options": [
+          "Because harmonics cause the resistors to overheat.",
+          "Because the balance condition is strictly frequency-dependent; harmonics will not balance and will produce a residual signal at the detector.",
+          "Because harmonics damage the capacitors dielectric.",
+          "Because harmonics reverse the phase of the galvanometer."
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "wb_q5",
+        "question": "What type of detector is most suitable for a Wien Bridge operating at an audio frequency of 1 kHz?",
+        "options": [
+          "A DC moving-coil galvanometer.",
+          "A vibration galvanometer tuned to 50 Hz.",
+          "Headphones or a tuned audio-frequency detector.",
+          "A digital logic probe."
+        ],
+        "correctIndex": 2
       }
-]
+    ]
   },
   {
     "id": "transformer-ratio-bridge",
@@ -1838,170 +1858,160 @@ export const EXPERIMENTS = [
     ],
     "pretest": [
       {
-        "q": "Transformer ratio bridges replace resistive arms with:",
+        "q": "Info: The Transformer Ratio Bridge uses a tapped precision transformer to provide exact voltage ratios, replacing resistive arms. Prerequisite: Magnetic coupling and transformer turns ratio. What is the primary advantage of a transformer ratio bridge?",
         "options": [
-          "Capacitors",
-          "Inductive voltage dividers",
-          "Diodes",
-          "Op-amps"
+          "It uses DC only",
+          "It is immune to stray capacitances and requires no Wagner earth connection",
+          "It is extremely cheap to build",
+          "It measures only inductors"
         ],
         "answer": 1
       },
       {
-        "q": "What is the main advantage of an inductive voltage divider?",
+        "q": "If the tapped transformer provides a voltage ratio of N1/N2, the balance condition for unknown impedance Zx and standard Zs is:",
         "options": [
-          "Cheap",
-          "High accuracy and low output impedance",
-          "Works on DC",
-          "Generates power"
-        ],
-        "answer": 1
-      },
-      {
-        "q": "Transformer ratio bridges are immune to:",
-        "options": [
-          "Temperature",
-          "Stray capacitance to ground",
-          "Magnetic fields",
-          "Harmonics"
-        ],
-        "answer": 1
-      },
-      {
-        "q": "The balance condition depends on the:",
-        "options": [
-          "Turns ratio (N1/N2)",
-          "Resistance ratio",
-          "Capacitance ratio",
-          "Voltage amplitude"
+          "Zx = Zs * (N1/N2)",
+          "Zx = Zs * (N2/N1)",
+          "Zx = Zs",
+          "Zx = Zs * √(N1/N2)"
         ],
         "answer": 0
-      },
-      {
-        "q": "These bridges are typically used in:",
-        "options": [
-          "Basic schools",
-          "National standards laboratories",
-          "DC circuits",
-          "Microwave frequencies"
-        ],
-        "answer": 1
       }
     ],
     "posttest": [
       {
-        "q": "The stray capacitance from a tap to ground does not affect the balance because:",
+        "q": "In a transformer ratio capacitance bridge, a standard capacitor Cs=100pF is connected to a tap with 10 turns. The unknown Cx is connected to a tap with 100 turns. What is Cx at balance?",
         "options": [
-          "It is cancelled by inductance",
-          "The transformer has very low leakage impedance",
-          "It is bypassed by a resistor",
-          "It is infinite"
-        ],
-        "answer": 1
-      },
-      {
-        "q": "At balance, Zx is calculated as:",
-        "options": [
-          "Z_std * (N1/N2)",
-          "Z_std * (N2/N1)",
-          "Z_std + N1",
-          "Z_std - N2"
+          "10 pF",
+          "100 pF",
+          "1000 pF",
+          "1 pF"
         ],
         "answer": 0
       },
       {
-        "q": "The core of the transformer is usually made of:",
+        "q": "Why do stray capacitances to ground at the detector nodes not affect the balance point of a transformer ratio bridge?",
         "options": [
-          "Wood",
-          "High permeability material (e.g., Mu-metal)",
-          "Air",
-          "Aluminum"
-        ],
-        "answer": 1
-      },
-      {
-        "q": "Can a transformer ratio bridge operate on DC?",
-        "options": [
-          "Yes",
-          "No, transformers require AC",
-          "Only at 0 Hz",
-          "Only with batteries"
-        ],
-        "answer": 1
-      },
-      {
-        "q": "The accuracy of the ratio depends primarily on:",
-        "options": [
-          "Temperature",
-          "Exact turns ratio",
-          "Resistor aging",
-          "Detector sensitivity"
+          "Because the transformer operates at high frequency",
+          "Because at balance, the detector nodes are at zero potential difference",
+          "Because the stray capacitance is absorbed into the transformer leakage inductance",
+          "Because DC current blocks capacitance"
         ],
         "answer": 1
       }
     ],
     "viva": [
-      {"id":"trb_q6","question":"What replaces the resistive ratio arms in a Transformer Ratio Arm Bridge?","options":["Capacitors","Inductors","A tapped transformer winding","Active op-amps"],"correctIndex":2},
-      {"id":"trb_q7","question":"A major advantage of the transformer ratio arm bridge is its:","options":["Ability to operate on DC","Extreme accuracy and immunity to stray capacitance","Very low cost","Simplicity for low frequency"],"correctIndex":1},
-      {"id":"trb_q8","question":"The voltage ratio in a transformer ratio arm bridge depends primarily on:","options":["The temperature of the wire","The turns ratio of the transformer","The supply voltage magnitude","The stray capacitance to ground"],"correctIndex":1},
-      {"id":"trb_q9","question":"Why are stray capacitances to ground less problematic in this bridge?","options":["Because they are eliminated by shielding","Because they shunt the low impedance transformer windings","Because they are resonated out","Because DC is used"],"correctIndex":1},
-      {"id":"trb_q10","question":"Transformer ratio arm bridges are often used for precision measurement of:","options":["Large inductors","Small capacitances","High voltages","DC resistances"],"correctIndex":1},
       {
-            "id": "trb_q1",
-            "question": "What replaces the standard resistive ratio arms in a Transformer Ratio Bridge?",
-            "options": [
-                  "Two standard variable capacitors.",
-                  "A tapped precision transformer or autotransformer.",
-                  "High wattage precision resistors.",
-                  "A balanced diode bridge."
-            ],
-            "correctIndex": 1
+        "id": "trb_q6",
+        "question": "What replaces the resistive ratio arms in a Transformer Ratio Arm Bridge?",
+        "options": [
+          "Capacitors",
+          "Inductors",
+          "A tapped transformer winding",
+          "Active op-amps"
+        ],
+        "correctIndex": 2
       },
       {
-            "id": "trb_q2",
-            "question": "What is a major advantage of using transformer ratio arms instead of resistive ratio arms?",
-            "options": [
-                  "They are much lighter and cheaper to manufacture.",
-                  "They provide highly stable and precise ratios that are largely immune to temperature changes and aging.",
-                  "They allow the bridge to operate on pure DC.",
-                  "They automatically amplify the detector signal."
-            ],
-            "correctIndex": 1
+        "id": "trb_q7",
+        "question": "A major advantage of the transformer ratio arm bridge is its:",
+        "options": [
+          "Ability to operate on DC",
+          "Extreme accuracy and immunity to stray capacitance",
+          "Very low cost",
+          "Simplicity for low frequency"
+        ],
+        "correctIndex": 1
       },
       {
-            "id": "trb_q3",
-            "question": "How is balance typically achieved in a Transformer Ratio Bridge?",
-            "options": [
-                  "By altering the frequency of the AC supply until null is reached.",
-                  "By adjusting a slide wire resistance.",
-                  "By selecting the appropriate taps on the transformer windings to change the voltage ratio.",
-                  "By moving the detector along a magnetic core."
-            ],
-            "correctIndex": 2
+        "id": "trb_q8",
+        "question": "The voltage ratio in a transformer ratio arm bridge depends primarily on:",
+        "options": [
+          "The temperature of the wire",
+          "The turns ratio of the transformer",
+          "The supply voltage magnitude",
+          "The stray capacitance to ground"
+        ],
+        "correctIndex": 1
       },
       {
-            "id": "trb_q4",
-            "question": "Why are stray capacitances from the bridge arms to ground significantly less problematic in a Transformer Ratio Bridge?",
-            "options": [
-                  "Because transformers operate at frequencies where stray capacitance does not exist.",
-                  "Because the very low impedance of the transformer windings shunts the stray capacitance to ground, minimizing error voltage.",
-                  "Because the transformer core absorbs all stray electrostatic fields.",
-                  "Because the bridge is operated entirely in a vacuum."
-            ],
-            "correctIndex": 1
+        "id": "trb_q9",
+        "question": "Why are stray capacitances to ground less problematic in this bridge?",
+        "options": [
+          "Because they are eliminated by shielding",
+          "Because they shunt the low impedance transformer windings",
+          "Because they are resonated out",
+          "Because DC is used"
+        ],
+        "correctIndex": 1
       },
       {
-            "id": "trb_q5",
-            "question": "Which fundamental property of an ideal transformer ensures that its voltage ratio remains highly accurate?",
-            "options": [
-                  "The core temperature.",
-                  "The exact turns ratio of the windings, which is physically fixed.",
-                  "The gauge of the wire used for the primary winding.",
-                  "The frequency of the input voltage."
-            ],
-            "correctIndex": 1
+        "id": "trb_q10",
+        "question": "Transformer ratio arm bridges are often used for precision measurement of:",
+        "options": [
+          "Large inductors",
+          "Small capacitances",
+          "High voltages",
+          "DC resistances"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "trb_q1",
+        "question": "What replaces the standard resistive ratio arms in a Transformer Ratio Bridge?",
+        "options": [
+          "Two standard variable capacitors.",
+          "A tapped precision transformer or autotransformer.",
+          "High wattage precision resistors.",
+          "A balanced diode bridge."
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "trb_q2",
+        "question": "What is a major advantage of using transformer ratio arms instead of resistive ratio arms?",
+        "options": [
+          "They are much lighter and cheaper to manufacture.",
+          "They provide highly stable and precise ratios that are largely immune to temperature changes and aging.",
+          "They allow the bridge to operate on pure DC.",
+          "They automatically amplify the detector signal."
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "trb_q3",
+        "question": "How is balance typically achieved in a Transformer Ratio Bridge?",
+        "options": [
+          "By altering the frequency of the AC supply until null is reached.",
+          "By adjusting a slide wire resistance.",
+          "By selecting the appropriate taps on the transformer windings to change the voltage ratio.",
+          "By moving the detector along a magnetic core."
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": "trb_q4",
+        "question": "Why are stray capacitances from the bridge arms to ground significantly less problematic in a Transformer Ratio Bridge?",
+        "options": [
+          "Because transformers operate at frequencies where stray capacitance does not exist.",
+          "Because the very low impedance of the transformer windings shunts the stray capacitance to ground, minimizing error voltage.",
+          "Because the transformer core absorbs all stray electrostatic fields.",
+          "Because the bridge is operated entirely in a vacuum."
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "trb_q5",
+        "question": "Which fundamental property of an ideal transformer ensures that its voltage ratio remains highly accurate?",
+        "options": [
+          "The core temperature.",
+          "The exact turns ratio of the windings, which is physically fixed.",
+          "The gauge of the wire used for the primary winding.",
+          "The frequency of the input voltage."
+        ],
+        "correctIndex": 1
       }
-]
+    ]
   },
   {
     "id": "thermocouple",
@@ -2037,36 +2047,126 @@ export const EXPERIMENTS = [
     ],
     "pretest": [
       {
-        "q": "The Seebeck effect states that when two dissimilar metals are joined and their junctions are at different temperatures:",
-        "options": ["A current flows only", "An EMF is generated", "Resistance changes", "No effect occurs"],
+        "q": "Info: A Thermocouple is a temperature sensor consisting of two dissimilar metals joined at one end, generating a voltage proportional to temperature difference (Seebeck Effect). Prerequisite: Seebeck effect and thermodynamics. What is the fundamental principle of a thermocouple?",
+        "options": [
+          "Peltier Effect",
+          "Seebeck Effect",
+          "Hall Effect",
+          "Thomson Effect"
+        ],
         "answer": 1
       },
       {
-        "q": "Which thermocouple type has the highest Seebeck coefficient (most sensitive)?",
-        "options": ["Type J", "Type K", "Type T", "Type E"],
-        "answer": 3
+        "q": "To measure absolute temperature using a thermocouple, the reference (cold) junction must be:",
+        "options": [
+          "At the same temperature as the hot junction",
+          "Kept at a known, stable temperature (usually 0°C)",
+          "Heated to boiling point",
+          "Left floating in open air"
+        ],
+        "answer": 1
       }
     ],
     "posttest": [
       {
-        "q": "Cold Junction Compensation is required because:",
-        "options": ["Hot junction burns out", "Cold junction is not always at 0°C", "Signal is too weak", "Metals corrode"],
-        "answer": 1
+        "q": "A K-type thermocouple has a sensitivity of approximately 41 µV/°C. If the reference junction is at 0°C and the voltmeter reads 4.1 mV, what is the temperature of the hot junction?",
+        "options": [
+          "10°C",
+          "50°C",
+          "100°C",
+          "410°C"
+        ],
+        "answer": 2
       },
       {
-        "q": "If the CJC sensor has a +2°C error, the temperature reading will be:",
-        "options": ["2°C too high", "2°C too low", "Unaffected", "Doubled"],
+        "q": "Which law states that a third metal inserted into a thermocouple circuit will not affect the net EMF, provided both ends of the new metal are at the same temperature?",
+        "options": [
+          "Law of Homogeneous Circuits",
+          "Law of Intermediate Metals",
+          "Law of Intermediate Temperatures",
+          "Ohm's Law"
+        ],
         "answer": 1
       }
     ],
     "viva": [
-      {"id":"tc_q4","question":"The Seebeck coefficient is defined as:","options":["Change in voltage per unit change in temperature","Change in resistance per unit temperature","Change in current per unit voltage","Heat absorbed per unit current"],"correctIndex":0},
-      {"id":"tc_q5","question":"What is Cold Junction Compensation (CJC) in a thermocouple?","options":["Cooling the thermocouple to 0°C","Adding a voltage to compensate for the reference junction not being at 0°C","Using ice water for the hot junction","Removing the cold junction entirely"],"correctIndex":1},
-      {"id":"tc_q6","question":"Which thermocouple type is made of Chromel and Alumel?","options":["Type J","Type K","Type T","Type E"],"correctIndex":1},
-      {"id":"tc_q7","question":"The Peltier effect is the reverse of which effect?","options":["Thomson effect","Seebeck effect","Hall effect","Faraday effect"],"correctIndex":1},
-      {"id":"tc_q8","question":"Which law states that the EMF of a thermocouple is independent of the temperature distribution along the wires?","options":["Law of intermediate metals","Law of homogeneous materials","Law of intermediate temperatures","Ohm's Law"],"correctIndex":1},
-      {"id":"tc_q9","question":"Thermocouples measure:","options":["Absolute temperature","Temperature difference between two junctions","Heat capacity","Thermal conductivity"],"correctIndex":1},
-      {"id":"tc_q10","question":"Type T thermocouple consists of which metals?","options":["Iron and Constantan","Copper and Constantan","Chromel and Alumel","Platinum and Rhodium"],"correctIndex":1},
+      {
+        "id": "tc_q4",
+        "question": "The Seebeck coefficient is defined as:",
+        "options": [
+          "Change in voltage per unit change in temperature",
+          "Change in resistance per unit temperature",
+          "Change in current per unit voltage",
+          "Heat absorbed per unit current"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": "tc_q5",
+        "question": "What is Cold Junction Compensation (CJC) in a thermocouple?",
+        "options": [
+          "Cooling the thermocouple to 0°C",
+          "Adding a voltage to compensate for the reference junction not being at 0°C",
+          "Using ice water for the hot junction",
+          "Removing the cold junction entirely"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "tc_q6",
+        "question": "Which thermocouple type is made of Chromel and Alumel?",
+        "options": [
+          "Type J",
+          "Type K",
+          "Type T",
+          "Type E"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "tc_q7",
+        "question": "The Peltier effect is the reverse of which effect?",
+        "options": [
+          "Thomson effect",
+          "Seebeck effect",
+          "Hall effect",
+          "Faraday effect"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "tc_q8",
+        "question": "Which law states that the EMF of a thermocouple is independent of the temperature distribution along the wires?",
+        "options": [
+          "Law of intermediate metals",
+          "Law of homogeneous materials",
+          "Law of intermediate temperatures",
+          "Ohm's Law"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "tc_q9",
+        "question": "Thermocouples measure:",
+        "options": [
+          "Absolute temperature",
+          "Temperature difference between two junctions",
+          "Heat capacity",
+          "Thermal conductivity"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "tc_q10",
+        "question": "Type T thermocouple consists of which metals?",
+        "options": [
+          "Iron and Constantan",
+          "Copper and Constantan",
+          "Chromel and Alumel",
+          "Platinum and Rhodium"
+        ],
+        "correctIndex": 1
+      },
       {
         "id": "tc_q1",
         "question": "What is the Seebeck effect?",
@@ -2136,36 +2236,126 @@ export const EXPERIMENTS = [
     ],
     "pretest": [
       {
-        "q": "PT100 means the RTD has a resistance of 100 Ω at:",
-        "options": ["100°C", "0°C", "-100°C", "25°C"],
-        "answer": 1
+        "q": "Info: A Resistance Temperature Detector (RTD) measures temperature by correlating the resistance of the RTD element with temperature. Prerequisite: Temperature coefficient of resistance (alpha). Which material is the industry standard for precision RTDs (e.g., PT100)?",
+        "options": [
+          "Copper",
+          "Nickel",
+          "Platinum",
+          "Tungsten"
+        ],
+        "answer": 2
       },
       {
-        "q": "The main advantage of 4-wire RTD measurement over 2-wire is:",
-        "options": ["Faster response", "Elimination of lead resistance error", "Higher temperature range", "Cheaper cost"],
+        "q": "What does 'PT100' mean?",
+        "options": [
+          "Platinum sensor with 100 ohms resistance at 100°C",
+          "Platinum sensor with 100 ohms resistance at 0°C",
+          "Polymer sensor with 100 ohms resistance",
+          "Platinum sensor handling 100 Amps"
+        ],
         "answer": 1
       }
     ],
     "posttest": [
       {
-        "q": "The Callendar-Van Dusen equation gives R(T) for PT100. The R at 100°C is approximately:",
-        "options": ["100 Ω", "138.5 Ω", "200 Ω", "50 Ω"],
+        "q": "A PT100 RTD has an alpha (α) of 0.00385 Ω/Ω/°C. At 100°C, what is its approximate resistance? (R = R0(1 + αΔT))",
+        "options": [
+          "100.0 Ω",
+          "138.5 Ω",
+          "200.0 Ω",
+          "103.8 Ω"
+        ],
         "answer": 1
       },
       {
-        "q": "In 2-wire RTD measurement with 1 Ω lead resistance per wire, the error is:",
-        "options": ["0 Ω", "1 Ω", "2 Ω", "4 Ω"],
-        "answer": 2
+        "q": "Why is a 3-wire or 4-wire measurement configuration preferred over a 2-wire configuration for RTDs?",
+        "options": [
+          "To increase the current flow",
+          "To eliminate the error caused by lead wire resistance",
+          "To double the sensitivity",
+          "To prevent the RTD from overheating"
+        ],
+        "answer": 1
       }
     ],
     "viva": [
-      {"id":"rtd_q4","question":"What does PT100 mean?","options":["Platinum sensor with 100 ohms at 100°C","Platinum sensor with 100 ohms at 0°C","Potentiometer with 100 turns","Polymer thermistor with 100 ohms"],"correctIndex":1},
-      {"id":"rtd_q5","question":"Why is a 3-wire or 4-wire configuration used for RTDs?","options":["To increase the resistance","To compensate for lead wire resistance","To make it physically stronger","To allow higher currents"],"correctIndex":1},
-      {"id":"rtd_q6","question":"RTDs typically have a:","options":["Positive temperature coefficient (PTC)","Negative temperature coefficient (NTC)","Zero temperature coefficient","Exponential temperature coefficient"],"correctIndex":0},
-      {"id":"rtd_q7","question":"Which material provides the most stable and accurate RTD?","options":["Copper","Nickel","Platinum","Tungsten"],"correctIndex":2},
-      {"id":"rtd_q8","question":"The Callendar-Van Dusen equation is used for:","options":["Calculating thermocouple EMF","Describing the resistance-temperature relationship of Platinum RTDs","Finding the null point in a bridge","Calculating optical intensity"],"correctIndex":1},
-      {"id":"rtd_q9","question":"Self-heating in an RTD is caused by:","options":["Ambient temperature","Excitation current passing through it","Lead wire resistance","Electromagnetic interference"],"correctIndex":1},
-      {"id":"rtd_q10","question":"Compared to thermocouples, RTDs generally offer:","options":["Higher temperature range","Faster response time","Higher accuracy and stability","Lower cost"],"correctIndex":2},
+      {
+        "id": "rtd_q4",
+        "question": "What does PT100 mean?",
+        "options": [
+          "Platinum sensor with 100 ohms at 100°C",
+          "Platinum sensor with 100 ohms at 0°C",
+          "Potentiometer with 100 turns",
+          "Polymer thermistor with 100 ohms"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "rtd_q5",
+        "question": "Why is a 3-wire or 4-wire configuration used for RTDs?",
+        "options": [
+          "To increase the resistance",
+          "To compensate for lead wire resistance",
+          "To make it physically stronger",
+          "To allow higher currents"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "rtd_q6",
+        "question": "RTDs typically have a:",
+        "options": [
+          "Positive temperature coefficient (PTC)",
+          "Negative temperature coefficient (NTC)",
+          "Zero temperature coefficient",
+          "Exponential temperature coefficient"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": "rtd_q7",
+        "question": "Which material provides the most stable and accurate RTD?",
+        "options": [
+          "Copper",
+          "Nickel",
+          "Platinum",
+          "Tungsten"
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": "rtd_q8",
+        "question": "The Callendar-Van Dusen equation is used for:",
+        "options": [
+          "Calculating thermocouple EMF",
+          "Describing the resistance-temperature relationship of Platinum RTDs",
+          "Finding the null point in a bridge",
+          "Calculating optical intensity"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "rtd_q9",
+        "question": "Self-heating in an RTD is caused by:",
+        "options": [
+          "Ambient temperature",
+          "Excitation current passing through it",
+          "Lead wire resistance",
+          "Electromagnetic interference"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "rtd_q10",
+        "question": "Compared to thermocouples, RTDs generally offer:",
+        "options": [
+          "Higher temperature range",
+          "Faster response time",
+          "Higher accuracy and stability",
+          "Lower cost"
+        ],
+        "correctIndex": 2
+      },
       {
         "id": "rtd_q1",
         "question": "Why is platinum preferred for RTDs over copper or nickel?",
@@ -2234,36 +2424,126 @@ export const EXPERIMENTS = [
     ],
     "pretest": [
       {
-        "q": "A photodiode is typically operated in:",
-        "options": ["Forward bias", "Reverse bias (photoconductive mode)", "Zero bias only", "AC mode"],
-        "answer": 1
+        "q": "Info: LDRs (photoresistors) decrease resistance with light, while Photodiodes generate current/voltage from light. Prerequisite: Semiconductor physics, electron-hole pairs, depletion regions. In which biasing mode does a photodiode exhibit the fastest response time for optical communication?",
+        "options": [
+          "Forward bias",
+          "Photovoltaic mode (zero bias)",
+          "Reverse bias (photoconductive mode)",
+          "Avalanche mode"
+        ],
+        "answer": 2
       },
       {
-        "q": "As light intensity increases, the resistance of an LDR:",
-        "options": ["Increases", "Decreases", "Remains constant", "Becomes zero"],
+        "q": "An LDR (Light Dependent Resistor) is typically made from:",
+        "options": [
+          "Intrinsic Silicon",
+          "Cadmium Sulfide (CdS)",
+          "Gallium Arsenide",
+          "Platinum"
+        ],
         "answer": 1
       }
     ],
     "posttest": [
       {
-        "q": "The photocurrent in a photodiode is proportional to:",
-        "options": ["Voltage squared", "Light intensity (illuminance)", "Temperature", "Frequency only"],
-        "answer": 1
+        "q": "An LDR in a voltage divider is in series with a 10kΩ resistor, powered by 5V. In dark, LDR = 1MΩ. In light, LDR = 1kΩ. If the LDR is tied to ground, what is the output voltage across the LDR in the light?",
+        "options": [
+          "0.45 V",
+          "2.5 V",
+          "4.5 V",
+          "5.0 V"
+        ],
+        "answer": 0
       },
       {
-        "q": "In a voltage divider with LDR and fixed Rload, Vout increases when:",
-        "options": ["Light intensity decreases (LDR resistance increases)", "Light intensity increases (LDR resistance decreases)", "Vcc decreases", "Rload increases"],
-        "answer": 0
+        "q": "A photodiode operates in reverse bias. When incident light intensity doubles, the reverse leakage current (photocurrent):",
+        "options": [
+          "Remains constant",
+          "Halves",
+          "Increases exponentially",
+          "Doubles (highly linear relationship)"
+        ],
+        "answer": 3
       }
     ],
     "viva": [
-      {"id":"pdl_q4","question":"What is the primary semiconductor material used in common LDRs?","options":["Silicon","Cadmium Sulfide (CdS)","Germanium","Gallium Arsenide"],"correctIndex":1},
-      {"id":"pdl_q5","question":"In which biasing mode is a photodiode typically operated for light detection?","options":["Forward bias","Reverse bias","Zero bias","Alternating bias"],"correctIndex":1},
-      {"id":"pdl_q6","question":"What is dark current in a photodiode?","options":["Current generated by maximum light","Leakage current that flows when there is no incident light","Current used to power the LED","Current from the power supply"],"correctIndex":1},
-      {"id":"pdl_q7","question":"The resistance of an LDR ________ when light intensity increases.","options":["Increases","Decreases","Remains constant","Becomes zero"],"correctIndex":1},
-      {"id":"pdl_q8","question":"Which sensor has a faster response time?","options":["LDR (Photoresistor)","Photodiode","Thermistor","RTD"],"correctIndex":1},
-      {"id":"pdl_q9","question":"Photovoltaic mode in a photodiode means:","options":["It operates with zero external bias","It operates with reverse bias","It emits light","It acts as a resistor"],"correctIndex":0},
-      {"id":"pdl_q10","question":"LDRs are often used in:","options":["High-speed optical communication","Precision temperature sensing","Automatic street lighting circuits","Measuring magnetic fields"],"correctIndex":2},
+      {
+        "id": "pdl_q4",
+        "question": "What is the primary semiconductor material used in common LDRs?",
+        "options": [
+          "Silicon",
+          "Cadmium Sulfide (CdS)",
+          "Germanium",
+          "Gallium Arsenide"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "pdl_q5",
+        "question": "In which biasing mode is a photodiode typically operated for light detection?",
+        "options": [
+          "Forward bias",
+          "Reverse bias",
+          "Zero bias",
+          "Alternating bias"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "pdl_q6",
+        "question": "What is dark current in a photodiode?",
+        "options": [
+          "Current generated by maximum light",
+          "Leakage current that flows when there is no incident light",
+          "Current used to power the LED",
+          "Current from the power supply"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "pdl_q7",
+        "question": "The resistance of an LDR ________ when light intensity increases.",
+        "options": [
+          "Increases",
+          "Decreases",
+          "Remains constant",
+          "Becomes zero"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "pdl_q8",
+        "question": "Which sensor has a faster response time?",
+        "options": [
+          "LDR (Photoresistor)",
+          "Photodiode",
+          "Thermistor",
+          "RTD"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "pdl_q9",
+        "question": "Photovoltaic mode in a photodiode means:",
+        "options": [
+          "It operates with zero external bias",
+          "It operates with reverse bias",
+          "It emits light",
+          "It acts as a resistor"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": "pdl_q10",
+        "question": "LDRs are often used in:",
+        "options": [
+          "High-speed optical communication",
+          "Precision temperature sensing",
+          "Automatic street lighting circuits",
+          "Measuring magnetic fields"
+        ],
+        "correctIndex": 2
+      },
       {
         "id": "ldr_q1",
         "question": "What is the main difference between a photodiode and an LDR in terms of response speed?",
