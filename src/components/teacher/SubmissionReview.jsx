@@ -47,60 +47,82 @@ export function SubmissionReview({
           <table style={{ width:'100%',borderCollapse:'collapse',fontSize:14 }}>
             <thead>
               <tr style={{ background:'linear-gradient(90deg,#f8f7ff,#f0f9ff)' }}>
-                {['Student','Experiment','Progress','Date Submitted','Grade Status','Action'].map((h,i)=>(
-                  <th key={h} style={{ padding:'14px 20px',textAlign:i===5?'right':'left',fontSize:12,fontWeight:800,color:'#4f46e5',textTransform:'uppercase',letterSpacing:'0.06em',whiteSpace:'nowrap',borderBottom:'1px solid rgba(99,102,241,0.1)' }}>{h}</th>
+                {['Student','Progress','Date Submitted','Grade Status','Action'].map((h,i)=>(
+                  <th key={h} style={{ padding:'14px 20px',textAlign:i===4?'right':'left',fontSize:12,fontWeight:800,color:'#4f46e5',textTransform:'uppercase',letterSpacing:'0.06em',whiteSpace:'nowrap',borderBottom:'1px solid rgba(99,102,241,0.1)' }}>{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody>
-              {filtSubs.map(sub => {
-                const prog = sub.progressPercent ?? 0;
-                return (
-                  <tr key={sub.id} className="table-row-hover" style={{ borderTop:'1px solid #f1f5f9',background:'#fff',borderLeft:'4px solid transparent',transition:'all 0.2s' }}>
-                    <td style={{ padding:'14px 20px' }}>
-                      <div style={{ display:'flex',alignItems:'center',gap:10 }}>
-                        <div style={{ width:36,height:36,borderRadius:'50%',background:'#f1f5f9',overflow:'hidden',flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',border:'1px solid #e2e8f0' }}>
-                          {sub.studentAvatar?<img src={sub.studentAvatar} alt="av" style={{ width:'100%',height:'100%',objectFit:'cover' }}/>:<User size={16} color="#94a3b8"/>}
-                        </div>
-                        <span style={{ fontWeight:700,color:'#1e1b4b',fontSize:14 }}>{sub.studentName||'Unknown'}</span>
+            {(()=>{
+              // Group submissions by experiment
+              const grouped = {};
+              filtSubs.forEach(sub => {
+                const expKey = sub.experimentName || sub.experimentId || 'Other Experiments';
+                if (!grouped[expKey]) grouped[expKey] = [];
+                grouped[expKey].push(sub);
+              });
+              
+              return Object.keys(grouped).map(expKey => (
+                <tbody key={expKey}>
+                  {/* Group Header */}
+                  <tr>
+                    <td colSpan={5} style={{ background:'#f1f5f9', padding:'10px 20px', fontWeight:900, color:'#1e293b', fontSize:14, borderBottom:'1px solid #e2e8f0', borderTop:'2px solid #cbd5e1' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ background: '#3b82f6', color: '#fff', borderRadius: 999, padding: '2px 8px', fontSize: 11 }}>{grouped[expKey].length}</span>
+                        {expKey}
                       </div>
-                    </td>
-                    <td style={{ padding:'14px 20px',color:'#475569',fontWeight:500 }}>{sub.experimentName||sub.experimentId}</td>
-                    <td style={{ padding:'14px 20px',minWidth:130 }}>
-                      <div style={{ display:'flex',alignItems:'center',gap:8 }}>
-                        <div style={{ flex:1,height:6,background:'#f1f5f9',borderRadius:99,overflow:'hidden' }}>
-                          <div style={{ width:`${prog}%`,height:'100%',background:prog>=100?'linear-gradient(90deg,#10b981,#34d399)':'linear-gradient(90deg,#6366f1,#8b5cf6)',borderRadius:99,transition:'width 0.4s ease' }} />
-                        </div>
-                        <span style={{ fontSize:12,fontWeight:800,color:prog>=100?'#10b981':'#6366f1',whiteSpace:'nowrap' }}>{prog}%</span>
-                      </div>
-                    </td>
-                    <td style={{ padding:'14px 20px',color:'#64748b',fontSize:13 }}>{sub.submittedAt?new Date(sub.submittedAt).toLocaleDateString():'N/A'}</td>
-                    <td style={{ padding:'14px 20px' }}>
-                      {(()=>{
-                        const badge = {
-                          auto_graded:        { icon: '✅', label: 'Auto-Graded',      bg: 'linear-gradient(135deg,#10b981,#34d399)' },
-                          teacher_reviewed:   { icon: '🎓', label: 'Teacher Graded',   bg: 'linear-gradient(135deg,#3b82f6,#60a5fa)' },
-                          pending_auto_grade: { icon: '⏳', label: 'Pending Auto-Grade', bg: 'linear-gradient(135deg,#6366f1,#8b5cf6)' },
-                          grading_failed:     { icon: '⚠️', label: 'Grading Failed',   bg: 'linear-gradient(135deg,#ef4444,#f87171)' },
-                          completed:          { icon: '⏳', label: 'Pending Review',    bg: 'linear-gradient(135deg,#f59e0b,#f97316)' },
-                        }[sub.status] ?? { icon: '⏳', label: 'Pending Review', bg: 'linear-gradient(135deg,#f59e0b,#f97316)' };
-                        
-                        return (
-                          <span style={{ display:'inline-flex',alignItems:'center',gap:6,background:badge.bg,color:'#fff',padding:'5px 12px',borderRadius:999,fontSize:12,fontWeight:700 }}>
-                            <span>{badge.icon}</span> {badge.label} {sub.teacherScore != null ? `(${sub.teacherScore}/${sub.gradingVersion === 1 ? '100' : '10'})` : ''}
-                          </span>
-                        );
-                      })()}
-                    </td>
-                    <td style={{ padding:'14px 20px',textAlign:'right' }}>
-                      <button onClick={()=>{ setSelectedSubmission(sub); setReportTab('overview'); }} style={{ display:'inline-flex',alignItems:'center',gap:6,background:'transparent',border:'1px solid #8b5cf6',color:'#8b5cf6',padding:'7px 14px',borderRadius:10,fontWeight:700,fontSize:13,cursor:'pointer',transition:'all 0.2s' }} onMouseEnter={e=>{e.currentTarget.style.background='#8b5cf6';e.currentTarget.style.color='#fff';}} onMouseLeave={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.color='#8b5cf6';}}>
-                        Review <ChevronRight size={14}/>
-                      </button>
                     </td>
                   </tr>
-                );
-              })}
-            </tbody>
+                  
+                  {/* Rows for this group */}
+                  {grouped[expKey].map(sub => {
+                    const prog = sub.progressPercent ?? 0;
+                    return (
+                      <tr key={sub.id} className="table-row-hover" style={{ borderTop:'1px solid #f1f5f9',background:'#fff',borderLeft:'4px solid transparent',transition:'all 0.2s' }}>
+                        <td style={{ padding:'14px 20px' }}>
+                          <div style={{ display:'flex',alignItems:'center',gap:10 }}>
+                            <div style={{ width:36,height:36,borderRadius:'50%',background:'#f1f5f9',overflow:'hidden',flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',border:'1px solid #e2e8f0' }}>
+                              {sub.studentAvatar?<img src={sub.studentAvatar} alt="av" style={{ width:'100%',height:'100%',objectFit:'cover' }}/>:<User size={16} color="#94a3b8"/>}
+                            </div>
+                            <span style={{ fontWeight:700,color:'#1e1b4b',fontSize:14 }}>{sub.studentName||'Unknown'}</span>
+                          </div>
+                        </td>
+                        <td style={{ padding:'14px 20px',minWidth:130 }}>
+                          <div style={{ display:'flex',alignItems:'center',gap:8 }}>
+                            <div style={{ flex:1,height:6,background:'#f1f5f9',borderRadius:99,overflow:'hidden' }}>
+                              <div style={{ width:`${prog}%`,height:'100%',background:prog>=100?'linear-gradient(90deg,#10b981,#34d399)':'linear-gradient(90deg,#6366f1,#8b5cf6)',borderRadius:99,transition:'width 0.4s ease' }} />
+                            </div>
+                            <span style={{ fontSize:12,fontWeight:800,color:prog>=100?'#10b981':'#6366f1',whiteSpace:'nowrap' }}>{prog}%</span>
+                          </div>
+                        </td>
+                        <td style={{ padding:'14px 20px',color:'#64748b',fontSize:13 }}>{sub.submittedAt?new Date(sub.submittedAt).toLocaleDateString():'N/A'}</td>
+                        <td style={{ padding:'14px 20px' }}>
+                          {(()=>{
+                            const badge = {
+                              auto_graded:        { icon: '✅', label: 'Auto-Graded',      bg: 'linear-gradient(135deg,#10b981,#34d399)' },
+                              teacher_reviewed:   { icon: '🎓', label: 'Teacher Graded',   bg: 'linear-gradient(135deg,#3b82f6,#60a5fa)' },
+                              pending_auto_grade: { icon: '⏳', label: 'Pending Auto-Grade', bg: 'linear-gradient(135deg,#6366f1,#8b5cf6)' },
+                              grading_failed:     { icon: '⚠️', label: 'Grading Failed',   bg: 'linear-gradient(135deg,#ef4444,#f87171)' },
+                              completed:          { icon: '⏳', label: 'Pending Review',    bg: 'linear-gradient(135deg,#f59e0b,#f97316)' },
+                            }[sub.status] ?? { icon: '⏳', label: 'Pending Review', bg: 'linear-gradient(135deg,#f59e0b,#f97316)' };
+                            
+                            return (
+                              <span style={{ display:'inline-flex',alignItems:'center',gap:6,background:badge.bg,color:'#fff',padding:'5px 12px',borderRadius:999,fontSize:12,fontWeight:700 }}>
+                                <span>{badge.icon}</span> {badge.label} {sub.teacherScore != null ? `(${sub.teacherScore}/${sub.gradingVersion === 1 ? '100' : '10'})` : ''}
+                              </span>
+                            );
+                          })()}
+                        </td>
+                        <td style={{ padding:'14px 20px',textAlign:'right' }}>
+                          <button onClick={()=>{ setSelectedSubmission(sub); setReportTab('overview'); }} style={{ display:'inline-flex',alignItems:'center',gap:6,background:'transparent',border:'1px solid #8b5cf6',color:'#8b5cf6',padding:'7px 14px',borderRadius:10,fontWeight:700,fontSize:13,cursor:'pointer',transition:'all 0.2s' }} onMouseEnter={e=>{e.currentTarget.style.background='#8b5cf6';e.currentTarget.style.color='#fff';}} onMouseLeave={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.color='#8b5cf6';}}>
+                            Review <ChevronRight size={14}/>
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              ));
+            })()}
           </table>
         </div>
         {filtSubs.length===0 && (

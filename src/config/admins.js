@@ -1,7 +1,7 @@
 // Admin teacher emails - update these when the teacher emails are confirmed
 export const ADMIN_TEACHER_EMAILS = [
-  'admin1@srmist.edu.in',
-  'admin2@srmist.edu.in',
+  'sowmmiyu@srmist.edu.in',
+  'ushas@srmist.edu.in'
 ];
 
 

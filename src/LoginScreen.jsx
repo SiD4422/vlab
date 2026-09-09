@@ -92,7 +92,7 @@ export default function LoginScreen() {
 
       const isAdminTeacher = isAdminWhitelisted;
       const resolvedRole   = isAdminTeacher ? 'admin_teacher' : currentRole;
-      const resolvedStatus = (currentRole === 'teacher' && !isAdminTeacher) ? 'pending' : 'active';
+      const resolvedStatus = isAdminTeacher ? 'active' : 'pending';
 
       const newUserData = {
         uid: userCredential.user.uid,

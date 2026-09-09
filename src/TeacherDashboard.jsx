@@ -9,6 +9,7 @@ import { ClassList } from './components/teacher/ClassList';
 import { SubmissionReview } from './components/teacher/SubmissionReview';
 import { Analytics } from './components/teacher/Analytics';
 import { GroupManager } from './components/teacher/GroupManager';
+import { AuthManager } from './components/teacher/AuthManager';
 import { EXPERIMENTS } from './data/experiments';
 import { useCollege } from './contexts/CollegeContext';
 import { useNavigate } from 'react-router-dom';
@@ -194,6 +195,20 @@ export default function TeacherDashboard({ user, onLogout, onUpdate }) {
         status:'teacher_reviewed',
         manuallyOverridden:true
       }:x));
+      
+      try {
+        const studentDoc = await getDoc(doc(db, 'users', selectedSubmission.studentUid));
+        const studentEmail = studentDoc.exists() ? studentDoc.data().email : '';
+        if (studentEmail) {
+          const expName = selectedSubmission.experimentName || 'your experiment';
+          const subject = `Your Grade for ${expName}`;
+          const body = `Dear ${selectedSubmission.studentName},\n\nYour lab report for ${expName} has been graded.\n\nYou scored ${score} out of ${maxScore}.\n\nBest regards,\n${user.name || 'Your Teacher'}`;
+          window.location.href = `mailto:${studentEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        }
+      } catch (err) {
+        console.error('Failed to open mailto:', err);
+      }
+
       setSelectedSubmission(null); setTeacherScoreInput('');
     } catch(e){ 
       console.error(e);
@@ -276,6 +291,9 @@ export default function TeacherDashboard({ user, onLogout, onUpdate }) {
           <NavItem icon={BookOpen}        label="Classes"    active={activeNav==='classes'}      onClick={()=>setActiveNav('classes')} />
           <NavItem icon={ClipboardList}   label="Grades"     active={activeNav==='submissions'}  onClick={()=>setActiveNav('submissions')} badge={pending} />
           <NavItem icon={Users}           label="Groups"     active={activeNav==='groups'}       onClick={()=>setActiveNav('groups')} />
+          {user?.role === 'admin_teacher' && (
+            <NavItem icon={ShieldAlert}   label="Authorization" active={activeNav==='auth'}      onClick={()=>setActiveNav('auth')} />
+          )}
           <NavItem icon={User}            label="Profile"    active={activeNav==='profile'}      onClick={()=>setActiveNav('profile')} />
         </div>
         <div style={{ width:'100%',paddingBottom:20 }}>
@@ -289,7 +307,7 @@ export default function TeacherDashboard({ user, onLogout, onUpdate }) {
           <div>
             <div style={{ fontSize:11,color:'#64748b',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.07em' }}>V-Lab Console</div>
             <div style={{ fontSize:18,fontWeight:800,color:'#1e1b4b',marginTop:1 }}>
-              {activeNav==='classes'?'Classes':activeNav==='submissions'?'Student Submissions':activeNav==='dashboard'?'Dashboard':activeNav==='groups'?'Groups':'Profile'}
+              {activeNav==='classes'?'Classes':activeNav==='submissions'?'Student Submissions':activeNav==='dashboard'?'Dashboard':activeNav==='groups'?'Groups':activeNav==='auth'?'Authorization':'Profile'}
             </div>
           </div>
           <div style={{ display:'flex',alignItems:'center',gap:16 }}>
@@ -338,6 +356,7 @@ export default function TeacherDashboard({ user, onLogout, onUpdate }) {
                   creatingGroup={creatingGroup} deletingGroupId={deletingGroupId} createGroup={createGroup} 
                   deleteGroup={deleteGroup} toggleStudent={toggleStudent}
                 />}
+              {activeNav==='auth' && <AuthManager user={user} />}
               {activeNav==='profile' && <Profile user={user} onUpdate={onUpdate} />}
             </>
           )}
