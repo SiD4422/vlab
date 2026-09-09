@@ -1,3 +1,5 @@
+import ProfileOnboardingModal from './components/ProfileOnboardingModal';
+import NavbarProfile from './components/NavbarProfile';
 import { useState, useEffect } from 'react';
 import { db } from './services/firebase';
 import { collection, query, where, getDocs, setDoc, doc, updateDoc, writeBatch, getDoc, arrayRemove } from 'firebase/firestore';
@@ -60,6 +62,7 @@ export default function TeacherDashboard({ user, onLogout, onUpdate }) {
   const [showCreateForm,setShowCreateForm] = useState(false);
   const [newClassName,setNewClassName]     = useState('');
   const [creating,setCreating]             = useState(false);
+  const [createError,setCreateError]       = useState('');
   const [selectedSubmission,setSelectedSubmission] = useState(null);
   const [teacherScoreInput,setTeacherScoreInput]   = useState('');
   const [savingGrade,setSavingGrade]               = useState(false);
@@ -115,6 +118,7 @@ export default function TeacherDashboard({ user, onLogout, onUpdate }) {
         groupName: newGroupName.trim(),
         memberUids: selectedStudentIds,
         createdAt: new Date().toISOString(),
+          org_id: user.org_id || 'srm_univ',
       });
       setNewGroupName(''); setSelectedStudentIds([]); setShowGroupForm(false);
       fetchData();
@@ -143,12 +147,18 @@ export default function TeacherDashboard({ user, onLogout, onUpdate }) {
     e.preventDefault();
     if (!newClassName.trim()) return;
     setCreating(true);
+    setCreateError('');
     const code = 'VLAB-'+Math.random().toString(36).substring(2,8).toUpperCase();
     try {
-      await setDoc(doc(db,'classes',code),{ teacherUid:user.uid,className:newClassName.trim(),inviteCode:code,studentUids:[] });
+      await setDoc(doc(db,'classes',code),{ 
+        teacherUid:user.uid, className:newClassName.trim(), inviteCode:code, studentUids:[], 
+        org_id: user.org_id || 'srm_univ' 
+      });
       setNewClassName(''); setShowCreateForm(false); fetchData();
-    } catch(e){ console.error(e); }
-    finally{ setCreating(false); }
+    } catch(err) { 
+      console.error('createClass error:', err);
+      setCreateError('Failed to create class: ' + (err.message || 'Permission denied. Please sign out and sign back in.'));
+    } finally { setCreating(false); }
   };
 
   const saveGrade = async (e) => {
@@ -156,11 +166,39 @@ export default function TeacherDashboard({ user, onLogout, onUpdate }) {
     if (!teacherScoreInput||!selectedSubmission) return;
     setSavingGrade(true);
     try {
-      const score=parseInt(teacherScoreInput);
-      await updateDoc(doc(db,'submissions',selectedSubmission.id),{teacherScore:score,status:'graded'});
-      setSubmissions(s=>s.map(x=>x.id===selectedSubmission.id?{...x,teacherScore:score,status:'graded'}:x));
+      const maxScore = selectedSubmission.gradingVersion === 1 ? 100 : 10;
+      const score = Math.min(maxScore, Math.max(0, parseInt(teacherScoreInput) || 0));
+      
+      const { auth } = await import('./services/firebase');
+      const idToken = await auth.currentUser.getIdToken(true);
+      
+      const res = await fetch('/api/override', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify({
+          submissionId: selectedSubmission.id,
+          teacherScore: score
+        })
+      });
+      
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+      
+      setSubmissions(s=>s.map(x=>x.id===selectedSubmission.id?{
+        ...x,
+        teacherScore:score,
+        status:'teacher_reviewed',
+        manuallyOverridden:true
+      }:x));
       setSelectedSubmission(null); setTeacherScoreInput('');
-    } catch(e){ alert('Failed to save grade.'); }
+    } catch(e){ 
+      console.error(e);
+      alert('Failed to save grade securely.'); 
+    }
     finally{ setSavingGrade(false); }
   };
 
@@ -201,14 +239,16 @@ export default function TeacherDashboard({ user, onLogout, onUpdate }) {
     finally{ setDeletingClass(false); }
   };
 
-  const pending  = submissions.filter(s=>s.teacherScore==null).length;
+  const pending  = submissions.filter(s=>!['teacher_reviewed','graded'].includes(s.status)).length;
   const filtSubs = submissions.filter(s=>!searchQ||s.studentName?.toLowerCase().includes(searchQ.toLowerCase())||s.experimentName?.toLowerCase().includes(searchQ.toLowerCase()));
   const filtCls  = classes.filter(c=>!searchQ||c.className?.toLowerCase().includes(searchQ.toLowerCase()));
 
-  const avgViva = submissions.length > 0 ? (submissions.reduce((acc, sub) => acc + (sub.vivaScore || 0), 0) / submissions.length).toFixed(1) : '-';
+  const avgViva = submissions.length > 0 ? (submissions.reduce((acc, sub) => acc + (Number(sub.vivaScore) || 0), 0) / submissions.length).toFixed(1) : '-';
   const cheatingFlags = submissions.filter(s => (s.tabSwitches || 0) > 0).length;
+  
+  const toPercent = (sub) => sub.gradingVersion === 1 ? sub.teacherScore : (sub.teacherScore ?? 0) * 10;
   const gradedSubs = submissions.filter(s => s.teacherScore != null);
-  const avgTeacher = gradedSubs.length > 0 ? (gradedSubs.reduce((acc, sub) => acc + sub.teacherScore, 0) / gradedSubs.length).toFixed(1) : '-';
+  const avgTeacher = gradedSubs.length > 0 ? (gradedSubs.reduce((acc, sub) => acc + toPercent(sub), 0) / gradedSubs.length).toFixed(1) + '%' : '-';
 
   return (
     <div style={{ display:'flex',height:'100vh',overflow:'hidden',fontFamily:"'Inter', 'Segoe UI', sans-serif",background:'linear-gradient(145deg, #f0f4ff 0%, #faf7ff 40%, #f0fbff 100%)' }}>
@@ -225,8 +265,11 @@ export default function TeacherDashboard({ user, onLogout, onUpdate }) {
       `}</style>
       {/* SIDEBAR */}
       <aside style={{ width:72,background:'linear-gradient(180deg, #1e1b4b 0%, #312e81 50%, #1e3a5f 100%)',display:'flex',flexDirection:'column',alignItems:'center',flexShrink:0,zIndex:10,boxShadow:'4px 0 24px rgba(0,0,0,0.1)' }}>
-        <div style={{ width:40,height:40,borderRadius:'50%',background:'linear-gradient(135deg, #818cf8, #38bdf8)',display:'flex',alignItems:'center',justifyContent:'center',margin:'20px 0 28px',flexShrink:0,boxShadow:'0 4px 12px rgba(129,140,248,0.4)' }}>
-          <GraduationCap size={20} color="#fff" />
+        <div style={{ width:48,height:48,borderRadius:'50%',margin:'20px auto 28px',flexShrink:0,overflow:'hidden',border:'2px solid rgba(255,255,255,0.25)',boxShadow:'0 4px 12px rgba(0,0,0,0.3)',display:'flex',alignItems:'center',justifyContent:'center',background:'linear-gradient(135deg,#818cf8,#38bdf8)' }}>
+          {user?.avatar
+            ? <img src={user.avatar} alt="avatar" style={{ width:'100%',height:'100%',objectFit:'cover' }} />
+            : <span style={{ color:'#fff',fontWeight:800,fontSize:18 }}>{(user?.name||'T')[0].toUpperCase()}</span>
+          }
         </div>
         <div style={{ flex:1,width:'100%' }}>
           <NavItem icon={LayoutDashboard} label="Dashboard"  active={activeNav==='dashboard'}    onClick={()=>setActiveNav('dashboard')} />
@@ -250,16 +293,16 @@ export default function TeacherDashboard({ user, onLogout, onUpdate }) {
             </div>
           </div>
           <div style={{ display:'flex',alignItems:'center',gap:16 }}>
+            {activeNav === 'classes' && !showCreateForm && !managingClass && (
+              <button onClick={() => setShowCreateForm(true)} style={{ display:'flex',alignItems:'center',gap:6,background:'linear-gradient(135deg,#6366f1,#8b5cf6)',color:'#fff',border:'none',padding:'0 16px',height:36,borderRadius:18,fontWeight:700,fontSize:13,cursor:'pointer',boxShadow:'0 4px 12px rgba(99,102,241,0.3)',transition:'all 0.2s' }}>
+                <Plus size={16} /> Create Class
+              </button>
+            )}
             <div style={{ position:'relative' }}>
               <Search size={15} style={{ position:'absolute',left:12,top:'50%',transform:'translateY(-50%)',color:'#94a3b8' }} />
-              <input placeholder="Search…" value={searchQ} onChange={e=>setSearchQ(e.target.value)} style={{ paddingLeft:36,paddingRight:12,height:36,borderRadius:18,border:'1px solid #e2e8f0',fontSize:13,color:'#1e293b',outline:'none',width:200,background:'rgba(255,255,255,0.8)',boxShadow:'inset 0 1px 3px rgba(0,0,0,0.02)',transition:'all 0.2s',fontFamily:'inherit' }} onFocus={e=>e.target.style.outline='2px solid rgba(99,102,241,0.3)'} onBlur={e=>e.target.style.outline='none'} />
+              <input placeholder="Search..." value={searchQ} onChange={e=>setSearchQ(e.target.value)} style={{ paddingLeft:36,paddingRight:12,height:36,borderRadius:18,border:'1px solid #e2e8f0',fontSize:13,color:'#1e293b',outline:'none',width:200,background:'rgba(255,255,255,0.8)',boxShadow:'inset 0 1px 3px rgba(0,0,0,0.02)',transition:'all 0.2s',fontFamily:'inherit' }} onFocus={e=>e.target.style.outline='2px solid rgba(99,102,241,0.3)'} onBlur={e=>e.target.style.outline='none'} />
             </div>
-            
-            {/* ─── Plan Upgrade Widget ─── */}
-            )}
-            <div style={{ width:44,height:44,borderRadius:'50%',overflow:'hidden',border:'2px solid #fff',boxShadow:'0 4px 12px rgba(0,0,0,0.1)',background:'#f1f5f9',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',transition:'transform 0.2s' }} onClick={()=>setActiveNav('profile')} onMouseEnter={e=>e.target.style.transform='scale(1.08)'} onMouseLeave={e=>e.target.style.transform='none'}>
-              {user.avatar?<img src={user.avatar} alt="me" style={{ width:'100%',height:'100%',objectFit:'cover' }}/>:<User size={22} color="#94a3b8" />}
-            </div>
+            <NavbarProfile user={user} onProfileClick={() => setActiveNav('profile')} />
           </div>
         </header>
 
@@ -271,6 +314,7 @@ export default function TeacherDashboard({ user, onLogout, onUpdate }) {
               {activeNav==='classes' && <ClassList 
                   classes={classes} submissions={submissions} showCreateForm={showCreateForm} setShowCreateForm={setShowCreateForm} 
                   createClass={createClass} newClassName={newClassName} setNewClassName={setNewClassName} creating={creating} 
+                  createError={createError}
                   searchQ={searchQ} filtCls={filtCls} openManageStudents={openManageStudents} managingClass={managingClass} 
                   setManagingClass={setManagingClass} deleteClass={deleteClass} deletingClass={deletingClass} 
                   loadingStudents={loadingStudents} classStudents={classStudents} removeStudent={removeStudent} 
@@ -294,6 +338,7 @@ export default function TeacherDashboard({ user, onLogout, onUpdate }) {
                   creatingGroup={creatingGroup} deletingGroupId={deletingGroupId} createGroup={createGroup} 
                   deleteGroup={deleteGroup} toggleStudent={toggleStudent}
                 />}
+              {activeNav==='profile' && <Profile user={user} onUpdate={onUpdate} />}
             </>
           )}
         </div>

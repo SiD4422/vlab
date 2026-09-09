@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from './services/firebase';
-import { User, Settings, Save, Loader2, Building, Hash, GraduationCap, LogOut, Award, CheckCircle, Zap, Camera } from 'lucide-react';
+import { User, Settings, Save, Loader2, Building, Hash, GraduationCap, LogOut, Award, CheckCircle, Zap, Camera, BarChart2 } from 'lucide-react';
 import { auth } from './services/firebase';
 import { signOut } from 'firebase/auth';
+import { useAuth } from './contexts/AuthContext';
+import { EXPERIMENTS } from './data/experiments';
 
 const C = {
   shell: "var(--shell)",
@@ -24,6 +26,7 @@ const C = {
 };
 
 export default function Profile({ user, onUpdate }) {
+  const { completedExperiments } = useAuth();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [profileData, setProfileData] = useState({
@@ -73,11 +76,19 @@ export default function Profile({ user, onUpdate }) {
       const updatePayload = {
         name: profileData.name,
         department: profileData.department,
-        role: user.role
+        dept: profileData.department, // alias for components that read dept
+        role: user.role,
+        uid: user.uid,
+        email: user.email,
+        status: user.status || 'active',
+        org_id: user.org_id || 'srm_univ',
+        detailsFilled: true,
       };
       
-      if (user.role === 'student') {
+      const isStudent = user.role === 'student';
+      if (isStudent) {
         updatePayload.registrationNo = profileData.registrationNo;
+        updatePayload.regNo = profileData.registrationNo; // alias for LabReportTab
         updatePayload.section = profileData.section;
       }
       
@@ -90,8 +101,10 @@ export default function Profile({ user, onUpdate }) {
         timeoutPromise
       ]);
       
-      setMessage('Profile updated successfully!');
-      if (onUpdate) onUpdate({ ...user, name: profileData.name });
+      setMessage('✓ Profile updated successfully!');
+      const fullUpdatedUser = { ...user, ...updatePayload };
+      localStorage.setItem('vlab_user', JSON.stringify(fullUpdatedUser));
+      if (onUpdate) onUpdate(fullUpdatedUser);
     } catch (err) {
       console.error("Update failed", err);
       setMessage(err.message === "Timeout: Could not connect to database" 
@@ -147,7 +160,7 @@ export default function Profile({ user, onUpdate }) {
 
           // Save to Firestore
           const docRef = doc(db, 'users', user.uid);
-          await setDoc(docRef, { avatar: dataUrl }, { merge: true });
+          await setDoc(docRef, { avatar: dataUrl, org_id: user.org_id || 'srm_univ', role: user.role, uid: user.uid, email: user.email }, { merge: true });
 
           // Update global state
           if (onUpdate) onUpdate({ ...user, avatar: dataUrl });
@@ -275,38 +288,62 @@ export default function Profile({ user, onUpdate }) {
         </form>
       </div>
 
-      <div style={{ background: C.bgCard, borderRadius: 12, padding: 32, border: `1px solid ${C.border}`, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-          <div style={{ background: 'rgba(217, 119, 6, 0.1)', color: C.primary, padding: 10, borderRadius: 10 }}>
-            <Award size={24} />
+      {user.role === 'student' && (
+        <div style={{ background: C.bgCard, borderRadius: 12, padding: 32, border: `1px solid ${C.border}`, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+            <div style={{ background: 'rgba(217, 119, 6, 0.1)', color: C.primary, padding: 10, borderRadius: 10 }}>
+              <BarChart2 size={24} />
+            </div>
+            <h2 style={{ fontSize: 20, fontWeight: 700, color: C.text, margin: 0 }}>My Lab Progress</h2>
           </div>
-          <h2 style={{ fontSize: 20, fontWeight: 700, color: C.text, margin: 0 }}>Achievements & Progress</h2>
+          
+          {(() => {
+            const done = completedExperiments?.length || 0;
+            const total = EXPERIMENTS.length;
+            const pct = total ? Math.round((done / total) * 100) : 0;
+            const color = pct >= 75 ? '#10b981' : pct >= 40 ? '#f59e0b' : '#6366f1';
+            
+            return (
+              <div style={{ marginBottom: 30 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <span style={{ fontSize: 15, fontWeight: 700, color: C.text }}>Completed Experiments</span>
+                  <span style={{ fontSize: 15, fontWeight: 800, color: color }}>{done} / {total} ({pct}%)</span>
+                </div>
+                <div style={{ height: 12, background: C.bgLighter, borderRadius: 999, overflow: 'hidden', border: `1px solid ${C.border}` }}>
+                  <div style={{ height: '100%', width: `${pct}%`, background: `linear-gradient(90deg, ${color}, ${color}bb)`, borderRadius: 999, transition: 'width 0.6s ease' }} />
+                </div>
+              </div>
+            );
+          })()}
+          
+          <h3 style={{ fontSize: 16, fontWeight: 700, color: C.text, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Award size={18} color={C.primary} /> Achievements
+          </h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
+            <div style={{ background: C.bgLighter, padding: '16px', borderRadius: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', border: `1px solid ${C.border}`, opacity: (completedExperiments?.length > 0) ? 1 : 0.5 }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '24px', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
+                <CheckCircle size={24} />
+              </div>
+              <h4 style={{ margin: '0 0 4px', fontSize: '14px', color: C.text }}>First Steps</h4>
+              <p style={{ margin: 0, fontSize: '12px', color: C.textMuted }}>Completed first experiment</p>
+            </div>
+            <div style={{ background: C.bgLighter, padding: '16px', borderRadius: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', border: `1px solid ${C.border}`, opacity: 0.5 }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '24px', background: 'rgba(156, 163, 175, 0.1)', color: '#9ca3af', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
+                <Award size={24} />
+              </div>
+              <h4 style={{ margin: '0 0 4px', fontSize: '14px', color: C.text }}>Bridge Master</h4>
+              <p style={{ margin: 0, fontSize: '12px', color: C.textMuted }}>Complete all AC/DC bridges</p>
+            </div>
+            <div style={{ background: C.bgLighter, padding: '16px', borderRadius: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', border: `1px solid ${C.border}`, opacity: 0.5 }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '24px', background: 'rgba(156, 163, 175, 0.1)', color: '#9ca3af', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
+                <Zap size={24} />
+              </div>
+              <h4 style={{ margin: '0 0 4px', fontSize: '14px', color: C.text }}>Flawless Viva</h4>
+              <p style={{ margin: 0, fontSize: '12px', color: C.textMuted }}>Score 100% on AI Examiner</p>
+            </div>
+          </div>
         </div>
-        
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
-          <div style={{ background: C.bgLighter, padding: '16px', borderRadius: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', border: `1px solid ${C.border}` }}>
-            <div style={{ width: '48px', height: '48px', borderRadius: '24px', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
-              <CheckCircle size={24} />
-            </div>
-            <h4 style={{ margin: '0 0 4px', fontSize: '14px', color: C.text }}>First Steps</h4>
-            <p style={{ margin: 0, fontSize: '12px', color: C.textMuted }}>Completed first experiment</p>
-          </div>
-          <div style={{ background: C.bgLighter, padding: '16px', borderRadius: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', border: `1px solid ${C.border}`, opacity: 0.5 }}>
-            <div style={{ width: '48px', height: '48px', borderRadius: '24px', background: 'rgba(156, 163, 175, 0.1)', color: '#9ca3af', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
-              <Award size={24} />
-            </div>
-            <h4 style={{ margin: '0 0 4px', fontSize: '14px', color: C.text }}>Bridge Master</h4>
-            <p style={{ margin: 0, fontSize: '12px', color: C.textMuted }}>Complete all AC/DC bridges</p>
-          </div>
-          <div style={{ background: C.bgLighter, padding: '16px', borderRadius: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', border: `1px solid ${C.border}`, opacity: 0.5 }}>
-            <div style={{ width: '48px', height: '48px', borderRadius: '24px', background: 'rgba(156, 163, 175, 0.1)', color: '#9ca3af', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
-              <Zap size={24} />
-            </div>
-            <h4 style={{ margin: '0 0 4px', fontSize: '14px', color: C.text }}>Flawless Viva</h4>
-            <p style={{ margin: 0, fontSize: '12px', color: C.textMuted }}>Score 100% on AI Examiner</p>
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

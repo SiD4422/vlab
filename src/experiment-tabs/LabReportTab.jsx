@@ -2,23 +2,24 @@ import { useState } from 'react';
 import {
   Target, BookOpen, Zap, Sparkles, Activity, Calculator,
   BarChart2, Trophy, HelpCircle, CheckCircle2, XCircle,
-  Printer, Download, Loader2, User, GraduationCap, Building, IdCard, Award,
+  Printer, Download, Loader2, User, GraduationCap, Building, IdCard,
 } from 'lucide-react';
-import { generateLabCertificate } from '../components/CertificateGenerator';
 import { C } from '../App';
-import { db } from '../services/firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { db, auth } from '../services/firebase';
+import { doc, getDoc, setDoc, updateDoc, collection, getDocs } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { BRIDGES, CircuitSVG } from '../simulations/UnifiedBridgeSim';
 import { AccordionSection } from './VivaPrepTab';
 import VivaPrepTab from './VivaPrepTab';
+import { computeProgress } from '../pages/ExperimentSession';
 
 /**
  * LabReportTab — The printable lab report view.
  * Handles observation table editing, AI conclusion generation,
  * and Firestore submission to the teacher.
  */
-export default function LabReportTab({ exp, bridgeState, setBridgeSims }) {
+export default function LabReportTab({ exp, bridgeState, setBridgeSims, onReportSubmitted, flushTelemetry }) {
+
   const { user, enrolledClass } = useAuth();
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -53,18 +54,71 @@ export default function LabReportTab({ exp, bridgeState, setBridgeSims }) {
     const vivaScore = bridgeState?.vivaScore || 0;
     const vivaResponses = bridgeState?.vivaResponses || {};
     const submissionId = `${user.uid}_${exp.id}`;
+    
+    const isNonBridge = ['thermocouple', 'rtd', 'photodiode-ldr'].includes(exp.id);
+    const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+    const p = bridgeState?.progress || {};
+    
+    const progressPercent = computeProgress(bridgeState);
+
     const payload = {
       studentUid: user.uid, studentName: user.name, studentAvatar: user.avatar,
       classId: enrolledClass.id, teacherUid: enrolledClass.teacherUid,
       experimentId: exp.id, experimentName: exp.title,
-      vivaScore, vivaResponses, teacherScore: null,
+      vivaScore, vivaResponses,
+      gradingVersion: 2,
+      feedback: null,
       tabSwitches: bridgeState?.tabSwitches || 0,
-      labData: bridgeState || {}, submittedAt: new Date().toISOString(), status: 'completed',
+      progressPercent,
+      labData: bridgeState || {}, submittedAt: new Date().toISOString(),
+      status: 'pending_auto_grade'
     };
     try {
       await setDoc(doc(db, 'submissions', submissionId), payload);
+      
+      // 1. Wait for all telemetry writes to fully complete (no more timer race condition)
+      if (flushTelemetry) {
+        await flushTelemetry();
+      }
+
+      // 2. Trigger Server-Authoritative Grading with retry
+      let res = null;
+      let attempt = 0;
+      
+      while (attempt < 2) {
+        attempt++;
+        try {
+          // Force token refresh to avoid silent expiry stalls
+          const idToken = await auth.currentUser.getIdToken(true);
+          res = await fetch('/api/grade', {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${idToken}`
+            },
+            body: JSON.stringify({ submissionId })
+          });
+          
+          if (res.ok) break; // Success, exit retry loop
+          
+          console.warn(`API grading attempt ${attempt} failed:`, await res.text());
+        } catch (fetchErr) {
+          console.warn(`API grading attempt ${attempt} network error:`, fetchErr);
+        }
+      }
+
+      if (!res || !res.ok) {
+        // Fallback: Both attempts failed. Mark as grading_failed so it doesn't get stuck in pending.
+        await updateDoc(doc(db, 'submissions', submissionId), { status: 'grading_failed' });
+        showMsg('error', 'Report submitted, but auto-grading failed. Your teacher will grade it manually.');
+        setSubmitted(true);
+        if (onReportSubmitted) onReportSubmitted();
+        return;
+      }
+      
       setSubmitted(true);
-      showMsg('success', `Lab report submitted to ${enrolledClass.className}!`);
+      if (onReportSubmitted) onReportSubmitted();
+      showMsg('success', `Lab report submitted and securely graded!`);
     } catch (e) {
       console.error('Submission error:', e);
       showMsg('error', 'Failed to submit report. Please try again.');
@@ -370,45 +424,28 @@ export default function LabReportTab({ exp, bridgeState, setBridgeSims }) {
         )}
       </AccordionSection>
 
-      <div className="no-print" style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 40, flexWrap: 'wrap' }}>
-        {enrolledClass && (
+      <div className="no-print" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, marginTop: 40 }}>
+
+        {/* Submit button — always visible */}
+        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', justifyContent: 'center' }}>
           <button
-            onClick={submitToTeacher}
+            onClick={enrolledClass ? submitToTeacher : () => showMsg('error', 'You must join a class first. Go to Home → Enter your class code.')}
             disabled={submitting || submitted}
             className="create-btn"
-            style={{ opacity: submitted ? 0.6 : 1, cursor: submitted ? 'default' : 'pointer', padding: '12px 32px', fontSize: 16, borderRadius: 999 }}
+            style={{ opacity: (submitted || !enrolledClass) ? 0.6 : 1, cursor: (submitted || !enrolledClass) ? 'not-allowed' : 'pointer', padding: '12px 32px', fontSize: 16, borderRadius: 999, display: 'flex', alignItems: 'center', gap: 8 }}
           >
             {submitting ? <Loader2 className="spin" size={16} /> : <CheckCircle2 size={16} />}
             {submitted ? 'Report Submitted ✓' : 'Submit Lab Report to Teacher'}
           </button>
+        </div>
+
+        {/* No class warning */}
+        {!enrolledClass && !submitted && (
+          <div style={{ fontSize: 13, color: '#b45309', background: '#fef3c7', border: '1px solid #fcd34d', borderRadius: 10, padding: '10px 20px', display: 'flex', alignItems: 'center', gap: 8 }}>
+            ⚠️ You are not enrolled in a class. Go to <strong style={{ marginLeft: 4 }}>Home</strong> and enter your class code to submit to a teacher.
+          </div>
         )}
 
-        {/* Certificate button — appears after submission */}
-        {submitted && (
-          <button
-            onClick={() => generateLabCertificate({
-              studentName: user?.name || 'Student',
-              experimentName: exp?.title || 'Experiment',
-              vivaScore: Math.round((bridgeState?.vivaScore || 0) * 100),
-              teacherName: enrolledClass?.teacherName || 'Faculty',
-              className: enrolledClass?.className || '',
-              institutionName: enrolledClass?.institutionName || 'V-Lab Enterprise',
-            })}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 10,
-              background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-              color: '#fff', border: 'none',
-              padding: '12px 28px', borderRadius: 999,
-              fontSize: 15, fontWeight: 700, cursor: 'pointer',
-              boxShadow: '0 4px 20px rgba(245,158,11,0.4)',
-              transition: 'transform 0.2s, box-shadow 0.2s',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(245,158,11,0.55)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(245,158,11,0.4)'; }}
-          >
-            <Award size={18} /> Download Certificate
-          </button>
-        )}
       </div>
     </div>
   );

@@ -260,15 +260,21 @@ export default function UnifiedBridgeSim({ bridgeId }) {
  * This is rendered inside the Procedure tab for bridge experiments.
  * Shows: Apparatus list, Balance Formula, Observation Table, Result.
  */
-export function BridgeProcedurePanel({ bridgeId, bridgeState, onStateChange }) {
+export function BridgeProcedurePanel({ bridgeId, bridgeState, onStateChange, trackEvent }) {
+  // trackEvent is provided by ExperimentSession (shared single useTelemetry instance).
+  // Fallback to no-op if somehow called without it.
+  const _track = trackEvent || (() => {});
   const bridge = BRIDGES.find(b => b.id === bridgeId);
   const [graphX, setGraphX] = useState(bridge && bridge.tabCols.length >= 2 ? bridge.tabCols[0].k : '');
   const [graphY, setGraphY] = useState(bridge && bridge.tabCols.length >= 2 ? bridge.tabCols[1].k : '');
   if (!bridge) return null;
-  const st = bridgeState || initBridgeState(bridge);
+  const st = { ...initBridgeState(bridge), ...(bridgeState || {}) };
+  if (!st.rows) st.rows = []; // Ultimate safety net
+
   function update(newSt) { if (onStateChange) onStateChange(newSt); }
 
   function updateRow(index, key, rawVal) {
+    _track('balance_adjusted', { key });
     const newRows = [...st.rows];
     const val = rawVal === '' ? '' : parseFloat(rawVal);
     newRows[index] = { ...newRows[index], [key]: isNaN(val) ? rawVal : val };
@@ -276,6 +282,7 @@ export function BridgeProcedurePanel({ bridgeId, bridgeState, onStateChange }) {
   }
 
   function addEmptyRow() {
+    trackEvent('reading_added');
     const emptyRow = {};
     bridge.tabCols.forEach(c => emptyRow[c.k] = '');
     update({ ...st, rows: [...st.rows, emptyRow] });

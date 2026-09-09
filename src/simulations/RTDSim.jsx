@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   LineChart,
   Line,
@@ -218,10 +218,17 @@ const WIRING_INFO = {
 // ─────────────────────────────────────────────
 //  Main Component
 // ─────────────────────────────────────────────
-export default function RTDSim() {
+export default function RTDSim({ trackEvent: trackEventProp }) {
+  // Fallback to no-op if trackEvent is not provided
+  const trackEvent = trackEventProp || (() => {});
+
   const [temperature, setTemperature] = useState(25);
   const [rlead, setRlead] = useState(1.0);
   const [wiringConfig, setWiringConfig] = useState("2-wire");
+
+  useEffect(() => { trackEvent('slider_adjusted', { param: 'temperature', val: temperature }); }, [temperature, trackEvent]);
+  useEffect(() => { trackEvent('slider_adjusted', { param: 'rlead', val: rlead }); }, [rlead, trackEvent]);
+  useEffect(() => { trackEvent('slider_adjusted', { param: 'wiringConfig', val: wiringConfig }); }, [wiringConfig, trackEvent]);
 
   // ── Core calculations ──
   const rTrue = useMemo(() => calcRTrue(temperature), [temperature]);

@@ -6,14 +6,17 @@ import {
 import { C } from '../App';
 import { EXPERIMENTS } from '../data/experiments.js';
 import { db } from '../services/firebase';
-import { doc, getDoc, arrayUnion, writeBatch } from 'firebase/firestore';
+import { doc, getDoc, arrayUnion, arrayRemove, writeBatch } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
+import { computeProgress } from './ExperimentSession';
 
 
-export default function Home({ onOpen, collapsedCategories, toggleCategory, searchQuery, setSearchQuery, completed }) {
+export default function Home({ onOpen, collapsedCategories, toggleCategory, searchQuery, setSearchQuery, completed, bridgeSims = {} }) {
+
   const { user, enrolledClass, setEnrolledClass } = useAuth();
   const [inviteCode, setInviteCode] = useState('');
   const [joining, setJoining] = useState(false);
+  const [leaving, setLeaving] = useState(false);
   const [joinError, setJoinError] = useState(null);
   const [joinSuccess, setJoinSuccess] = useState(null);
 
@@ -47,6 +50,35 @@ export default function Home({ onOpen, collapsedCategories, toggleCategory, sear
       setJoinError("Failed to join class. Please try again.");
     } finally {
       setJoining(false);
+    }
+  };
+
+  const leaveClass = async () => {
+    if (!enrolledClass) return;
+    if (!window.confirm(`Are you sure you want to leave ${enrolledClass.className}?`)) return;
+    setLeaving(true);
+    try {
+      const classDocRef = doc(db, 'classes', enrolledClass.id);
+      const userDocRef = doc(db, 'users', user.uid);
+      const batch = writeBatch(db);
+      
+      batch.update(classDocRef, { studentUids: arrayRemove(user.uid) });
+      batch.update(userDocRef, {
+        enrolledTeacherUids: arrayRemove(enrolledClass.teacherUid),
+        lastJoinedClassId: null,
+      });
+      
+      await batch.commit();
+      
+      setEnrolledClass(null);
+      setJoinError(null);
+      setJoinSuccess("You have left the class.");
+      localStorage.removeItem('vlab_class');
+    } catch (e) {
+      console.error("Error leaving class:", e);
+      setJoinError("Failed to leave class. You might not have permissions.");
+    } finally {
+      setLeaving(false);
     }
   };
 
@@ -94,18 +126,6 @@ export default function Home({ onOpen, collapsedCategories, toggleCategory, sear
             Explore Experiments <ArrowLeft size={18} style={{ transform: "rotate(180deg)" }} />
           </button>
         </div>
-
-        {/* Clean stat badge — professional alternative to the spinning sticker */}
-        <div style={{ position: "absolute", bottom: "40px", right: "40px", zIndex: 10, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
-          <div style={{ background: "rgba(13,148,136,0.15)", border: "1px solid rgba(13,148,136,0.3)", borderRadius: 12, padding: "12px 20px", backdropFilter: "blur(12px)", textAlign: "right" }}>
-            <div style={{ fontSize: 28, fontWeight: 900, color: "#14b8a6", lineHeight: 1 }}>{EXPERIMENTS.length}</div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.6)", letterSpacing: "0.08em", textTransform: "uppercase", marginTop: 4 }}>Lab Modules</div>
-          </div>
-          <div style={{ background: "rgba(193,113,47,0.15)", border: "1px solid rgba(193,113,47,0.3)", borderRadius: 12, padding: "12px 20px", backdropFilter: "blur(12px)", textAlign: "right" }}>
-            <div style={{ fontSize: 28, fontWeight: 900, color: "#c1712f", lineHeight: 1 }}>AI</div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.6)", letterSpacing: "0.08em", textTransform: "uppercase", marginTop: 4 }}>Powered</div>
-          </div>
-        </div>
       </div>
 
       {/* Feature Pillars */}
@@ -113,7 +133,7 @@ export default function Home({ onOpen, collapsedCategories, toggleCategory, sear
         {[
           { icon: Target, title: "Objective-Driven", desc: "Understand real-world deviations by plotting static and dynamic characteristics of ideal sensors." },
           { icon: Activity, title: "Live Graphing & Export", desc: "Watch a live deviation graph update as you balance the bridge. Export your readings as a CSV file for lab reports." },
-          { icon: Zap, title: "Circuit Sandbox", desc: "Build custom circuits with a full drag-and-drop physics simulator — resistors, capacitors, inductors, AC sources, and more." },
+          { icon: Zap, title: "Circuit Sandbox", desc: "Build custom circuits with a full drag-and-drop physics simulator â€” resistors, capacitors, inductors, AC sources, and more." },
         ].map((feature, i) => (
           <div key={i} style={{ flex: "1 1 300px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
             <div style={{ width: 56, height: 56, borderRadius: 16, background: "#e8f5f3", color: C.teal, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
@@ -145,9 +165,18 @@ export default function Home({ onOpen, collapsedCategories, toggleCategory, sear
           </div>
 
           <div style={{ position: 'relative', zIndex: 1 }}>
-            {enrolledClass ? (
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 20px', background: '#ecfdf5', color: '#059669', borderRadius: 999, fontWeight: 700, fontSize: 15, border: '1px solid #a7f3d0', boxShadow: '0 4px 12px rgba(5, 150, 105, 0.1)' }}>
-                <CheckCircle2 size={18} /> Enrolled
+            {(!enrolledClass && user?.lastJoinedClassId) ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 20px', background: '#f8fafc', color: '#475569', borderRadius: 999, fontWeight: 600, fontSize: 14, border: '1px solid #e2e8f0' }}>
+                <Loader2 className="spin" size={18} /> Restoring your class session...
+              </div>
+            ) : enrolledClass ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 20px', background: '#ecfdf5', color: '#059669', borderRadius: 999, fontWeight: 700, fontSize: 15, border: '1px solid #a7f3d0', boxShadow: '0 4px 12px rgba(5, 150, 105, 0.1)' }}>
+                  <CheckCircle2 size={18} /> Enrolled
+                </div>
+                <button onClick={leaveClass} disabled={leaving} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 20px', background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', borderRadius: 999, fontWeight: 700, fontSize: 14, cursor: leaving ? 'not-allowed' : 'pointer', opacity: leaving ? 0.7 : 1, transition: 'all 0.2s' }} onMouseEnter={e=>e.target.style.background='#fee2e2'} onMouseLeave={e=>e.target.style.background='#fef2f2'}>
+                  {leaving ? <Loader2 className="spin" size={16} /> : <Lock size={16} />} Leave Class
+                </button>
               </div>
             ) : (
               <>
@@ -256,6 +285,7 @@ export default function Home({ onOpen, collapsedCategories, toggleCategory, sear
                       {categoryExps.map(exp => {
                         const isLocked = false;
                         const isCompleted = completed?.includes(exp.id);
+                        const progressPct = computeProgress(bridgeSims[exp.id] || {});
                         return (
                           <button key={exp.id} onClick={() => { if (!isLocked) onOpen(exp.id); }} className="class-card"
                             style={{ textAlign: "left", cursor: isLocked ? "not-allowed" : "pointer", display: "flex", flexDirection: "column", gap: 12, opacity: isLocked ? 0.7 : 1, border: isCompleted ? '1.5px solid var(--teal)' : 'none', background: 'var(--card)', position: 'relative', overflow: 'hidden' }}
@@ -272,9 +302,23 @@ export default function Home({ onOpen, collapsedCategories, toggleCategory, sear
                             </div>
                             <div style={{ fontWeight: 800, color: 'var(--ink)', fontSize: 18, lineHeight: 1.3, marginTop: 4 }}>{exp.title}</div>
                             <div style={{ color: 'var(--muted)', fontSize: 14, lineHeight: 1.6, flex: 1 }}>{exp.aim}</div>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12, borderTop: `1px solid var(--border)`, paddingTop: 16, width: "100%" }}>
+
+                            {/* Per-experiment progress bar */}
+                            {progressPct > 0 && (
+                              <div style={{ width: '100%' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
+                                  <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Progress</span>
+                                  <span style={{ fontSize: 12, fontWeight: 800, color: progressPct >= 100 ? 'var(--teal)' : 'var(--copper)' }}>{progressPct}%</span>
+                                </div>
+                                <div style={{ height: 6, background: 'var(--border)', borderRadius: 99, overflow: 'hidden' }}>
+                                  <div style={{ width: `${progressPct}%`, height: '100%', background: progressPct >= 100 ? 'linear-gradient(90deg, var(--teal), #14b8a6)' : 'linear-gradient(90deg, var(--copper), #d97706)', borderRadius: 99, transition: 'width 0.6s ease' }} />
+                                </div>
+                              </div>
+                            )}
+
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 4, borderTop: `1px solid var(--border)`, paddingTop: 16, width: "100%" }}>
                               <span style={{ fontSize: 13, fontWeight: 600, color: isLocked ? 'var(--muted)' : 'var(--ink)' }}>
-                                {isLocked ? "Module Locked" : "Launch lab module"}
+                                {isLocked ? "Module Locked" : progressPct > 0 ? "Continue lab" : "Launch lab module"}
                               </span>
                               {!isLocked && <ArrowLeft className="exp-arrow" size={16} color="var(--muted)" style={{ transform: "rotate(180deg)", transition: "all 0.2s ease" }} />}
                             </div>

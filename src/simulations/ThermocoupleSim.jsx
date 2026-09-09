@@ -121,9 +121,11 @@ function LabeledSlider({ label, value, min, max, step = 1, onChange, unit, accen
     </div>
   );
 }
-
 // ─── Main Component ───────────────────────────────────────────────────────────
-export default function ThermocoupleSim() {
+export default function ThermocoupleSim({ trackEvent: trackEventProp }) {
+  // Fallback to no-op if trackEvent is not provided
+  const trackEvent = trackEventProp || (() => {});
+
   const [tcType, setTcType]       = useState('K');
   const [tHot, setTHot]           = useState(300);
   const [tCold, setTCold]         = useState(25);
@@ -131,6 +133,12 @@ export default function ThermocoupleSim() {
   const [curveData, setCurveData] = useState([]);
 
   const tc = THERMOCOUPLE_TYPES[tcType];
+
+  // Track interactions
+  useEffect(() => { trackEvent('slider_adjusted', { param: 'type', val: tcType }); }, [tcType, trackEvent]);
+  useEffect(() => { trackEvent('slider_adjusted', { param: 'tHot', val: tHot }); }, [tHot, trackEvent]);
+  useEffect(() => { trackEvent('slider_adjusted', { param: 'tCold', val: tCold }); }, [tCold, trackEvent]);
+  useEffect(() => { trackEvent('slider_adjusted', { param: 'cjcError', val: cjcError }); }, [cjcError, trackEvent]);
 
   // Clamp tHot to the type's valid range whenever type changes
   useEffect(() => {

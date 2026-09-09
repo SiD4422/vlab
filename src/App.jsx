@@ -4,6 +4,7 @@ import LoginScreen from "./LoginScreen";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import PendingApproval from "./pages/PendingApproval";
 
 // Lazy-load heavy route components — each becomes a separate JS chunk
 const TeacherDashboardView = lazy(() => import("./pages/TeacherDashboardView"));
@@ -13,8 +14,7 @@ const SuperAdminDashboard = lazy(() => import("./pages/SuperAdminDashboard"));
 const Pricing = lazy(() => import("./pages/Pricing"));
 
 /* ---------------------------------------------------------------
-   DESIGN TOKENS — circuit-board palette: ink navy shell, copper
-   accent (component/trace color), teal secondary, warm paper canvas
+   DESIGN TOKENS — circuit-board palette
 --------------------------------------------------------------- */
 export const C = {
   shell: "var(--shell)",
@@ -38,19 +38,12 @@ function FullScreenSpinner() {
   );
 }
 
-/* ---------------------------------------------------------------
-   ROUTER SHELL — the real default export
-   Replaces the old conditional render (if !user / if teacher / else student)
-   with proper react-router-dom routes + ProtectedRoute guards
---------------------------------------------------------------- */
 export default function App() {
   const { user, role, authReady } = useAuth();
 
-  // While Firebase + Firestore role are resolving, show a full-screen spinner.
-  // This prevents ANY flash of wrong content.
-  if (!authReady) {
-    return <FullScreenSpinner />;
-  }
+  if (!authReady) return <FullScreenSpinner />;
+
+  const isTeacher = role === 'teacher' || role === 'admin_teacher';
 
   return (
     <Suspense fallback={<FullScreenSpinner />}>
@@ -59,10 +52,18 @@ export default function App() {
         <Route
           path="/"
           element={
-            user
-              ? <Navigate to={role === 'teacher' ? '/teacher' : '/student'} replace />
+            (user && role !== null)
+              ? (user.status === 'pending'
+                  ? <Navigate to="/pending-approval" replace />
+                  : <Navigate to={isTeacher ? '/teacher' : '/student'} replace />)
               : <LoginScreen />
           }
+        />
+
+        {/* Pending approval screen for unreviewed teachers */}
+        <Route
+          path="/pending-approval"
+          element={user ? <PendingApproval /> : <Navigate to="/" replace />}
         />
 
         {/* Protected: Student app shell */}
@@ -75,7 +76,7 @@ export default function App() {
           }
         />
 
-        {/* Protected: Teacher dashboard */}
+        {/* Protected: Teacher dashboard (also admin_teacher) */}
         <Route
           path="/teacher"
           element={
@@ -85,16 +86,9 @@ export default function App() {
           }
         />
 
-        {/* Public: About page */}
         <Route path="/about" element={<About />} />
-
-        {/* Public: Pricing page */}
         <Route path="/pricing" element={<Pricing />} />
-
-        {/* Super Admin: protected inside the component itself by UID check */}
         <Route path="/admin" element={user ? <SuperAdminDashboard /> : <Navigate to="/" replace />} />
-
-        {/* Catch-all: redirect to root */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>

@@ -38,6 +38,7 @@ import { useAuth } from '../contexts/AuthContext';
 import Toast from '../components/Toast';
 import Section from '../components/Section';
 import { useToast } from '../hooks/useToast';
+import { useTelemetry } from '../hooks/useTelemetry';
 
 function TabSpinner() {
   return (
@@ -69,10 +70,41 @@ const BRIDGE_IDS = [
   'schering-bridge', 'wiens-bridge', 'transformer-ratio-bridge',
 ];
 
+// ─── Progress scoring weights ─────────────────────────────────────
+// Tab visits contribute lightweight points; submitting quiz/report earns the rest
+const PROGRESS_WEIGHTS = {
+  aim: 5,
+  theory: 5,
+  simulation: 10,
+  procedure: 5,
+  references: 2,
+  feedback: 2,
+  pretestDone: 15,    // quiz submitted
+  posttestDone: 15,   // quiz submitted
+  snapshotCaptured: 15, // at least one circuit snapshot
+  reportSubmitted: 26,  // lab report submitted
+};
+// Total = 100
+
+export function computeProgress(bridgeState = {}) {
+  const p = bridgeState.progress || {};
+  let score = 0;
+  Object.entries(PROGRESS_WEIGHTS).forEach(([key, weight]) => {
+    if (p[key]) score += weight;
+  });
+  return Math.min(100, score);
+}
+
+
+
 // ─── Detail (main experiment layout) ───────────────────────────────────────────
 function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCompleted, bridgeSims, setBridgeSims, isBroadcaster, isSpectator, classId }) {
   const { user } = useAuth();
   const { toasts, addToast } = useToast();
+  // Single shared telemetry hook — owns ALL write promises for this experiment session.
+  // flushTelemetry() is passed to LabReportTab so it can await all writes before grading.
+  // trackEvent is passed to simulation components so they don't need their own hook instances.
+  const { trackEvent, flushTelemetry } = useTelemetry(exp.id, user);
 
   // Warn on browser close/refresh if lab has unsaved data
   useEffect(() => {
@@ -87,6 +119,21 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
     return () => window.removeEventListener('beforeunload', handler);
   }, [bridgeSims, exp.id]);
 
+  // ─── Progress Tracking Helpers ────────────────────────────────────
+  const markProgress = (keys) => {
+    setBridgeSims(prev => {
+      const current = prev[exp.id] || {};
+      const existingProgress = current.progress || {};
+      const updates = {};
+      (Array.isArray(keys) ? keys : [keys]).forEach(k => { updates[k] = true; });
+      if (Object.keys(updates).every(k => existingProgress[k])) return prev; // nothing new
+      return {
+        ...prev,
+        [exp.id]: { ...current, progress: { ...existingProgress, ...updates } },
+      };
+    });
+  };
+
   // Listen for snapshot/reading events from the circuit iframe
   useEffect(() => {
     const handleMessage = (e) => {
@@ -99,21 +146,17 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
             [exp.id]: {
               ...current,
               snapshots: [...(current.snapshots || []), { id: Date.now(), svg: e.data.svgDataUrl, graph: e.data.graphDataUrl }],
+              progress: { ...(current.progress || {}), snapshotCaptured: true },
             },
           };
         });
         addToast('Circuit Captured!', 'Your circuit snapshot has been added to the Lab Report.', 'success');
-      } else if (e.data.type === 'READING_RESULT') {
-        const newRow = { id: Date.now() };
-        setBridgeSims(prev => {
-          const current = prev[exp.id] || { rows: [], snapshots: [] };
-          return { ...prev, [exp.id]: { ...current, rows: [...current.rows, newRow] } };
-        });
       }
     };
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
   }, [exp.id, setBridgeSims, addToast]);
+
 
   // Tab-switch detection (Anti-Cheat)
   useEffect(() => {
@@ -183,7 +226,7 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
                 <button
                   key={t.id}
                   id={t.id === 'procedure' ? 'tour-procedure-tab' : undefined}
-                  onClick={() => setTab(t.id)}
+                  onClick={() => { setTab(t.id); markProgress(t.id); }}
                   style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderRadius: 8, background: isActive ? 'var(--teal-soft)' : 'transparent', color: isActive ? 'var(--teal)' : 'var(--ink-soft)', border: 'none', cursor: 'pointer', fontSize: 15, fontWeight: isActive ? 700 : 500, textAlign: 'left', transition: 'all 0.2s ease' }}
                   onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'var(--bg)'; }}
                   onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
@@ -273,13 +316,13 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
               <Suspense fallback={<TabSpinner />}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
                   {exp.id === 'strain-gauge' ? (
-                    <Section title="Interactive Simulation"><StrainGaugeSim /></Section>
+                    <Section title="Interactive Simulation"><StrainGaugeSim trackEvent={trackEvent} /></Section>
                   ) : exp.id === 'thermocouple' ? (
-                    <Section title="Thermocouple Interactive Simulation"><ThermocoupleSim /></Section>
+                    <Section title="Thermocouple Interactive Simulation"><ThermocoupleSim trackEvent={trackEvent} /></Section>
                   ) : exp.id === 'rtd' ? (
-                    <Section title="RTD (PT100) Interactive Simulation"><RTDSim /></Section>
+                    <Section title="RTD (PT100) Interactive Simulation"><RTDSim trackEvent={trackEvent} /></Section>
                   ) : exp.id === 'photodiode-ldr' ? (
-                    <Section title="Photodiode / LDR Interactive Simulation"><PhotodiodeLDRSim /></Section>
+                    <Section title="Photodiode / LDR Interactive Simulation"><PhotodiodeLDRSim trackEvent={trackEvent} /></Section>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
                       <Section title="Reference Diagram" id="tour-reference">
@@ -323,7 +366,7 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
             {tab === 'pretest' && (
               <Suspense fallback={<TabSpinner />}>
                 <Section title="Pretest">
-                  <QuizTab questions={exp.pretest} />
+                  <QuizTab questions={exp.pretest} onComplete={() => markProgress('pretestDone')} />
                 </Section>
               </Suspense>
             )}
@@ -331,7 +374,7 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
             {tab === 'posttest' && (
               <Suspense fallback={<TabSpinner />}>
                 <Section title="Posttest">
-                  <QuizTab questions={exp.posttest} onComplete={markCompleted} />
+                  <QuizTab questions={exp.posttest} onComplete={() => { markCompleted(); markProgress('posttestDone'); }} />
                   <VivaPrepTab exp={exp} bridgeState={bridgeSims[exp.id]} setBridgeSims={setBridgeSims} />
                 </Section>
               </Suspense>
@@ -339,9 +382,10 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
 
             {tab === 'report' && (
               <Suspense fallback={<TabSpinner />}>
-                <LabReportTab exp={exp} bridgeState={bridgeSims[exp.id]} setBridgeSims={setBridgeSims} />
+                <LabReportTab exp={exp} bridgeState={bridgeSims[exp.id]} setBridgeSims={setBridgeSims} onReportSubmitted={() => markProgress('reportSubmitted')} flushTelemetry={flushTelemetry} />
               </Suspense>
             )}
+
 
             {tab === 'procedure' && (
               <Section title="Procedure">
@@ -354,6 +398,7 @@ function Detail({ exp, tab, setTab, onBack, sidebarOpen, setSidebarOpen, markCom
                       bridgeId={exp.id}
                       bridgeState={bridgeSims[exp.id]}
                       onStateChange={newSt => setBridgeSims(prev => ({ ...prev, [exp.id]: newSt }))}
+                      trackEvent={trackEvent}
                     />
                   </Suspense>
                 )}

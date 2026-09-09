@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, OAuthProvider } from "firebase/auth";
 import { getFirestore, initializeFirestore } from "firebase/firestore";
 import { getDatabase } from "firebase/database";
 
@@ -17,26 +17,27 @@ const firebaseConfig = {
 let app;
 let authService;
 let googleProviderService;
+let microsoftProviderService;
 let firestoreDb;
 let realtimeDb;
 
 try {
+  console.log("Firebase Config being used:", firebaseConfig);
   app = initializeApp(firebaseConfig);
   authService = getAuth(app);
   googleProviderService = new GoogleAuthProvider();
   googleProviderService.setCustomParameters({ prompt: 'select_account' });
+  microsoftProviderService = new OAuthProvider('microsoft.com');
+  microsoftProviderService.setCustomParameters({ prompt: 'select_account' });
   realtimeDb = getDatabase(app);
-  
-  // Force long-polling to bypass WebSocket blocks (common cause of infinite hangs)
-  firestoreDb = initializeFirestore(app, {
-    experimentalForceLongPolling: true
-  });
+  firestoreDb = getFirestore(app);
 } catch (error) {
-  console.error("Firebase initialization error:", error);
+  console.warn("Firebase initialization skipped or failed. Using mock mode.", error);
 }
 
 export const auth = authService;
 export const googleProvider = googleProviderService;
+export const microsoftProvider = microsoftProviderService;
 export const db = firestoreDb;
 export const rtdb = realtimeDb;
 

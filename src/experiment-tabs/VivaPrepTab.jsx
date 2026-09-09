@@ -132,10 +132,10 @@ function VivaMCQ({ questions, exp, bridgeState, setBridgeSims, hideTitle }) {
   const handleSubmit = () => {
     let correctCount = 0;
     shuffled.forEach(q => { if (responses[q.id] === q.correctIndex) correctCount++; });
-    const finalScore = Math.round((correctCount / shuffled.length) * 3);
+    const finalScore = (correctCount / shuffled.length) * 3;
     setBridgeSims && setBridgeSims(prev => {
       const cur = prev[exp.id] || {};
-      return { ...prev, [exp.id]: { ...cur, vivaSubmitted: true, vivaScore: finalScore, vivaCorrectCount: correctCount } };
+      return { ...prev, [exp.id]: { ...cur, vivaSubmitted: true, vivaScore: finalScore, vivaCorrectCount: correctCount, vivaTotal: shuffled.length } };
     });
   };
 

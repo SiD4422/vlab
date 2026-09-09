@@ -48,8 +48,15 @@ export default function ProtectedRoute({ role, children }) {
     return <Navigate to="/" replace />;
   }
 
+  // State 2.5: Pending teacher — redirect to waiting screen
+  if (user.status === 'pending') {
+    return <Navigate to="/pending-approval" replace />;
+  }
+
   // State 3: Logged in but wrong role (e.g. student tries /teacher)
-  if (role && userRole !== role) {
+  // admin_teacher is also allowed through the teacher route
+  const effectiveRole = userRole === 'admin_teacher' ? 'teacher' : userRole;
+  if (role && effectiveRole !== role) {
     return <Navigate to="/" replace />;
   }
 

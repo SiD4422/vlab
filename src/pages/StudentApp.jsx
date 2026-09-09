@@ -1,3 +1,4 @@
+import ProfileOnboardingModal from '../components/ProfileOnboardingModal';
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -14,6 +15,7 @@ import AIChatbot from "../AIChatbot";
 import { C } from "../App";
 import { rtdb } from "../services/firebase";
 import { ref, onValue } from "firebase/database";
+import NavbarProfile from '../components/NavbarProfile';
 
 export default function StudentApp() {
   const navigate = useNavigate();
@@ -50,7 +52,7 @@ export default function StudentApp() {
     return () => unsub();
   }, [enrolledClass?.id]);
 
-  // bridgeState lives here — correct scope for the student session
+  // bridgeState lives here â€” correct scope for the student session
   // (resets naturally when the user logs out/navigates away)
 
   useEffect(() => {
@@ -106,7 +108,7 @@ export default function StudentApp() {
     <div style={{ background: C.canvas, minHeight: "100vh", fontFamily: "ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif" }}>
       
       
-      <div id="app-ui">
+      <ProfileOnboardingModal />      <div id="app-ui">
       {/* Sticky Navbar */}
       <nav aria-label="Main navigation" className="no-print" style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
         background: (scrolled || view !== "home" || liveSession) ? "rgba(18, 24, 38, 0.85)" : "transparent",
@@ -127,17 +129,30 @@ export default function StudentApp() {
             </div>
           </button>
           </div>
-          <div role="list" style={{ display: "flex", gap: 28, fontSize: 14, color: "#c3c9d6", fontWeight: 600 }}>
+          <div role="list" style={{ display: "flex", alignItems: "center", gap: 28, fontSize: 14, color: "#c3c9d6", fontWeight: 600 }}>
             <button role="listitem" style={{ background: "none", border: "none", color: view === "home" ? "#fff" : "#c3c9d6", cursor: "pointer", fontWeight: 600, fontSize: 14, padding: 0 }} onClick={() => setView("home")} aria-current={view === "home" ? "page" : undefined}>Home</button>
             <button role="listitem" style={{ background: "none", border: "none", color: view === "team" ? "#fff" : "#c3c9d6", cursor: "pointer", fontWeight: 600, fontSize: 14, padding: 0 }} onClick={() => setView("team")} aria-current={view === "team" ? "page" : undefined}>Developers</button>
             <button role="listitem" style={{ background: "none", border: "none", color: "#c3c9d6", cursor: "pointer", fontWeight: 600, fontSize: 14, padding: 0 }} onClick={() => navigate("/about")}>About</button>
             <button onClick={() => setUnlocked(!unlocked)} style={{ display: "none" }}>Toggle</button>
+            <NavbarProfile onProfileClick={() => setView("profile")} />
           </div>
         </div>
       </nav>
 
-      {liveSession && view === "home" && (
+      {user?.authProvider === 'password' && !user?.emailVerified && (
         <div style={{ paddingTop: 76 }}>
+          <div style={{
+            background: '#fffbeb', borderBottom: '1px solid #fde68a', color: '#92400e', padding: '12px 40px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, fontSize: 14, fontWeight: 600
+          }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Please verify your email address to submit assignments. Check your inbox for the verification link.
+          </div>
+        </div>
+      )}
+
+      {liveSession && view === "home" && (
+        <div style={{ paddingTop: (user?.authProvider === 'password' && !user?.emailVerified) ? 0 : 76 }}>
           <div style={{
             background: 'linear-gradient(90deg, #7f1d1d 0%, #991b1b 40%, #b45309 100%)',
             color: '#fff', padding: '0 40px',
@@ -164,7 +179,7 @@ export default function StudentApp() {
               onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.35)'; }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.25)'; }}
             >
-              📡 Join Broadcast
+              ðŸ“¡ Join Broadcast
             </button>
           </div>
         </div>
@@ -189,7 +204,7 @@ export default function StudentApp() {
       ) : view === "team" ? (
         <Team />
       ) : view === "profile" ? (
-        <div style={{ paddingTop: 76 }}>
+        <div style={{ paddingTop: (user?.authProvider === 'password' && !user?.emailVerified) ? 0 : 76 }}>
           <Profile user={user} onUpdate={(updatedUser) => setUser(updatedUser)} />
         </div>
       ) : null}
@@ -225,7 +240,7 @@ export default function StudentApp() {
 
         {/* Copyright */}
         <div style={{ borderTop: `1px solid ${C.border}`, padding: "20px 40px", textAlign: "center", fontSize: 13, color: "#8891a3" }}>
-          © {new Date().getFullYear()} {orgName}{deptName ? ` — ${deptName}` : ''}. All rights reserved.
+          Â© {new Date().getFullYear()} {orgName}{deptName ? ` â€” ${deptName}` : ''}. All rights reserved.
         </div>
       </div>
 

@@ -1,118 +1,120 @@
-import { createContext, useContext, useState, useEffect } from 'react';
-import { auth, db } from '../services/firebase';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { doc, getDoc, updateDoc, collection, query, where, getDocs, arrayUnion } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, arrayUnion, onSnapshot } from 'firebase/firestore';
+import { auth, db } from '../services/firebase';
+import { ADMIN_TEACHER_EMAILS } from '../config/admins';
 
-const AuthContext = createContext(null);
+const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  // Initialize state from cache to enable instant loading (Optimistic UI)
-  const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('vlab_user')) || null);
-  const [role, setRole] = useState(() => localStorage.getItem('vlab_role') || null);
-  const [enrolledClass, setEnrolledClass] = useState(() => JSON.parse(localStorage.getItem('vlab_class')) || null);
-  // Persist experiment progress across page refreshes
-  const [completedExperiments, setCompletedExperiments] = useState(
-    () => JSON.parse(localStorage.getItem('vlab_completed')) || []
-  );
-
-  // If we have a cached user, we can consider auth "ready" immediately
-  const [authReady, setAuthReady] = useState(() => !!localStorage.getItem('vlab_user'));
+  const [user, setUser] = useState(() => {
+    const cached = localStorage.getItem('vlab_user');
+    return cached ? JSON.parse(cached) : null;
+  });
+  const [role, setRole] = useState(() => localStorage.getItem('vlab_role'));
+  const [authReady, setAuthReady] = useState(() => {
+    return !!localStorage.getItem('vlab_user');
+  });
+  const [enrolledClass, setEnrolledClass] = useState(() => {
+    const cached = localStorage.getItem('vlab_class');
+    return cached ? JSON.parse(cached) : null;
+  });
+  const [completedExperiments, setCompletedExperiments] = useState(() => {
+    const cached = localStorage.getItem('vlab_completed');
+    return cached ? JSON.parse(cached) : [];
+  });
 
   useEffect(() => {
-    if (!auth) {
-      setAuthReady(true);
-      return;
-    }
+    if (enrolledClass) localStorage.setItem('vlab_class', JSON.stringify(enrolledClass));
+    else localStorage.removeItem('vlab_class');
+  }, [enrolledClass]);
+
+  useEffect(() => {
+    localStorage.setItem('vlab_completed', JSON.stringify(completedExperiments));
+  }, [completedExperiments]);
+
+  useEffect(() => {
+    let unsubDoc = null;
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (unsubDoc) {
+        unsubDoc();
+        unsubDoc = null;
+      }
+
       if (firebaseUser) {
         const skeletonUser = {
-          uid:    firebaseUser.uid,
-          email:  firebaseUser.email,
-          name:   firebaseUser.displayName || firebaseUser.email.split('@')[0],
-          avatar: firebaseUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.email}`,
-          role:   'student',
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
+          avatar: firebaseUser.photoURL || null,
+          emailVerified: firebaseUser.emailVerified,
+          org_id: 'srm_univ', // default; will be overwritten by Firestore data if present
         };
 
-        try {
-          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+        const userDocRef = doc(db, 'users', firebaseUser.uid);
+        
+        unsubDoc = onSnapshot(userDocRef, async (userDoc) => {
           let resolvedRole = 'student';
-          let resolvedName = skeletonUser.name;
-          let resolvedAvatar = skeletonUser.avatar;
-
+          let fullUser = { ...skeletonUser };
+          
           if (userDoc.exists()) {
             const data = userDoc.data();
-            resolvedRole   = data.role   || 'student';
-            resolvedName   = data.name   || resolvedName;
-            resolvedAvatar = data.avatar || resolvedAvatar;
+
+            // Rejected teacher: sign them out cleanly, leave a message for LoginScreen
+            if (data.status === 'rejected') {
+              localStorage.setItem('vlab_auth_error', 'Your teacher registration was declined. Please contact your administrator.');
+              await signOut(auth);
+              setAuthReady(true);
+              return;
+            }
+
+            resolvedRole = data.role || 'student';
+            Object.assign(fullUser, data);
+            if (!fullUser.org_id) fullUser.org_id = 'srm_univ';
+
+          } else {
+            // No Firestore doc: user is mid-registration
+            resolvedRole = null;
           }
-
-          const fullUser = { ...skeletonUser, role: resolvedRole, name: resolvedName, avatar: resolvedAvatar };
-
+          
           setUser(fullUser);
           setRole(resolvedRole);
           localStorage.setItem('vlab_user', JSON.stringify(fullUser));
           localStorage.setItem('vlab_role', resolvedRole);
 
-          // Fetch completed experiments from Firestore
+          // Fetch enrolled class if present in Firestore
+          if (fullUser.lastJoinedClassId) {
+            try {
+              const classDoc = await getDoc(doc(db, 'classes', fullUser.lastJoinedClassId));
+              if (classDoc.exists()) {
+                const classData = { id: classDoc.id, ...classDoc.data() };
+                setEnrolledClass(classData);
+                localStorage.setItem('vlab_class', JSON.stringify(classData));
+              }
+            } catch (err) {
+              console.error('Failed to fetch enrolled class on login:', err);
+            }
+          }
+
           try {
-            const completed = userDoc.exists() ? (userDoc.data().completedExperiments || []) : [];
+            const completed = fullUser.completedExperiments || [];
             setCompletedExperiments(completed);
             localStorage.setItem('vlab_completed', JSON.stringify(completed));
           } catch (e) {
             console.error('Error fetching completedExperiments:', e);
           }
+          
+          setAuthReady(true);
+        }, (err) => {
+          console.error('Error in onSnapshot user profile:', err);
+          setUser(null);
+          setRole(null);
+          localStorage.removeItem('vlab_user');
+          localStorage.removeItem('vlab_role');
+          setAuthReady(true);
+        });
 
-          if (resolvedRole === 'student') {
-            try {
-              const classQ    = query(collection(db, 'classes'), where('studentUids', 'array-contains', firebaseUser.uid));
-              const classSnap = await getDocs(classQ);
-              if (!classSnap.empty) {
-                const classData = { id: classSnap.docs[0].id, ...classSnap.docs[0].data() };
-                setEnrolledClass(classData);
-                localStorage.setItem('vlab_class', JSON.stringify(classData));
-              } else if (firebaseUser.email) {
-                // Auto-enroll via CSV Bulk Upload (pendingEmails)
-                const pendingQ = query(collection(db, 'classes'), where('pendingEmails', 'array-contains', firebaseUser.email.toLowerCase()));
-                const pendingSnap = await getDocs(pendingQ);
-                
-                if (!pendingSnap.empty) {
-                  const targetClassDoc = pendingSnap.docs[0];
-                  const targetClass = targetClassDoc.data();
-                  
-                  // Add user to studentUids and remove from pendingEmails
-                  const updatedUids = [...(targetClass.studentUids || []), firebaseUser.uid];
-                  const updatedPending = (targetClass.pendingEmails || []).filter(e => e !== firebaseUser.email.toLowerCase());
-                  
-                  // Also update visual roster status
-                  const updatedRoster = (targetClass.roster || []).map(r => 
-                    r.email.toLowerCase() === firebaseUser.email.toLowerCase() 
-                      ? { ...r, status: 'Joined' } 
-                      : r
-                  );
-
-                  // Using dynamic import of updateDoc to avoid needing to mess with top-level imports if it wasn't exported here
-                  const { updateDoc } = await import('firebase/firestore');
-                  await updateDoc(targetClassDoc.ref, {
-                    studentUids: updatedUids,
-                    pendingEmails: updatedPending,
-                    roster: updatedRoster
-                  });
-
-                  const classData = { id: targetClassDoc.id, ...targetClass, studentUids: updatedUids };
-                  setEnrolledClass(classData);
-                  localStorage.setItem('vlab_class', JSON.stringify(classData));
-                }
-              }
-            } catch (e) {
-              console.error('Error fetching enrolled class:', e);
-            }
-          }
-        } catch (e) {
-          console.error('Error fetching user profile:', e);
-          setUser(skeletonUser);
-          setRole('student');
-        }
       } else {
         setUser(null);
         setRole(null);
@@ -122,17 +124,30 @@ export function AuthProvider({ children }) {
         localStorage.removeItem('vlab_role');
         localStorage.removeItem('vlab_class');
         localStorage.removeItem('vlab_completed');
+        setAuthReady(true);
       }
-
-      setAuthReady(true);
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      if (unsubDoc) unsubDoc();
+    };
   }, []);
 
-  const logout = () => signOut(auth);
+  const logout = async () => {
+    try {
+      await signOut(auth);
+    } catch(err) {
+      console.warn("Firebase signout error:", err);
+    }
+    setUser(null);
+    setRole(null);
+    setEnrolledClass(null);
+    setCompletedExperiments([]);
+    localStorage.clear();
+    window.location.href = "/";
+  };
 
-  // Persists a completed experiment ID to both state, localStorage, and Firestore
   const markExperimentComplete = async (experimentId) => {
     if (completedExperiments.includes(experimentId)) return;
     const updated = [...completedExperiments, experimentId];
@@ -150,14 +165,12 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, setUser, role, authReady, enrolledClass, setEnrolledClass, logout, completedExperiments, markExperimentComplete }}>
+    <AuthContext.Provider value={{ user, setUser, role, setRole, authReady, enrolledClass, setEnrolledClass, logout, completedExperiments, markExperimentComplete }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
 export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used inside AuthProvider');
-  return ctx;
+  return useContext(AuthContext);
 }

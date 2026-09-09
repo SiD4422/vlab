@@ -2,100 +2,188 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ── Helper: get caller's user document ──────────────────────────────────
-    function callerDoc() {
+    // ── Helper functions ──────────────────────────────────────────────────
+
+    // NOTE: getUser() calls get() on the caller's own /users doc.
+    // It CANNOT be used inside a 'create' rule for /users/{userId}
+    // because the document doesn't exist yet — get() returns null
+    // and the rule fails closed, blocking even legitimate signups.
+    function getUser() {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
     }
 
-    // ── Helper: check org_id match ───────────────────────────────────────────
-    function sameOrg(resourceData) {
-      return callerDoc().org_id == resourceData.org_id;
+    function isValidDomain() {
+      return request.auth.token.email.lower().matches('.*@srmist[.]edu[.]in$')
+          || request.auth.token.email.lower().matches('.*@gmail[.]com$');
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // USERS
-    // ─────────────────────────────────────────────────────────────────────────
+    // Literal email list — the ONLY safe domain/identity check for 'create'
+    // rules where getUser() is unavailable. Must be kept in sync with
+    // ADMIN_TEACHER_EMAILS in src/config/admins.js.
+    function isAdminEmail() {
+      return request.auth.token.email in [
+        'admin1@srmist.edu.in',
+        'admin2@srmist.edu.in'
+      ];
+    }
+
+    // Role helpers — safe only in read/update/delete rules where the user doc exists.
+    function isTeacher() {
+      let u = getUser();
+      return u.role in ['teacher', 'admin_teacher']
+          && (!('status' in u) || u.status == 'active');
+    }
+    function isStudent() {
+      return getUser().role == 'student';
+    }
+    function isSuperAdmin() {
+      return getUser().role == 'admin_teacher';
+    }
+
+
+    // ── /users/{userId} ───────────────────────────────────────────────────
     match /users/{userId} {
-      // Read your own doc, or teacher reads a student in same org
-      allow read: if request.auth != null && (
-        request.auth.uid == userId ||
-        sameOrg(resource.data)
-      );
 
-      // Create: invite code must exist, be unexpired, and match the org being claimed
-      allow create: if request.auth != null &&
-        request.auth.uid == userId &&
-        (
-          // SRM users can omit invite code (org_id defaults to srm_univ)
-          request.resource.data.org_id == 'srm_univ' ||
-          (
-            exists(/databases/$(database)/documents/invite_codes/$(request.resource.data.invite_code)) &&
-            get(/databases/$(database)/documents/invite_codes/$(request.resource.data.invite_code)).data.expires_at > request.time &&
-            get(/databases/$(database)/documents/invite_codes/$(request.resource.data.invite_code)).data.org_id == request.resource.data.org_id &&
-            get(/databases/$(database)/documents/invite_codes/$(request.resource.data.invite_code)).data.revoked == false
-          )
-        );
+      // Intentionally broad read: teachers need to see student names/depts for
+      // class rosters. Pre-existing accounts created before this rule change
+      // retain read access. Accepted tradeoff for classroom continuity.
+      allow read: if request.auth != null;
 
-      // Update: only yourself, cannot change org_id or role
-      allow update: if request.auth.uid == userId &&
-        request.resource.data.org_id == resource.data.org_id &&
-        request.resource.data.role == resource.data.role;
-    }
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // CLASSES
-    // ─────────────────────────────────────────────────────────────────────────
-    match /classes/{classId} {
-      allow read: if request.auth != null && sameOrg(resource.data);
-      allow write: if request.auth != null &&
-        callerDoc().role == 'teacher' &&
-        sameOrg(resource.data);
-    }
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // SUBMISSIONS / LAB RECORDS
-    // ─────────────────────────────────────────────────────────────────────────
-    match /submissions/{submissionId} {
-      allow read: if request.auth != null && sameOrg(resource.data);
-      // Students can only create/update their OWN submissions — prevents grade overwriting
-      allow create: if request.auth != null
-        && request.auth.uid == request.resource.data.studentUid
-        && sameOrg(request.resource.data);
-      allow update: if request.auth != null
+      // Create: own doc only, valid domain or whitelisted admin email.
+      // Three permitted branches; anything outside these is denied.
+      // isSuperAdmin()/getUser() are NOT used here — see note above on bootstrap
+      // circularity: getUser() would call get() on a non-existent doc and fail.
+      allow create: if request.auth.uid == userId
+        && request.resource.data.authProvider == request.auth.token.firebase.sign_in_provider
+        && (isValidDomain() || isAdminEmail())
         && (
-          // Student updating their own un-graded submission
-          (request.auth.uid == resource.data.studentUid && resource.data.teacherScore == null)
-          ||
-          // Teacher grading a submission in their org
-          (callerDoc().role == 'teacher' && sameOrg(resource.data))
-        );
+          // Student signup
+          (request.resource.data.role == 'student'
+            && request.resource.data.status == 'active')
+          // Teacher signup — domain required, account starts pending for approval
+          || (request.resource.data.role == 'teacher'
+              && request.resource.data.status == 'pending'
+              && isValidDomain())
+          // Admin bootstrap — literal email list only, never via getUser()
+          || (isAdminEmail()
+              && request.resource.data.role == 'admin_teacher'
+              && request.resource.data.status == 'active')
+        )
+        && request.resource.data.uid == userId;
+
+      // Update: own doc only, restricted fields blocked to prevent self-escalation.
+      allow update: if request.auth.uid == userId
+        && !request.resource.data.diff(resource.data)
+              .affectedKeys().hasAny(['role', 'status', 'uid', 'email', 'authProvider']);
+
+      // Teacher approval/rejection path — tightly scoped:
+      //   • Target doc must be role:'teacher', status:'pending' (pending-teacher only)
+      //   • Only 'status' and timestamp fields may change
+      //   • New status must be one of the valid outcomes
+      // This prevents a teacher from demoting students, other teachers, or admins.
+      allow update: if isTeacher()
+        && resource.data.role == 'teacher'
+        && resource.data.status == 'pending'
+        && request.resource.data.diff(resource.data)
+              .affectedKeys().hasOnly(['status', 'approvedAt', 'rejectedAt'])
+        && request.resource.data.status in ['active', 'rejected'];
+
+      // No client-side deletion.
+      allow delete: if false;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // GROUPS
-    // ─────────────────────────────────────────────────────────────────────────
-    match /groups/{groupId} {
-      allow read, write: if request.auth != null && sameOrg(resource.data);
+
+    // ── /submissions/{submissionId} ───────────────────────────────────────
+    match /submissions/{submissionId} {
+
+      // Students read own submissions only.
+      // Teachers read all submissions (any class) — cross-teacher read is
+      // intentional; all staff are mutually trusted for grade review.
+      allow read: if isTeacher() || isSuperAdmin() || (isStudent() && resource.data.studentUid == request.auth.uid);
+      
+      // Create: student must own the submission and have a verified email if using password auth.
+      allow create: if isStudent()
+        && (getUser().authProvider != 'password' || request.auth.token.email_verified == true)
+        && request.resource.data.studentUid == request.auth.uid
+        && request.resource.data.status == 'pending_auto_grade'
+        && !('teacherScore' in request.resource.data)
+        && !('gradingBreakdown' in request.resource.data)
+        && !('manuallyOverridden' in request.resource.data)
+        && !('integrityFlags' in request.resource.data)
+        && !('integrityScore' in request.resource.data);
+
+      // Update path 1: Teachers can update submission (e.g., feedback), but NOT grading fields.
+      // Grading fields are strictly updated via secure Vercel API.
+      allow update: if isTeacher()
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+             'teacherScore', 'status', 'gradingBreakdown',
+             'manuallyOverridden', 'gradingVersion',
+             'integrityFlags', 'integrityScore'
+           ]);
+
+      // Update path 2: Students can resubmit own un-reviewed report, but cannot
+      // touch any grading-related fields — these carry auto-grading and
+      // teacher-review outputs and must not be student-writable.
+      allow update: if isStudent()
+        && resource.data.studentUid == request.auth.uid
+        && resource.data.status != 'teacher_reviewed'
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+             'teacherScore', 'status', 'gradingBreakdown',
+             'manuallyOverridden', 'gradingVersion',
+             'integrityFlags', 'integrityScore'
+           ]);
+
+      // Update path 3: Students can mark a pending submission as failed if the API crashes.
+      allow update: if isStudent()
+        && resource.data.studentUid == request.auth.uid
+        && resource.data.status == 'pending_auto_grade'
+        && request.resource.data.status == 'grading_failed'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
+
+      // No client-side deletion.
+      allow delete: if false;
+
+      // ── Subcollection: telemetry ──
+      match /telemetry/{eventId} {
+        // Students can write their own telemetry events. They cannot read or modify them.
+        // We enforce that they can only write if they own the parent submission (submissionId starts with their uid).
+        // We also enforce that the timestamp is a server timestamp.
+        allow create: if isStudent()
+          && submissionId.split('_')[0] == request.auth.uid
+          && request.resource.data.ts == request.time;
+          
+        allow read, update, delete: if isTeacher() || isSuperAdmin();
+      }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // ORGANIZATIONS
-    // Anyone logged in can read their own org document (needed for CollegeContext).
-    // Only the backend (Admin SDK) can write.
-    // ─────────────────────────────────────────────────────────────────────────
-    match /organizations/{orgId} {
-      allow read: if request.auth != null && callerDoc().org_id == orgId;
-      allow write: if false; // Write only via Admin SDK
+
+    // ── /classes/{classId} ───────────────────────────────────────────────
+    match /classes/{classId} {
+      // Any authenticated user can read (needed for join-by-code flow).
+      allow read: if request.auth != null;
+
+      // Only active teachers can create/modify/delete classes.
+      allow create, delete: if isTeacher();
+      
+      // Teachers can update any field.
+      // Students can ONLY update the studentUids array to add themselves.
+      allow update: if isTeacher()
+        || (request.auth != null 
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['studentUids']));
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // INVITE CODES
-    // Public read so unauthenticated signup flow can validate a code.
-    // Write only via Admin SDK.
-    // ─────────────────────────────────────────────────────────────────────────
-    match /invite_codes/{code} {
-      allow read: if true;
-      allow write: if false;
+
+    // ── Admin-only collections ────────────────────────────────────────────
+    // Restricted to super-admins (admin_teacher role) only.
+    // Regular teachers and students have no access.
+    match /organizations/{docId} {
+      allow read, write: if isSuperAdmin();
+    }
+    match /invite_codes/{docId} {
+      allow read, write: if isSuperAdmin();
+    }
+    match /invoice_requests/{docId} {
+      allow read, write: if isSuperAdmin();
     }
   }
 }

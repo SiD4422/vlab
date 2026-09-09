@@ -138,6 +138,30 @@ export function useLiveBroadcast({ isBroadcaster, isSpectator, classId, expId, t
         },
       }));
     }
+    // Handle "Record" button click in the sandbox: save readings as a new row
+    if (data.type === 'READING_RESULT' && data.readings) {
+      const readings = data.readings;
+      // Build a new row from the readings object (key -> value pairs from the simulation)
+      const newRow = {};
+      Object.entries(readings).forEach(([k, v]) => {
+        if (v !== null && v !== undefined && !isNaN(parseFloat(v))) {
+          newRow[k] = parseFloat(parseFloat(v).toPrecision(5));
+        }
+      });
+      if (Object.keys(newRow).length > 0) {
+        setBridgeSims(prev => {
+          const current = prev[eid] || { rows: [] };
+          const existingRows = current.rows || [];
+          return {
+            ...prev,
+            [eid]: {
+              ...current,
+              rows: [...existingRows, newRow],
+            },
+          };
+        });
+      }
+    }
   };
 
   return { spectatorState, iframeRef, iframeLoaded, setIframeLoaded, handleIframeMessage };
