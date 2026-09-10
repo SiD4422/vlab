@@ -7,6 +7,12 @@ export function SubmissionReview({
   reportTab, setReportTab, saveGrade, teacherScoreInput, setTeacherScoreInput,
   savingGrade, setActiveNav
 }) {
+  const [expandedGroups, setExpandedGroups] = React.useState({});
+  
+  const toggleGroup = (expKey) => {
+    setExpandedGroups(prev => ({ ...prev, [expKey]: !prev[expKey] }));
+  };
+
   return (
     <>
       {/* ── Submissions Table ── */}
@@ -61,22 +67,26 @@ export function SubmissionReview({
                 grouped[expKey].push(sub);
               });
               
-              return Object.keys(grouped).map(expKey => (
-                <tbody key={expKey}>
-                  {/* Group Header */}
-                  <tr>
-                    <td colSpan={5} style={{ background:'#f1f5f9', padding:'10px 20px', fontWeight:900, color:'#1e293b', fontSize:14, borderBottom:'1px solid #e2e8f0', borderTop:'2px solid #cbd5e1' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ background: '#3b82f6', color: '#fff', borderRadius: 999, padding: '2px 8px', fontSize: 11 }}>{grouped[expKey].length}</span>
-                        {expKey}
-                      </div>
-                    </td>
-                  </tr>
-                  
-                  {/* Rows for this group */}
-                  {grouped[expKey].map(sub => {
-                    const prog = sub.progressPercent ?? 0;
-                    return (
+              return Object.keys(grouped).map(expKey => {
+                const isExpanded = expandedGroups[expKey] !== false; // Default to true (expanded)
+                
+                return (
+                  <tbody key={expKey}>
+                    {/* Group Header */}
+                    <tr onClick={() => toggleGroup(expKey)} style={{ cursor: 'pointer' }}>
+                      <td colSpan={5} style={{ background:'#f1f5f9', padding:'10px 20px', fontWeight:900, color:'#1e293b', fontSize:14, borderBottom:'1px solid #e2e8f0', borderTop:'2px solid #cbd5e1' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.2s', display: 'inline-block' }}><ChevronRight size={16} /></span>
+                          <span style={{ background: '#3b82f6', color: '#fff', borderRadius: 999, padding: '2px 8px', fontSize: 11 }}>{grouped[expKey].length}</span>
+                          {expKey}
+                        </div>
+                      </td>
+                    </tr>
+                    
+                    {/* Rows for this group */}
+                    {isExpanded && grouped[expKey].map(sub => {
+                      const prog = sub.progressPercent ?? 0;
+                      return (
                       <tr key={sub.id} className="table-row-hover" style={{ borderTop:'1px solid #f1f5f9',background:'#fff',borderLeft:'4px solid transparent',transition:'all 0.2s' }}>
                         <td style={{ padding:'14px 20px' }}>
                           <div style={{ display:'flex',alignItems:'center',gap:10 }}>
@@ -121,8 +131,9 @@ export function SubmissionReview({
                     );
                   })}
                 </tbody>
-              ));
-            })()}
+              );
+            });
+          })()}
           </table>
         </div>
         {filtSubs.length===0 && (
