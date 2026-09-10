@@ -11,7 +11,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { computeProgress } from './ExperimentSession';
 
 
-export default function Home({ onOpen, collapsedCategories, toggleCategory, searchQuery, setSearchQuery, completed, bridgeSims = {} }) {
+export default function Home({ onOpen, collapsedCategories, toggleCategory, searchQuery, setSearchQuery, completed, bridgeSims = {}, mySubmissions = {} }) {
 
   const { user, enrolledClass, setEnrolledClass } = useAuth();
   const [inviteCode, setInviteCode] = useState('');
@@ -291,16 +291,24 @@ export default function Home({ onOpen, collapsedCategories, toggleCategory, sear
                             style={{ textAlign: "left", cursor: isLocked ? "not-allowed" : "pointer", display: "flex", flexDirection: "column", gap: 12, opacity: isLocked ? 0.7 : 1, border: isCompleted ? '1.5px solid var(--teal)' : undefined, background: 'var(--card)', position: 'relative', overflow: 'hidden' }}
                           >
                             {isCompleted && (
-                              <div style={{ position: 'absolute', top: 12, right: 12, width: 28, height: 28, borderRadius: '50%', background: 'var(--teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, boxShadow: '0 4px 12px rgba(31,122,114,0.4)' }}>
-                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7L5.5 10.5L12 3.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(255, 255, 255, 0.65)', backdropFilter: 'blur(3px)', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s' }} onMouseEnter={e => e.currentTarget.style.backdropFilter = 'blur(1px)'} onMouseLeave={e => e.currentTarget.style.backdropFilter = 'blur(3px)'}>
+                                <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'linear-gradient(135deg, #14b8a6, #0d9488)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', marginBottom: 12, boxShadow: '0 8px 16px rgba(13, 148, 136, 0.3)' }}>
+                                  <CheckCircle2 size={24} />
+                                </div>
+                                <div style={{ fontSize: 22, fontWeight: 900, color: '#0f766e', letterSpacing: '-0.02em', textShadow: '0 2px 4px rgba(255,255,255,0.8)' }}>Completed</div>
+                                {mySubmissions[exp.id]?.teacherScore != null && (
+                                  <div style={{ marginTop: 12, background: '#fff', border: '2px solid #14b8a6', color: '#0f766e', padding: '6px 16px', borderRadius: 999, fontSize: 14, fontWeight: 800, boxShadow: '0 4px 12px rgba(20,184,166,0.15)' }}>
+                                    Score: {mySubmissions[exp.id].teacherScore} / {mySubmissions[exp.id].gradingVersion === 1 ? '100' : '10'} marks
+                                  </div>
+                                )}
                               </div>
                             )}
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", width: "100%" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", width: "100%", position: 'relative', zIndex: 1 }}>
                               <span className={isLocked ? "status-badge pending" : "status-badge graded"} style={{ fontSize: 12 }}>{exp.tag}</span>
                               {!isLocked && <span style={{ fontSize: 11, fontWeight: 700, color: '#64748b', background: 'rgba(100,116,139,0.1)', padding: '2px 8px', borderRadius: 999, letterSpacing: '0.04em' }}>SIMULATION</span>}
                               {isLocked && <Lock size={16} color="var(--muted)" />}
                             </div>
-                            <div style={{ fontWeight: 800, color: 'var(--ink)', fontSize: 18, lineHeight: 1.3, marginTop: 4 }}>{exp.title}</div>
+                            <div style={{ fontWeight: 800, color: 'var(--ink)', fontSize: 18, lineHeight: 1.3, marginTop: 4, position: 'relative', zIndex: 1 }}>{exp.title}</div>
                             <div style={{ color: 'var(--muted)', fontSize: 14, lineHeight: 1.6, flex: 1 }}>{exp.aim}</div>
 
                             {/* Per-experiment progress bar */}

@@ -13,8 +13,9 @@ import ExperimentSession from "./ExperimentSession";
 import { EXPERIMENTS } from '../data/experiments.js';
 import AIChatbot from "../AIChatbot";
 import { C } from "../App";
-import { rtdb } from "../services/firebase";
+import { rtdb, db } from "../services/firebase";
 import { ref, onValue } from "firebase/database";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import NavbarProfile from '../components/NavbarProfile';
 
 export default function StudentApp() {
@@ -37,6 +38,30 @@ export default function StudentApp() {
   const [theme, setTheme] = useState(() => localStorage.getItem('vlab_theme') || 'light');
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [liveSession, setLiveSession] = useState(null);
+  const [mySubmissions, setMySubmissions] = useState({});
+
+  useEffect(() => {
+    if (!user?.uid) return;
+    const fetchSubs = async () => {
+      try {
+        const q = query(collection(db, 'submissions'), where('studentUid', '==', user.uid));
+        const snap = await getDocs(q);
+        const subs = {};
+        snap.forEach(d => {
+          const data = d.data();
+          const expId = data.experimentId;
+          // If multiple submissions exist, keep the one with the highest teacherScore or most recent
+          if (!subs[expId] || (data.teacherScore > (subs[expId].teacherScore || -1))) {
+            subs[expId] = data;
+          }
+        });
+        setMySubmissions(subs);
+      } catch (err) {
+        console.error("Failed to fetch my submissions:", err);
+      }
+    };
+    fetchSubs();
+  }, [user?.uid, view]); // Re-fetch when view changes (e.g. back from detail to home)
 
   useEffect(() => {
     if (!enrolledClass?.id) return;
@@ -186,7 +211,7 @@ export default function StudentApp() {
       )}
 
       {view === "home" ? (
-      <Home onOpen={openExperiment} unlocked={unlocked} collapsedCategories={collapsedCategories} toggleCategory={toggleCategory} searchQuery={searchQuery} setSearchQuery={setSearchQuery} completed={completedExperiments} />
+      <Home onOpen={openExperiment} unlocked={unlocked} collapsedCategories={collapsedCategories} toggleCategory={toggleCategory} searchQuery={searchQuery} setSearchQuery={setSearchQuery} completed={completedExperiments} mySubmissions={mySubmissions} />
       ) : view === "detail" && active ? (
         <ExperimentSession
           exp={active}

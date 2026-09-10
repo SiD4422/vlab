@@ -11,6 +11,7 @@ import { Analytics } from './components/teacher/Analytics';
 import { GroupManager } from './components/teacher/GroupManager';
 import { AuthManager } from './components/teacher/AuthManager';
 import { EXPERIMENTS } from './data/experiments';
+import { ADMIN_TEACHER_EMAILS } from './config/admins';
 import { useCollege } from './contexts/CollegeContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -291,7 +292,7 @@ export default function TeacherDashboard({ user, onLogout, onUpdate }) {
           <NavItem icon={BookOpen}        label="Classes"    active={activeNav==='classes'}      onClick={()=>setActiveNav('classes')} />
           <NavItem icon={ClipboardList}   label="Grades"     active={activeNav==='submissions'}  onClick={()=>setActiveNav('submissions')} badge={pending} />
           <NavItem icon={Users}           label="Groups"     active={activeNav==='groups'}       onClick={()=>setActiveNav('groups')} />
-          {user?.role === 'admin_teacher' && (
+          {(user?.role === 'admin_teacher' || ADMIN_TEACHER_EMAILS.map(e => e.toLowerCase()).includes(user?.email?.toLowerCase())) && (
             <NavItem icon={ShieldAlert}   label="Authorization" active={activeNav==='auth'}      onClick={()=>setActiveNav('auth')} />
           )}
           <NavItem icon={User}            label="Profile"    active={activeNav==='profile'}      onClick={()=>setActiveNav('profile')} />

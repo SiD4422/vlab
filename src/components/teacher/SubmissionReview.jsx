@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, CheckCircle2, X, ChevronRight, FileText, Edit3, AlertTriangle, XCircle, Loader2, Shield } from 'lucide-react';
+import { User, CheckCircle2, X, ChevronRight, FileText, Edit3, AlertTriangle, XCircle, Loader2, Shield, Clock } from 'lucide-react';
 import { EXPERIMENTS } from '../../data/experiments';
 
 export function SubmissionReview({
@@ -73,12 +73,30 @@ export function SubmissionReview({
                 return (
                   <tbody key={expKey}>
                     {/* Group Header */}
-                    <tr onClick={() => toggleGroup(expKey)} style={{ cursor: 'pointer' }}>
-                      <td colSpan={5} style={{ background:'#f1f5f9', padding:'10px 20px', fontWeight:900, color:'#1e293b', fontSize:14, borderBottom:'1px solid #e2e8f0', borderTop:'2px solid #cbd5e1' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <span style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.2s', display: 'inline-block' }}><ChevronRight size={16} /></span>
-                          <span style={{ background: '#3b82f6', color: '#fff', borderRadius: 999, padding: '2px 8px', fontSize: 11 }}>{grouped[expKey].length}</span>
-                          {expKey}
+                    <tr onClick={() => toggleGroup(expKey)} style={{ cursor: 'pointer', transition: 'all 0.2s', background: isExpanded ? 'linear-gradient(90deg, #e0e7ff, #f8fafc)' : '#f8fafc' }} onMouseEnter={e=>{if(!isExpanded)e.currentTarget.style.background='#f1f5f9'}} onMouseLeave={e=>{if(!isExpanded)e.currentTarget.style.background='#f8fafc'}}>
+                      <td colSpan={5} style={{ padding:'14px 20px', borderBottom:'1px solid #e2e8f0', borderTop: isExpanded ? '2px solid #6366f1' : '1px solid #e2e8f0' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <div style={{ width: 28, height: 28, borderRadius: 8, background: isExpanded ? '#6366f1' : '#cbd5e1', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', transition: 'all 0.2s', boxShadow: isExpanded ? '0 4px 12px rgba(99,102,241,0.3)' : 'none' }}>
+                                <span style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.2s', display: 'flex' }}><ChevronRight size={18} /></span>
+                            </div>
+                            <span style={{ fontWeight: 800, color: '#1e293b', fontSize: 16 }}>{expKey}</span>
+                            <span style={{ background: isExpanded ? 'rgba(99,102,241,0.1)' : 'rgba(100,116,139,0.1)', color: isExpanded ? '#4f46e5' : '#475569', borderRadius: 999, padding: '4px 12px', fontSize: 12, fontWeight: 700 }}>
+                              {grouped[expKey].length} {grouped[expKey].length === 1 ? 'Submission' : 'Submissions'}
+                            </span>
+                          </div>
+                          <div style={{ display: 'flex', gap: 16 }}>
+                             {(() => {
+                               const pendingCount = grouped[expKey].filter(s => s.status !== 'teacher_reviewed' && s.status !== 'graded').length;
+                               const gradedCount = grouped[expKey].filter(s => s.status === 'teacher_reviewed' || s.status === 'graded').length;
+                               return (
+                                 <>
+                                   {pendingCount > 0 && <span style={{ fontSize: 13, fontWeight: 700, color: '#f59e0b', display: 'flex', alignItems: 'center', gap: 4 }}><Clock size={14}/> {pendingCount} Pending</span>}
+                                   {gradedCount > 0 && <span style={{ fontSize: 13, fontWeight: 700, color: '#10b981', display: 'flex', alignItems: 'center', gap: 4 }}><CheckCircle2 size={14}/> {gradedCount} Graded</span>}
+                                 </>
+                               )
+                             })()}
+                          </div>
                         </div>
                       </td>
                     </tr>
